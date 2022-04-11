@@ -1,0 +1,25 @@
+{{ define "mappers" }}
+{{ template "header" . }}
+
+{{- $extCfg := $.Config.Annotations.Ent2ogen }}
+
+import "{{ $extCfg.OgenPackage }}"
+
+{{- range $m := $extCfg.Mappings }}
+
+{{- $from  := $m.FromType }}
+{{- $to    := $m.To   }}
+{{- $rtype := sprintf "%s.%s" $extCfg.OgenPackageName $from.Name }}
+
+func (e *{{ $from.Name }}) ToOpenAPI() {{ $rtype }} {
+    return {{ $rtype }}{
+        {{- range $f := $from.Fields }}
+            {{- if $m.HasOpenAPIField $f }}
+            {{ $f.StructField }}: e.{{ $f.StructField }},
+            {{- end }}
+        {{- end }}
+    }
+}
+
+{{- end }}
+{{- end }}

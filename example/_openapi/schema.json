@@ -1,0 +1,92 @@
+{
+    "openapi": "3.0.3",
+    "paths": {
+        "/whoami": {
+            "get": {
+                "operationId": "whoami",
+                "responses": {
+                    "200": {
+                        "description": "User info.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/ErrorResponse"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "first_name",
+                    "last_name",
+                    "username",
+                    "city",
+                    "qwerty"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "city": {
+                        "$ref": "#/components/schemas/City"
+                    },
+                    "qwerty": {
+                        "type": "string"
+                    }
+                }
+            },
+            "City": {
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "responses": {
+            "ErrorResponse": {
+                "description": "Unexpected error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error_message": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "error_message"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -31,8 +31,7 @@
                     "first_name",
                     "last_name",
                     "username",
-                    "city",
-                    "qwerty"
+                    "city"
                 ],
                 "properties": {
                     "id": {
@@ -50,9 +49,6 @@
                     },
                     "city": {
                         "$ref": "#/components/schemas/City"
-                    },
-                    "qwerty": {
-                        "type": "string"
                     }
                 }
             },

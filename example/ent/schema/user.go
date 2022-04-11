@@ -2,8 +2,10 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/ogen-go/ent2ogen"
 )
 
 type User struct {
@@ -29,5 +31,11 @@ func (User) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		IDMixin{},
 		TimeMixin{},
+	}
+}
+
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		ent2ogen.BindTo("User"),
 	}
 }

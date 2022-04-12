@@ -18,14 +18,3 @@ var (
 	// templates holds all templates used by ent2ogen.
 	templates = gen.MustParse(gen.NewTemplate("ent2ogen").Funcs(funcMap).ParseFS(templateDir, "_templates/*.tmpl"))
 )
-
-type Config struct {
-	OgenPackage     string
-	OgenPackageName string
-
-	Mappings []*Mapping
-}
-
-func (Config) Name() string {
-	return "Ent2ogen"
-}

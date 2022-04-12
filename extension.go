@@ -15,6 +15,15 @@ type Extension struct {
 	cfg  *Config
 }
 
+type Config struct {
+	OgenPackage string
+	Mappings    []*Mapping
+}
+
+func (Config) Name() string {
+	return "Ent2ogen"
+}
+
 func NewExtension(spec *ogen.Spec) (*Extension, error) {
 	if spec == nil {
 		return nil, fmt.Errorf("spec cannot be nil")
@@ -22,8 +31,7 @@ func NewExtension(spec *ogen.Spec) (*Extension, error) {
 	return &Extension{
 		spec: spec,
 		cfg: &Config{
-			OgenPackage:     "github.com/ogen-go/ent2ogen/example/openapi",
-			OgenPackageName: "openapi",
+			OgenPackage: "github.com/ogen-go/ent2ogen/example/openapi",
 		},
 	}, nil
 }

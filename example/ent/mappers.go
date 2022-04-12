@@ -2,7 +2,7 @@
 
 package ent
 
-import "github.com/ogen-go/ent2ogen/example/openapi"
+import openapi "github.com/ogen-go/ent2ogen/example/openapi"
 
 func (e *City) ToOpenAPI() openapi.City {
 	return openapi.City{

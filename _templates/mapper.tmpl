@@ -3,13 +3,13 @@
 
 {{- $extCfg := $.Config.Annotations.Ent2ogen }}
 
-import "{{ $extCfg.OgenPackage }}"
+import openapi "{{ $extCfg.OgenPackage }}"
 
 {{- range $m := $extCfg.Mappings }}
 
 {{- $from  := $m.FromType }}
 {{- $to    := $m.To   }}
-{{- $rtype := sprintf "%s.%s" $extCfg.OgenPackageName $from.Name }}
+{{- $rtype := sprintf "openapi.%s" $from.Name }}
 
 func (e *{{ $from.Name }}) ToOpenAPI() {{ $rtype }} {
     return {{ $rtype }}{

@@ -43,13 +43,17 @@ func (m *Mapping) checkField(f *gen.Field, required bool, s *ogen.Schema) error 
 		return fmt.Errorf("nullability mismatch")
 	}
 
+	if f.Optional && !f.Nillable {
+		return fmt.Errorf("optional fields are not supported")
+	}
+
 	type tf struct {
 		Type   string
 		Format string
 	}
 
 	mapping := map[field.Type]tf{
-		field.TypeBool:   {"bool", ""},
+		field.TypeBool:   {"boolean", ""},
 		field.TypeString: {"string", ""},
 		field.TypeInt:    {"integer", "int32"},
 		field.TypeInt64:  {"integer", "int64"},

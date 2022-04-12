@@ -8,14 +8,19 @@ import openapi "{{ $extCfg.OgenPackage }}"
 {{- range $m := $extCfg.Mappings }}
 
 {{- $rtype := sprintf "openapi.%s" $m.From.Name }}
-func (e *{{ $m.From.Name }}) ToOpenAPI() {{ $rtype }} {
-    return {{ $rtype }}{
-        {{- range $f := $m.EntFields }}
-            {{- if $m.HasOpenAPIField $f }}
-            {{ $f.StructField }}: e.{{ $f.StructField }},
-            {{- end }}
-        {{- end }}
+func (e *{{ $m.From.Name }}) ToOpenAPI() (t {{ $rtype }}) {
+    {{- range $f := $m.EntFields }}{{- if $m.HasOpenAPIField $f }}
+
+    {{- if $f.Nillable }}
+    if e.{{ $f.StructField }} != nil {
+        t.{{ $f.StructField }}.SetTo(*e.{{ $f.StructField }})
     }
+    {{- else }}
+    t.{{ $f.StructField }} = e.{{ $f.StructField }}
+    {{- end }}
+    
+    {{- end }}{{- end }}
+    return t
 }
 
 {{- end }}

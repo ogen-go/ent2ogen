@@ -45,6 +45,10 @@
                     },
                     "username": {
                         "type": "string"
+                    },
+                    "optional_nullable_bool": {
+                        "type": "boolean",
+                        "nullable": true
                     }
                 }
             },

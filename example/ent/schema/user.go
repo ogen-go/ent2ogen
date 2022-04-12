@@ -17,7 +17,7 @@ func (User) Fields() []ent.Field {
 		field.String("first_name").NotEmpty(),
 		field.String("last_name").NotEmpty(),
 		field.String("username").Unique(),
-		field.String("abc"),
+		field.Bool("optional_nullable_bool").Optional().Nillable(),
 	}
 }
 

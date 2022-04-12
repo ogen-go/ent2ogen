@@ -30,8 +30,8 @@ type User struct {
 	LastName string `json:"last_name,omitempty"`
 	// Username holds the value of the "username" field.
 	Username string `json:"username,omitempty"`
-	// Abc holds the value of the "abc" field.
-	Abc string `json:"abc,omitempty"`
+	// OptionalNullableBool holds the value of the "optional_nullable_bool" field.
+	OptionalNullableBool *bool `json:"optional_nullable_bool,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges     UserEdges `json:"edges"`
@@ -66,7 +66,9 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldFirstName, user.FieldLastName, user.FieldUsername, user.FieldAbc:
+		case user.FieldOptionalNullableBool:
+			values[i] = new(sql.NullBool)
+		case user.FieldFirstName, user.FieldLastName, user.FieldUsername:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -125,11 +127,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.Username = value.String
 			}
-		case user.FieldAbc:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field abc", values[i])
+		case user.FieldOptionalNullableBool:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_nullable_bool", values[i])
 			} else if value.Valid {
-				u.Abc = value.String
+				u.OptionalNullableBool = new(bool)
+				*u.OptionalNullableBool = value.Bool
 			}
 		case user.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -181,8 +184,10 @@ func (u *User) String() string {
 	builder.WriteString(u.LastName)
 	builder.WriteString(", username=")
 	builder.WriteString(u.Username)
-	builder.WriteString(", abc=")
-	builder.WriteString(u.Abc)
+	if v := u.OptionalNullableBool; v != nil {
+		builder.WriteString(", optional_nullable_bool=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

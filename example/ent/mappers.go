@@ -4,11 +4,13 @@ package ent
 
 import openapi "github.com/ogen-go/ent2ogen/example/openapi"
 
-func (e *User) ToOpenAPI() openapi.User {
-	return openapi.User{
-		ID:        e.ID,
-		FirstName: e.FirstName,
-		LastName:  e.LastName,
-		Username:  e.Username,
+func (e *User) ToOpenAPI() (t openapi.User) {
+	t.ID = e.ID
+	t.FirstName = e.FirstName
+	t.LastName = e.LastName
+	t.Username = e.Username
+	if e.OptionalNullableBool != nil {
+		t.OptionalNullableBool.SetTo(*e.OptionalNullableBool)
 	}
+	return t
 }

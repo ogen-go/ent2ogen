@@ -129,10 +129,10 @@ func Username(v string) predicate.User {
 	})
 }
 
-// Abc applies equality check predicate on the "abc" field. It's identical to AbcEQ.
-func Abc(v string) predicate.User {
+// OptionalNullableBool applies equality check predicate on the "optional_nullable_bool" field. It's identical to OptionalNullableBoolEQ.
+func OptionalNullableBool(v bool) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAbc), v))
+		s.Where(sql.EQ(s.C(FieldOptionalNullableBool), v))
 	})
 }
 
@@ -621,114 +621,31 @@ func UsernameContainsFold(v string) predicate.User {
 	})
 }
 
-// AbcEQ applies the EQ predicate on the "abc" field.
-func AbcEQ(v string) predicate.User {
+// OptionalNullableBoolEQ applies the EQ predicate on the "optional_nullable_bool" field.
+func OptionalNullableBoolEQ(v bool) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAbc), v))
+		s.Where(sql.EQ(s.C(FieldOptionalNullableBool), v))
 	})
 }
 
-// AbcNEQ applies the NEQ predicate on the "abc" field.
-func AbcNEQ(v string) predicate.User {
+// OptionalNullableBoolNEQ applies the NEQ predicate on the "optional_nullable_bool" field.
+func OptionalNullableBoolNEQ(v bool) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAbc), v))
+		s.Where(sql.NEQ(s.C(FieldOptionalNullableBool), v))
 	})
 }
 
-// AbcIn applies the In predicate on the "abc" field.
-func AbcIn(vs ...string) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
+// OptionalNullableBoolIsNil applies the IsNil predicate on the "optional_nullable_bool" field.
+func OptionalNullableBoolIsNil() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldAbc), v...))
+		s.Where(sql.IsNull(s.C(FieldOptionalNullableBool)))
 	})
 }
 
-// AbcNotIn applies the NotIn predicate on the "abc" field.
-func AbcNotIn(vs ...string) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
+// OptionalNullableBoolNotNil applies the NotNil predicate on the "optional_nullable_bool" field.
+func OptionalNullableBoolNotNil() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldAbc), v...))
-	})
-}
-
-// AbcGT applies the GT predicate on the "abc" field.
-func AbcGT(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldAbc), v))
-	})
-}
-
-// AbcGTE applies the GTE predicate on the "abc" field.
-func AbcGTE(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldAbc), v))
-	})
-}
-
-// AbcLT applies the LT predicate on the "abc" field.
-func AbcLT(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldAbc), v))
-	})
-}
-
-// AbcLTE applies the LTE predicate on the "abc" field.
-func AbcLTE(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldAbc), v))
-	})
-}
-
-// AbcContains applies the Contains predicate on the "abc" field.
-func AbcContains(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldAbc), v))
-	})
-}
-
-// AbcHasPrefix applies the HasPrefix predicate on the "abc" field.
-func AbcHasPrefix(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldAbc), v))
-	})
-}
-
-// AbcHasSuffix applies the HasSuffix predicate on the "abc" field.
-func AbcHasSuffix(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldAbc), v))
-	})
-}
-
-// AbcEqualFold applies the EqualFold predicate on the "abc" field.
-func AbcEqualFold(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldAbc), v))
-	})
-}
-
-// AbcContainsFold applies the ContainsFold predicate on the "abc" field.
-func AbcContainsFold(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldAbc), v))
+		s.Where(sql.NotNull(s.C(FieldOptionalNullableBool)))
 	})
 }
 

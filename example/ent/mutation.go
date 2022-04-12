@@ -458,21 +458,21 @@ func (m *CityMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	created_at    *time.Time
-	updated_at    *time.Time
-	first_name    *string
-	last_name     *string
-	username      *string
-	abc           *string
-	clearedFields map[string]struct{}
-	city          *uuid.UUID
-	clearedcity   bool
-	done          bool
-	oldValue      func(context.Context) (*User, error)
-	predicates    []predicate.User
+	op                     Op
+	typ                    string
+	id                     *uuid.UUID
+	created_at             *time.Time
+	updated_at             *time.Time
+	first_name             *string
+	last_name              *string
+	username               *string
+	optional_nullable_bool *bool
+	clearedFields          map[string]struct{}
+	city                   *uuid.UUID
+	clearedcity            bool
+	done                   bool
+	oldValue               func(context.Context) (*User, error)
+	predicates             []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -759,40 +759,53 @@ func (m *UserMutation) ResetUsername() {
 	m.username = nil
 }
 
-// SetAbc sets the "abc" field.
-func (m *UserMutation) SetAbc(s string) {
-	m.abc = &s
+// SetOptionalNullableBool sets the "optional_nullable_bool" field.
+func (m *UserMutation) SetOptionalNullableBool(b bool) {
+	m.optional_nullable_bool = &b
 }
 
-// Abc returns the value of the "abc" field in the mutation.
-func (m *UserMutation) Abc() (r string, exists bool) {
-	v := m.abc
+// OptionalNullableBool returns the value of the "optional_nullable_bool" field in the mutation.
+func (m *UserMutation) OptionalNullableBool() (r bool, exists bool) {
+	v := m.optional_nullable_bool
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAbc returns the old "abc" field's value of the User entity.
+// OldOptionalNullableBool returns the old "optional_nullable_bool" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldAbc(ctx context.Context) (v string, err error) {
+func (m *UserMutation) OldOptionalNullableBool(ctx context.Context) (v *bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAbc is only allowed on UpdateOne operations")
+		return v, errors.New("OldOptionalNullableBool is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAbc requires an ID field in the mutation")
+		return v, errors.New("OldOptionalNullableBool requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAbc: %w", err)
+		return v, fmt.Errorf("querying old value for OldOptionalNullableBool: %w", err)
 	}
-	return oldValue.Abc, nil
+	return oldValue.OptionalNullableBool, nil
 }
 
-// ResetAbc resets all changes to the "abc" field.
-func (m *UserMutation) ResetAbc() {
-	m.abc = nil
+// ClearOptionalNullableBool clears the value of the "optional_nullable_bool" field.
+func (m *UserMutation) ClearOptionalNullableBool() {
+	m.optional_nullable_bool = nil
+	m.clearedFields[user.FieldOptionalNullableBool] = struct{}{}
+}
+
+// OptionalNullableBoolCleared returns if the "optional_nullable_bool" field was cleared in this mutation.
+func (m *UserMutation) OptionalNullableBoolCleared() bool {
+	_, ok := m.clearedFields[user.FieldOptionalNullableBool]
+	return ok
+}
+
+// ResetOptionalNullableBool resets all changes to the "optional_nullable_bool" field.
+func (m *UserMutation) ResetOptionalNullableBool() {
+	m.optional_nullable_bool = nil
+	delete(m.clearedFields, user.FieldOptionalNullableBool)
 }
 
 // SetCityID sets the "city" edge to the City entity by id.
@@ -869,8 +882,8 @@ func (m *UserMutation) Fields() []string {
 	if m.username != nil {
 		fields = append(fields, user.FieldUsername)
 	}
-	if m.abc != nil {
-		fields = append(fields, user.FieldAbc)
+	if m.optional_nullable_bool != nil {
+		fields = append(fields, user.FieldOptionalNullableBool)
 	}
 	return fields
 }
@@ -890,8 +903,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.LastName()
 	case user.FieldUsername:
 		return m.Username()
-	case user.FieldAbc:
-		return m.Abc()
+	case user.FieldOptionalNullableBool:
+		return m.OptionalNullableBool()
 	}
 	return nil, false
 }
@@ -911,8 +924,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldLastName(ctx)
 	case user.FieldUsername:
 		return m.OldUsername(ctx)
-	case user.FieldAbc:
-		return m.OldAbc(ctx)
+	case user.FieldOptionalNullableBool:
+		return m.OldOptionalNullableBool(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -957,12 +970,12 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUsername(v)
 		return nil
-	case user.FieldAbc:
-		v, ok := value.(string)
+	case user.FieldOptionalNullableBool:
+		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAbc(v)
+		m.SetOptionalNullableBool(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -993,7 +1006,11 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(user.FieldOptionalNullableBool) {
+		fields = append(fields, user.FieldOptionalNullableBool)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1006,6 +1023,11 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
+	switch name {
+	case user.FieldOptionalNullableBool:
+		m.ClearOptionalNullableBool()
+		return nil
+	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
 
@@ -1028,8 +1050,8 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldUsername:
 		m.ResetUsername()
 		return nil
-	case user.FieldAbc:
-		m.ResetAbc()
+	case user.FieldOptionalNullableBool:
+		m.ResetOptionalNullableBool()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

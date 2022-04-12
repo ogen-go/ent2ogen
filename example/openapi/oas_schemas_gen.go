@@ -93,10 +93,66 @@ type ErrorResponseStatusCode struct {
 	Response   ErrorResponse
 }
 
+// NewOptNilBool returns new OptNilBool with value set to v.
+func NewOptNilBool(v bool) OptNilBool {
+	return OptNilBool{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilBool is optional nullable bool.
+type OptNilBool struct {
+	Value bool
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilBool was set.
+func (o OptNilBool) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilBool) Reset() {
+	var v bool
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilBool) SetTo(v bool) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsSet returns true if value is Null.
+func (o OptNilBool) IsNull() bool { return o.Null }
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilBool) Get() (v bool, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // Ref: #/components/schemas/User
 type User struct {
-	ID        uuid.UUID "json:\"id\""
-	FirstName string    "json:\"first_name\""
-	LastName  string    "json:\"last_name\""
-	Username  string    "json:\"username\""
+	ID                   uuid.UUID  "json:\"id\""
+	FirstName            string     "json:\"first_name\""
+	LastName             string     "json:\"last_name\""
+	Username             string     "json:\"username\""
+	OptionalNullableBool OptNilBool "json:\"optional_nullable_bool\""
 }

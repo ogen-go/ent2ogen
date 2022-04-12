@@ -29,7 +29,7 @@ var (
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
 		{Name: "username", Type: field.TypeString, Unique: true},
-		{Name: "abc", Type: field.TypeString},
+		{Name: "optional_nullable_bool", Type: field.TypeBool, Nullable: true},
 		{Name: "user_city", Type: field.TypeUUID},
 	}
 	// UsersTable holds the schema information for the "users" table.

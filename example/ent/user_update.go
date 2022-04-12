@@ -54,9 +54,23 @@ func (uu *UserUpdate) SetUsername(s string) *UserUpdate {
 	return uu
 }
 
-// SetAbc sets the "abc" field.
-func (uu *UserUpdate) SetAbc(s string) *UserUpdate {
-	uu.mutation.SetAbc(s)
+// SetOptionalNullableBool sets the "optional_nullable_bool" field.
+func (uu *UserUpdate) SetOptionalNullableBool(b bool) *UserUpdate {
+	uu.mutation.SetOptionalNullableBool(b)
+	return uu
+}
+
+// SetNillableOptionalNullableBool sets the "optional_nullable_bool" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableOptionalNullableBool(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetOptionalNullableBool(*b)
+	}
+	return uu
+}
+
+// ClearOptionalNullableBool clears the value of the "optional_nullable_bool" field.
+func (uu *UserUpdate) ClearOptionalNullableBool() *UserUpdate {
+	uu.mutation.ClearOptionalNullableBool()
 	return uu
 }
 
@@ -215,11 +229,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldUsername,
 		})
 	}
-	if value, ok := uu.mutation.Abc(); ok {
+	if value, ok := uu.mutation.OptionalNullableBool(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeBool,
 			Value:  value,
-			Column: user.FieldAbc,
+			Column: user.FieldOptionalNullableBool,
+		})
+	}
+	if uu.mutation.OptionalNullableBoolCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: user.FieldOptionalNullableBool,
 		})
 	}
 	if uu.mutation.CityCleared() {
@@ -300,9 +320,23 @@ func (uuo *UserUpdateOne) SetUsername(s string) *UserUpdateOne {
 	return uuo
 }
 
-// SetAbc sets the "abc" field.
-func (uuo *UserUpdateOne) SetAbc(s string) *UserUpdateOne {
-	uuo.mutation.SetAbc(s)
+// SetOptionalNullableBool sets the "optional_nullable_bool" field.
+func (uuo *UserUpdateOne) SetOptionalNullableBool(b bool) *UserUpdateOne {
+	uuo.mutation.SetOptionalNullableBool(b)
+	return uuo
+}
+
+// SetNillableOptionalNullableBool sets the "optional_nullable_bool" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableOptionalNullableBool(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetOptionalNullableBool(*b)
+	}
+	return uuo
+}
+
+// ClearOptionalNullableBool clears the value of the "optional_nullable_bool" field.
+func (uuo *UserUpdateOne) ClearOptionalNullableBool() *UserUpdateOne {
+	uuo.mutation.ClearOptionalNullableBool()
 	return uuo
 }
 
@@ -485,11 +519,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Column: user.FieldUsername,
 		})
 	}
-	if value, ok := uuo.mutation.Abc(); ok {
+	if value, ok := uuo.mutation.OptionalNullableBool(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeBool,
 			Value:  value,
-			Column: user.FieldAbc,
+			Column: user.FieldOptionalNullableBool,
+		})
+	}
+	if uuo.mutation.OptionalNullableBoolCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: user.FieldOptionalNullableBool,
 		})
 	}
 	if uuo.mutation.CityCleared() {

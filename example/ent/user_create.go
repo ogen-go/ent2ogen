@@ -71,9 +71,17 @@ func (uc *UserCreate) SetUsername(s string) *UserCreate {
 	return uc
 }
 
-// SetAbc sets the "abc" field.
-func (uc *UserCreate) SetAbc(s string) *UserCreate {
-	uc.mutation.SetAbc(s)
+// SetOptionalNullableBool sets the "optional_nullable_bool" field.
+func (uc *UserCreate) SetOptionalNullableBool(b bool) *UserCreate {
+	uc.mutation.SetOptionalNullableBool(b)
+	return uc
+}
+
+// SetNillableOptionalNullableBool sets the "optional_nullable_bool" field if the given value is not nil.
+func (uc *UserCreate) SetNillableOptionalNullableBool(b *bool) *UserCreate {
+	if b != nil {
+		uc.SetOptionalNullableBool(*b)
+	}
 	return uc
 }
 
@@ -214,9 +222,6 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Username(); !ok {
 		return &ValidationError{Name: "username", err: errors.New(`ent: missing required field "User.username"`)}
 	}
-	if _, ok := uc.mutation.Abc(); !ok {
-		return &ValidationError{Name: "abc", err: errors.New(`ent: missing required field "User.abc"`)}
-	}
 	if _, ok := uc.mutation.CityID(); !ok {
 		return &ValidationError{Name: "city", err: errors.New(`ent: missing required edge "User.city"`)}
 	}
@@ -297,13 +302,13 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.Username = value
 	}
-	if value, ok := uc.mutation.Abc(); ok {
+	if value, ok := uc.mutation.OptionalNullableBool(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeBool,
 			Value:  value,
-			Column: user.FieldAbc,
+			Column: user.FieldOptionalNullableBool,
 		})
-		_node.Abc = value
+		_node.OptionalNullableBool = &value
 	}
 	if nodes := uc.mutation.CityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -439,15 +444,21 @@ func (u *UserUpsert) UpdateUsername() *UserUpsert {
 	return u
 }
 
-// SetAbc sets the "abc" field.
-func (u *UserUpsert) SetAbc(v string) *UserUpsert {
-	u.Set(user.FieldAbc, v)
+// SetOptionalNullableBool sets the "optional_nullable_bool" field.
+func (u *UserUpsert) SetOptionalNullableBool(v bool) *UserUpsert {
+	u.Set(user.FieldOptionalNullableBool, v)
 	return u
 }
 
-// UpdateAbc sets the "abc" field to the value that was provided on create.
-func (u *UserUpsert) UpdateAbc() *UserUpsert {
-	u.SetExcluded(user.FieldAbc)
+// UpdateOptionalNullableBool sets the "optional_nullable_bool" field to the value that was provided on create.
+func (u *UserUpsert) UpdateOptionalNullableBool() *UserUpsert {
+	u.SetExcluded(user.FieldOptionalNullableBool)
+	return u
+}
+
+// ClearOptionalNullableBool clears the value of the "optional_nullable_bool" field.
+func (u *UserUpsert) ClearOptionalNullableBool() *UserUpsert {
+	u.SetNull(user.FieldOptionalNullableBool)
 	return u
 }
 
@@ -574,17 +585,24 @@ func (u *UserUpsertOne) UpdateUsername() *UserUpsertOne {
 	})
 }
 
-// SetAbc sets the "abc" field.
-func (u *UserUpsertOne) SetAbc(v string) *UserUpsertOne {
+// SetOptionalNullableBool sets the "optional_nullable_bool" field.
+func (u *UserUpsertOne) SetOptionalNullableBool(v bool) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.SetAbc(v)
+		s.SetOptionalNullableBool(v)
 	})
 }
 
-// UpdateAbc sets the "abc" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateAbc() *UserUpsertOne {
+// UpdateOptionalNullableBool sets the "optional_nullable_bool" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateOptionalNullableBool() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdateAbc()
+		s.UpdateOptionalNullableBool()
+	})
+}
+
+// ClearOptionalNullableBool clears the value of the "optional_nullable_bool" field.
+func (u *UserUpsertOne) ClearOptionalNullableBool() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearOptionalNullableBool()
 	})
 }
 
@@ -877,17 +895,24 @@ func (u *UserUpsertBulk) UpdateUsername() *UserUpsertBulk {
 	})
 }
 
-// SetAbc sets the "abc" field.
-func (u *UserUpsertBulk) SetAbc(v string) *UserUpsertBulk {
+// SetOptionalNullableBool sets the "optional_nullable_bool" field.
+func (u *UserUpsertBulk) SetOptionalNullableBool(v bool) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.SetAbc(v)
+		s.SetOptionalNullableBool(v)
 	})
 }
 
-// UpdateAbc sets the "abc" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateAbc() *UserUpsertBulk {
+// UpdateOptionalNullableBool sets the "optional_nullable_bool" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateOptionalNullableBool() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdateAbc()
+		s.UpdateOptionalNullableBool()
+	})
+}
+
+// ClearOptionalNullableBool clears the value of the "optional_nullable_bool" field.
+func (u *UserUpsertBulk) ClearOptionalNullableBool() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearOptionalNullableBool()
 	})
 }
 

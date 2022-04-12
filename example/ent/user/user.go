@@ -23,8 +23,8 @@ const (
 	FieldLastName = "last_name"
 	// FieldUsername holds the string denoting the username field in the database.
 	FieldUsername = "username"
-	// FieldAbc holds the string denoting the abc field in the database.
-	FieldAbc = "abc"
+	// FieldOptionalNullableBool holds the string denoting the optional_nullable_bool field in the database.
+	FieldOptionalNullableBool = "optional_nullable_bool"
 	// EdgeCity holds the string denoting the city edge name in mutations.
 	EdgeCity = "city"
 	// Table holds the table name of the user in the database.
@@ -46,7 +46,7 @@ var Columns = []string{
 	FieldFirstName,
 	FieldLastName,
 	FieldUsername,
-	FieldAbc,
+	FieldOptionalNullableBool,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "users"

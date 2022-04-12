@@ -12,6 +12,7 @@ func (e *City) ToOpenAPI() openapi.City {
 
 func (e *User) ToOpenAPI() openapi.User {
 	return openapi.User{
+		ID:        e.ID,
 		FirstName: e.FirstName,
 		LastName:  e.LastName,
 		Username:  e.Username,

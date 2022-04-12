@@ -87,9 +87,9 @@ func (ex *Extension) generateMapping(g *gen.Graph, s *load.Schema) error {
 	}
 
 	m := &Mapping{
-		From:     s,
-		FromType: findNode(g, s.Name),
-		To:       oapiSchema,
+		From:       findNode(g, s.Name),
+		To:         oapiSchema,
+		fromSchema: s,
 	}
 
 	if err := m.checkConvertability(); err != nil {

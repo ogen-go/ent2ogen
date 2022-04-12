@@ -10,9 +10,10 @@ import (
 )
 
 type Mapping struct {
-	From     *load.Schema // Ent schema
-	FromType *gen.Type    // Ent go type
-	To       *ogen.Schema // OpenAPI schema
+	From *gen.Type    // Ent go type
+	To   *ogen.Schema // OpenAPI schema
+
+	fromSchema *load.Schema
 }
 
 func (m *Mapping) checkConvertability() error {
@@ -38,7 +39,11 @@ func (m *Mapping) checkConvertability() error {
 		return false
 	}
 
-	for _, field := range m.From.Fields {
+	fields := make([]*gen.Field, 0, len(m.From.Fields)+1)
+	fields = append(fields, m.From.ID)
+	fields = append(fields, m.From.Fields...)
+
+	for _, field := range fields {
 		s, ok := searchField(field.Name)
 		if !ok {
 			fmt.Printf("type %q: field %q not found in schema object\n", m.From.Name, field.Name)
@@ -53,7 +58,7 @@ func (m *Mapping) checkConvertability() error {
 	return nil
 }
 
-func (m *Mapping) checkField(f *load.Field, required bool, s *ogen.Schema) error {
+func (m *Mapping) checkField(f *gen.Field, required bool, s *ogen.Schema) error {
 	if f.Optional != !required {
 		return fmt.Errorf("optionality mismatch")
 	}
@@ -76,9 +81,9 @@ func (m *Mapping) checkField(f *load.Field, required bool, s *ogen.Schema) error
 		field.TypeUUID:   {"string", "uuid"},
 	}
 
-	v, ok := mapping[f.Info.Type]
+	v, ok := mapping[f.Type.Type]
 	if !ok {
-		return fmt.Errorf("unsupported ent type: %q", f.Info.Type)
+		return fmt.Errorf("unsupported ent type: %q", f.Type.Type)
 	}
 
 	if s.Type != v.Type {

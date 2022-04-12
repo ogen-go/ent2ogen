@@ -4,7 +4,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
-	"github.com/ogen-go/ent2ogen"
 )
 
 type City struct {
@@ -26,6 +25,6 @@ func (City) Mixin() []ent.Mixin {
 
 func (City) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		ent2ogen.BindTo("City"),
+		// ent2ogen.BindTo("City"),
 	}
 }

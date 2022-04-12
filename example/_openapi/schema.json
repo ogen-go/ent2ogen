@@ -30,8 +30,7 @@
                     "id",
                     "first_name",
                     "last_name",
-                    "username",
-                    "city"
+                    "username"
                 ],
                 "properties": {
                     "id": {
@@ -46,9 +45,6 @@
                     },
                     "username": {
                         "type": "string"
-                    },
-                    "city": {
-                        "$ref": "#/components/schemas/City"
                     }
                 }
             },

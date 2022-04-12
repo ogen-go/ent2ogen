@@ -7,16 +7,10 @@ import openapi "{{ $extCfg.OgenPackage }}"
 
 {{- range $m := $extCfg.Mappings }}
 
-{{- $from  := $m.From }}
-{{- $rtype := sprintf "openapi.%s" $from.Name }}
-
-func (e *{{ $from.Name }}) ToOpenAPI() {{ $rtype }} {
+{{- $rtype := sprintf "openapi.%s" $m.From.Name }}
+func (e *{{ $m.From.Name }}) ToOpenAPI() {{ $rtype }} {
     return {{ $rtype }}{
-        {{- if $m.HasOpenAPIField $from.ID }}
-        {{ $from.ID.StructField }}: e.{{ $from.ID.StructField }},
-        {{- end }}
-
-        {{- range $f := $from.Fields }}
+        {{- range $f := $m.EntFields }}
             {{- if $m.HasOpenAPIField $f }}
             {{ $f.StructField }}: e.{{ $f.StructField }},
             {{- end }}

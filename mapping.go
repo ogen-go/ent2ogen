@@ -21,16 +21,17 @@ func (m *Mapping) checkConvertability() error {
 		return fmt.Errorf("schema must be an object")
 	}
 
-	searchField := func(name string) (*ogen.Schema, bool) {
-		for _, prop := range m.To.Properties {
-			if prop.Name == name {
-				return prop.Schema, true
+	fields := m.EntFields()
+	lookupEntField := func(name string) (*gen.Field, bool) {
+		for _, f := range fields {
+			if f.Name == name {
+				return f, true
 			}
 		}
 		return nil, false
 	}
 
-	required := func(name string) bool {
+	propRequired := func(name string) bool {
 		for _, f := range m.To.Required {
 			if f == name {
 				return true
@@ -39,19 +40,14 @@ func (m *Mapping) checkConvertability() error {
 		return false
 	}
 
-	fields := make([]*gen.Field, 0, len(m.From.Fields)+1)
-	fields = append(fields, m.From.ID)
-	fields = append(fields, m.From.Fields...)
-
-	for _, field := range fields {
-		s, ok := searchField(field.Name)
+	for _, prop := range m.To.Properties {
+		f, ok := lookupEntField(prop.Name)
 		if !ok {
-			fmt.Printf("type %q: field %q not found in schema object\n", m.From.Name, field.Name)
-			continue
+			return fmt.Errorf("property %q not found in ent schema", prop.Name)
 		}
 
-		if err := m.checkField(field, required(field.Name), s); err != nil {
-			return fmt.Errorf("field %q: %w", field.Name, err)
+		if err := m.checkField(f, propRequired(prop.Name), prop.Schema); err != nil {
+			return fmt.Errorf("property %q: %w", f.Name, err)
 		}
 	}
 
@@ -109,4 +105,12 @@ func (m *Mapping) HasOpenAPIField(f *gen.Field) bool {
 	}
 
 	return false
+}
+
+// EntFields returns ent schema fields.
+func (m *Mapping) EntFields() []*gen.Field {
+	fields := make([]*gen.Field, 0, len(m.From.Fields)+1)
+	fields = append(fields, m.From.ID)
+	fields = append(fields, m.From.Fields...)
+	return fields
 }

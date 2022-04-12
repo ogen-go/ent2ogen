@@ -5,7 +5,6 @@ import (
 
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
-	"entgo.io/ent/entc/load"
 	"github.com/ogen-go/ogen"
 )
 
@@ -55,9 +54,9 @@ func (ex *Extension) Annotations() []entc.Annotation {
 
 func (ex *Extension) ogen(next gen.Generator) gen.Generator {
 	return gen.GenerateFunc(func(g *gen.Graph) error {
-		for _, s := range g.Schemas {
-			if err := ex.generateMapping(g, s); err != nil {
-				return fmt.Errorf("type %q: %w", s.Name, err)
+		for _, n := range g.Nodes {
+			if err := ex.generateMapping(n); err != nil {
+				return fmt.Errorf("type %q: %w", n.Name, err)
 			}
 		}
 
@@ -65,8 +64,8 @@ func (ex *Extension) ogen(next gen.Generator) gen.Generator {
 	})
 }
 
-func (ex *Extension) generateMapping(g *gen.Graph, s *load.Schema) error {
-	ant, err := annotation(s.Annotations)
+func (ex *Extension) generateMapping(n *gen.Type) error {
+	ant, err := annotation(n.Annotations)
 	if err != nil {
 		return fmt.Errorf("read annotation: %w", err)
 	}
@@ -76,24 +75,19 @@ func (ex *Extension) generateMapping(g *gen.Graph, s *load.Schema) error {
 	}
 
 	// OpenAPI schema component.
-	schemaName := s.Name
+	schemaName := n.Name
 	if ant.BindTo != "" {
 		schemaName = ant.BindTo
 	}
 
-	oapiSchema, err := ex.findComponent(schemaName)
+	s, err := ex.findComponent(schemaName)
 	if err != nil {
 		return fmt.Errorf("find %q schema: %w", schemaName, err)
 	}
 
-	m := &Mapping{
-		From:       findNode(g, s.Name),
-		To:         oapiSchema,
-		fromSchema: s,
-	}
-
-	if err := m.checkConvertability(); err != nil {
-		return fmt.Errorf("type %q: %w", s.Name, err)
+	m := &Mapping{From: n, To: s}
+	if err := m.checkCompatibility(); err != nil {
+		return fmt.Errorf("type %q: %w", n.Name, err)
 	}
 
 	ex.cfg.Mappings = append(ex.cfg.Mappings, m)

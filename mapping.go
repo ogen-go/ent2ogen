@@ -4,49 +4,29 @@ import (
 	"fmt"
 
 	"entgo.io/ent/entc/gen"
-	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/field"
 	"github.com/ogen-go/ogen"
 )
 
+// Mapping is used to render templates.
 type Mapping struct {
 	From *gen.Type    // Ent go type
 	To   *ogen.Schema // OpenAPI schema
-
-	fromSchema *load.Schema
 }
 
-func (m *Mapping) checkConvertability() error {
+func (m *Mapping) checkCompatibility() error {
 	if m.To.Type != "object" {
 		return fmt.Errorf("schema must be an object")
 	}
 
-	fields := m.EntFields()
-	lookupEntField := func(name string) (*gen.Field, bool) {
-		for _, f := range fields {
-			if f.Name == name {
-				return f, true
-			}
-		}
-		return nil, false
-	}
-
-	propRequired := func(name string) bool {
-		for _, f := range m.To.Required {
-			if f == name {
-				return true
-			}
-		}
-		return false
-	}
-
 	for _, prop := range m.To.Properties {
-		f, ok := lookupEntField(prop.Name)
+		f, ok := m.lookupEntField(prop.Name)
 		if !ok {
 			return fmt.Errorf("property %q not found in ent schema", prop.Name)
 		}
 
-		if err := m.checkField(f, propRequired(prop.Name), prop.Schema); err != nil {
+		required := m.isPropertyRequired(prop.Name)
+		if err := m.checkField(f, required, prop.Schema); err != nil {
 			return fmt.Errorf("property %q: %w", f.Name, err)
 		}
 	}
@@ -97,6 +77,25 @@ func (m *Mapping) checkField(f *gen.Field, required bool, s *ogen.Schema) error 
 	return nil
 }
 
+func (m *Mapping) lookupEntField(name string) (*gen.Field, bool) {
+	for _, f := range m.EntFields() {
+		if f.Name == name {
+			return f, true
+		}
+	}
+	return nil, false
+}
+
+func (m *Mapping) isPropertyRequired(name string) bool {
+	for _, f := range m.To.Required {
+		if f == name {
+			return true
+		}
+	}
+	return false
+}
+
+// HasOpenAPIField indicates whether OpenAPI schema has provided field.
 func (m *Mapping) HasOpenAPIField(f *gen.Field) bool {
 	for _, prop := range m.To.Properties {
 		if prop.Name == f.Name {

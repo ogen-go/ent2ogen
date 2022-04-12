@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/field"
-	"github.com/iancoleman/strcase"
 	"github.com/ogen-go/ogen"
 )
 
@@ -98,10 +97,8 @@ func (m *Mapping) checkField(f *load.Field, required bool, s *ogen.Schema) error
 }
 
 func (m *Mapping) HasOpenAPIField(f *gen.Field) bool {
-	name := strcase.ToSnake(f.Name)
-
 	for _, prop := range m.To.Properties {
-		if prop.Name == name {
+		if prop.Name == f.Name {
 			return true
 		}
 	}

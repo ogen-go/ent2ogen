@@ -5,12 +5,12 @@ go 1.18
 require (
 	entgo.io/ent v0.10.1
 	github.com/go-faster/errors v0.5.0
-	github.com/go-faster/jx v0.33.0
+	github.com/go-faster/jx v0.34.0
 	github.com/google/uuid v1.3.0
-	github.com/ogen-go/ogen v0.24.0
-	go.opentelemetry.io/otel v1.6.1
-	go.opentelemetry.io/otel/metric v0.28.0
-	go.opentelemetry.io/otel/trace v1.6.1
+	github.com/ogen-go/ogen v0.25.0
+	go.opentelemetry.io/otel v1.6.3
+	go.opentelemetry.io/otel/metric v0.29.0
+	go.opentelemetry.io/otel/trace v1.6.3
 )
 
 require (

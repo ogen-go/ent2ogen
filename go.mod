@@ -7,7 +7,7 @@ require (
 	github.com/go-faster/errors v0.5.0
 	github.com/go-faster/jx v0.34.0
 	github.com/google/uuid v1.3.0
-	github.com/ogen-go/ogen v0.25.0
+	github.com/ogen-go/ogen v0.26.1-0.20220419104058-0c83e40a8e64
 	go.opentelemetry.io/otel v1.6.3
 	go.opentelemetry.io/otel/metric v0.29.0
 	go.opentelemetry.io/otel/trace v1.6.3

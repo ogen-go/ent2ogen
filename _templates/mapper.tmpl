@@ -1,25 +1,28 @@
 {{ define "mappers" }}
 {{ template "header" . }}
 
-{{- $extCfg := $.Config.Annotations.Ent2ogen }}
+{{- $cfg := $.Config.Annotations.Ent2ogen }}
 
-import openapi "{{ $extCfg.OgenPackage }}"
+import openapi "{{ $cfg.OgenPackage }}"
 
-{{- range $m := $extCfg.Mappings }}
+{{- range $m := $cfg.Mappings }}
 
 {{- $rtype := sprintf "openapi.%s" $m.From.Name }}
 func (e *{{ $m.From.Name }}) ToOpenAPI() (t {{ $rtype }}) {
-    {{- range $f := $m.EntFields }}{{- if $m.HasOpenAPIField $f }}
+    {{- range $f := $m.FieldMappings }}
 
-    {{- if $f.Nillable }}
-    if e.{{ $f.StructField }} != nil {
-        t.{{ $f.StructField }}.SetTo(*e.{{ $f.StructField }})
+    {{- $entField  := $f.From }}
+    {{- $ogenField := $f.To }}
+
+    {{- if $entField.Nillable }}
+    if e.{{ $entField.StructField }} != nil {
+        t.{{ $ogenField.Name }}.SetTo(*e.{{ $entField.StructField }})
     }
     {{- else }}
-    t.{{ $f.StructField }} = e.{{ $f.StructField }}
+    t.{{ $ogenField.Name }} = e.{{ $entField.StructField }}
     {{- end }}
     
-    {{- end }}{{- end }}
+    {{- end }}
     return t
 }
 

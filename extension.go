@@ -5,13 +5,16 @@ import (
 
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
-	"github.com/ogen-go/ogen"
+	"github.com/ogen-go/ogen/gen/ir"
+	"github.com/ogen-go/ogen/jsonschema"
+	"github.com/ogen-go/ogen/openapi"
 )
 
 type Extension struct {
 	entc.DefaultExtension
-	spec *ogen.Spec
-	cfg  *Config
+	api   *openapi.API
+	index map[*jsonschema.Schema]*ir.Type
+	cfg   *Config
 }
 
 type Config struct {
@@ -23,14 +26,38 @@ func (Config) Name() string {
 	return "Ent2ogen"
 }
 
-func NewExtension(spec *ogen.Spec) (*Extension, error) {
-	if spec == nil {
+type ExtensionConfig struct {
+	API         *openapi.API
+	Types       map[string]*ir.Type
+	OgenPackage string
+}
+
+func NewExtension(cfg ExtensionConfig) (*Extension, error) {
+	if cfg.API == nil {
 		return nil, fmt.Errorf("spec cannot be nil")
 	}
+	if cfg.Types == nil {
+		return nil, fmt.Errorf("types map cannot be nil")
+	}
+
+	index := make(map[*jsonschema.Schema]*ir.Type)
+	for _, t := range cfg.Types {
+		if t.Schema == nil {
+			continue
+		}
+
+		if _, ok := index[t.Schema]; ok {
+			return nil, fmt.Errorf("type map schema collision: %+v", t)
+		}
+
+		index[t.Schema] = t
+	}
+
 	return &Extension{
-		spec: spec,
+		api:   cfg.API,
+		index: index,
 		cfg: &Config{
-			OgenPackage: "github.com/ogen-go/ent2ogen/example/openapi",
+			OgenPackage: cfg.OgenPackage,
 		},
 	}, nil
 }
@@ -85,7 +112,12 @@ func (ex *Extension) generateMapping(n *gen.Type) error {
 		return fmt.Errorf("find %q schema: %w", schemaName, err)
 	}
 
-	m := &Mapping{From: n, To: s}
+	t, ok := ex.index[s]
+	if !ok {
+		return fmt.Errorf("schema %q: ir type not found", schemaName)
+	}
+
+	m := &Mapping{From: n, To: t}
 	if err := m.checkCompatibility(); err != nil {
 		return fmt.Errorf("type %q: %w", n.Name, err)
 	}
@@ -94,16 +126,8 @@ func (ex *Extension) generateMapping(n *gen.Type) error {
 	return nil
 }
 
-func (ex *Extension) findComponent(name string) (*ogen.Schema, error) {
-	if ex.spec.Components == nil {
-		return nil, fmt.Errorf("components cannot be nil")
-	}
-
-	if ex.spec.Components.Schemas == nil {
-		return nil, fmt.Errorf("schema components cannot be nil")
-	}
-
-	s, ok := ex.spec.Components.Schemas[name]
+func (ex *Extension) findComponent(name string) (*jsonschema.Schema, error) {
+	s, ok := ex.api.Components.Schemas[name]
 	if !ok {
 		return nil, fmt.Errorf("component is not present in the openapi document")
 	}

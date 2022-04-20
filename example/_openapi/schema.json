@@ -30,7 +30,8 @@
                     "id",
                     "first_name",
                     "last_name",
-                    "username"
+                    "username",
+                    "city"
                 ],
                 "properties": {
                     "id": {
@@ -49,6 +50,9 @@
                     "optional_nullable_bool": {
                         "type": "boolean",
                         "nullable": true
+                    },
+                    "city": {
+                        "$ref": "#/components/schemas/City"
                     }
                 }
             },

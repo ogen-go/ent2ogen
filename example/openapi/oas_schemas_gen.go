@@ -85,6 +85,11 @@ func (s *ErrorResponseStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
+// Ref: #/components/schemas/City
+type City struct {
+	Name string "json:\"name\""
+}
+
 type ErrorResponse struct {
 	ErrorMessage string "json:\"error_message\""
 }
@@ -157,4 +162,5 @@ type User struct {
 	LastName             string     "json:\"last_name\""
 	Username             string     "json:\"username\""
 	OptionalNullableBool OptNilBool "json:\"optional_nullable_bool\""
+	City                 City       "json:\"city\""
 }

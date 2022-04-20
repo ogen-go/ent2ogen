@@ -19,7 +19,7 @@ type Extension struct {
 
 type Config struct {
 	OgenPackage string
-	Mappings    []*Mapping
+	Mappings    map[*gen.Type]*Mapping
 }
 
 func (Config) Name() string {
@@ -58,6 +58,7 @@ func NewExtension(cfg ExtensionConfig) (*Extension, error) {
 		index: index,
 		cfg: &Config{
 			OgenPackage: cfg.OgenPackage,
+			Mappings:    map[*gen.Type]*Mapping{},
 		},
 	}, nil
 }
@@ -117,12 +118,10 @@ func (ex *Extension) generateMapping(n *gen.Type) error {
 		return fmt.Errorf("schema %q: ir type not found", schemaName)
 	}
 
-	m := &Mapping{From: n, To: t}
-	if err := m.checkCompatibility(); err != nil {
+	if err := ex.createMapping(n, t); err != nil {
 		return fmt.Errorf("type %q: %w", n.Name, err)
 	}
 
-	ex.cfg.Mappings = append(ex.cfg.Mappings, m)
 	return nil
 }
 

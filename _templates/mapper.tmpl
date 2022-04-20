@@ -5,26 +5,39 @@
 
 import openapi "{{ $cfg.OgenPackage }}"
 
-{{- range $m := $cfg.Mappings }}
+{{- range $_, $m := $cfg.Mappings }}
 
 {{- $rtype := sprintf "openapi.%s" $m.From.Name }}
-func (e *{{ $m.From.Name }}) ToOpenAPI() (t {{ $rtype }}) {
+func (e *{{ $m.From.Name }}) ToOpenAPI() (t {{ $rtype }}, err error) {
     {{- range $f := $m.FieldMappings }}
+        {{- $entField  := $f.From }}
+        {{- $ogenField := $f.To }}
 
-    {{- $entField  := $f.From }}
-    {{- $ogenField := $f.To }}
+        {{- if $entField.Nillable }}
+        if e.{{ $entField.StructField }} != nil {
+            t.{{ $ogenField.Name }}.SetTo(*e.{{ $entField.StructField }})
+        }
+        {{- else }}
+        t.{{ $ogenField.Name }} = e.{{ $entField.StructField }}
+        {{- end }}
+    {{- end }}
 
-    {{- if $entField.Nillable }}
-    if e.{{ $entField.StructField }} != nil {
-        t.{{ $ogenField.Name }}.SetTo(*e.{{ $entField.StructField }})
+    {{- range $e := $m.EdgeMappings }}
+    // Edge '{{ $e.From.Name }}'.
+    {
+        v, err := e.Edges.{{ $e.From.StructField }}OrErr()
+        if err != nil {
+            return t, fmt.Errorf("load '{{ $e.From.Name }}' edge: %w", err)
+        }
+
+        t.{{ $e.To.Name }}, err = v.ToOpenAPI()
+        if err != nil {
+            return t, fmt.Errorf("convert '{{ $e.From.Name }}' type: %w", err)
+        }
     }
-    {{- else }}
-    t.{{ $ogenField.Name }} = e.{{ $entField.StructField }}
     {{- end }}
-    
-    {{- end }}
-    return t
+    return t, nil
 }
 
-{{- end }}
+{{ end }}
 {{- end }}

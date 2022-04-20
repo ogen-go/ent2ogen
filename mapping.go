@@ -14,11 +14,38 @@ type Mapping struct {
 	From          *gen.Type
 	To            *ir.Type
 	FieldMappings []FieldMapping
+	EdgeMappings  []EdgeMapping
+
+	ext *Extension
 }
 
 type FieldMapping struct {
 	From *gen.Field
 	To   *ir.Field
+}
+
+type EdgeMapping struct {
+	From *gen.Edge
+	To   *ir.Field
+}
+
+func (e *Extension) createMapping(from *gen.Type, to *ir.Type) error {
+	if _, ok := e.cfg.Mappings[from]; ok {
+		return fmt.Errorf("mapping already created")
+	}
+
+	m := &Mapping{
+		From: from,
+		To:   to,
+		ext:  e,
+	}
+
+	if err := m.checkCompatibility(); err != nil {
+		return err
+	}
+
+	e.cfg.Mappings[from] = m
+	return nil
 }
 
 func (m *Mapping) checkCompatibility() error {
@@ -31,20 +58,39 @@ func (m *Mapping) checkCompatibility() error {
 			return fmt.Errorf("field %q has no spec", field.Name)
 		}
 
-		f, ok := m.lookupEntField(field.Spec.Name)
+		f, ok := m.lookupField(field.Spec.Name)
 		if !ok {
-			return fmt.Errorf("property %q not found in ent schema", field.Spec.Name)
+			e, ok := m.lookupEdge(field.Spec.Name)
+			if !ok {
+				return fmt.Errorf("property %q not found in ent schema", field.Spec.Name)
+			}
+
+			if err := m.createEdgeMapping(e, field); err != nil {
+				return fmt.Errorf("edge %q: %w", f.Name, err)
+			}
+
+			continue
 		}
 
-		if err := m.checkField(f, field); err != nil {
-			return fmt.Errorf("property %q: %w", f.Name, err)
+		if err := m.createFieldMapping(f, field); err != nil {
+			return fmt.Errorf("field %q: %w", f.Name, err)
 		}
 	}
 
 	return nil
 }
 
-func (m *Mapping) checkField(entField *gen.Field, ogenField *ir.Field) error {
+func (m *Mapping) lookupField(name string) (*gen.Field, bool) {
+	for _, f := range m.EntFields() {
+		if f.Name == name {
+			return f, true
+		}
+	}
+
+	return nil, false
+}
+
+func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) error {
 	if ogenField.Spec == nil {
 		return nil
 	}
@@ -98,16 +144,43 @@ func (m *Mapping) checkField(entField *gen.Field, ogenField *ir.Field) error {
 		From: entField,
 		To:   ogenField,
 	})
+
 	return nil
 }
 
-func (m *Mapping) lookupEntField(name string) (*gen.Field, bool) {
-	for _, f := range m.EntFields() {
-		if f.Name == name {
-			return f, true
+func (m *Mapping) lookupEdge(name string) (*gen.Edge, bool) {
+	for _, e := range m.From.Edges {
+		if e.Name == name {
+			return e, true
 		}
 	}
+
 	return nil, false
+}
+
+func (m *Mapping) createEdgeMapping(from *gen.Edge, to *ir.Field) error {
+	if to.Spec == nil || to.Spec.Schema == nil {
+		return fmt.Errorf("spec cannot be nil")
+	}
+
+	if from.Optional != false {
+		return fmt.Errorf("optional edges are not supported")
+	}
+
+	if !from.Unique {
+		return fmt.Errorf("only unique edges are supported")
+	}
+
+	if err := m.ext.createMapping(from.Type, to.Type); err != nil {
+		return fmt.Errorf("edge %q: %w", from.Name, err)
+	}
+
+	m.EdgeMappings = append(m.EdgeMappings, EdgeMapping{
+		From: from,
+		To:   to,
+	})
+
+	return nil
 }
 
 // EntFields returns ent schema fields.

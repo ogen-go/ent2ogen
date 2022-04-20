@@ -2,9 +2,18 @@
 
 package ent
 
-import openapi "github.com/ogen-go/ent2ogen/example/openapi"
+import (
+	"fmt"
 
-func (e *User) ToOpenAPI() (t openapi.User) {
+	openapi "github.com/ogen-go/ent2ogen/example/openapi"
+)
+
+func (e *City) ToOpenAPI() (t openapi.City, err error) {
+	t.Name = e.Name
+	return t, nil
+}
+
+func (e *User) ToOpenAPI() (t openapi.User, err error) {
 	t.ID = e.ID
 	t.FirstName = e.FirstName
 	t.LastName = e.LastName
@@ -12,5 +21,17 @@ func (e *User) ToOpenAPI() (t openapi.User) {
 	if e.OptionalNullableBool != nil {
 		t.OptionalNullableBool.SetTo(*e.OptionalNullableBool)
 	}
-	return t
+	// Edge 'city'.
+	{
+		v, err := e.Edges.CityOrErr()
+		if err != nil {
+			return t, fmt.Errorf("load 'city' edge: %w", err)
+		}
+
+		t.City, err = v.ToOpenAPI()
+		if err != nil {
+			return t, fmt.Errorf("convert 'city' type: %w", err)
+		}
+	}
+	return t, nil
 }

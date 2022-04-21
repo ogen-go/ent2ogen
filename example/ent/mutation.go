@@ -470,6 +470,9 @@ type UserMutation struct {
 	clearedFields          map[string]struct{}
 	city                   *uuid.UUID
 	clearedcity            bool
+	friends                map[uuid.UUID]struct{}
+	removedfriends         map[uuid.UUID]struct{}
+	clearedfriends         bool
 	done                   bool
 	oldValue               func(context.Context) (*User, error)
 	predicates             []predicate.User
@@ -847,6 +850,60 @@ func (m *UserMutation) ResetCity() {
 	m.clearedcity = false
 }
 
+// AddFriendIDs adds the "friends" edge to the User entity by ids.
+func (m *UserMutation) AddFriendIDs(ids ...uuid.UUID) {
+	if m.friends == nil {
+		m.friends = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.friends[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFriends clears the "friends" edge to the User entity.
+func (m *UserMutation) ClearFriends() {
+	m.clearedfriends = true
+}
+
+// FriendsCleared reports if the "friends" edge to the User entity was cleared.
+func (m *UserMutation) FriendsCleared() bool {
+	return m.clearedfriends
+}
+
+// RemoveFriendIDs removes the "friends" edge to the User entity by IDs.
+func (m *UserMutation) RemoveFriendIDs(ids ...uuid.UUID) {
+	if m.removedfriends == nil {
+		m.removedfriends = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.friends, ids[i])
+		m.removedfriends[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFriends returns the removed IDs of the "friends" edge to the User entity.
+func (m *UserMutation) RemovedFriendsIDs() (ids []uuid.UUID) {
+	for id := range m.removedfriends {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FriendsIDs returns the "friends" edge IDs in the mutation.
+func (m *UserMutation) FriendsIDs() (ids []uuid.UUID) {
+	for id := range m.friends {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFriends resets all changes to the "friends" edge.
+func (m *UserMutation) ResetFriends() {
+	m.friends = nil
+	m.clearedfriends = false
+	m.removedfriends = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -1059,9 +1116,12 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.city != nil {
 		edges = append(edges, user.EdgeCity)
+	}
+	if m.friends != nil {
+		edges = append(edges, user.EdgeFriends)
 	}
 	return edges
 }
@@ -1074,13 +1134,22 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 		if id := m.city; id != nil {
 			return []ent.Value{*id}
 		}
+	case user.EdgeFriends:
+		ids := make([]ent.Value, 0, len(m.friends))
+		for id := range m.friends {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedfriends != nil {
+		edges = append(edges, user.EdgeFriends)
+	}
 	return edges
 }
 
@@ -1088,15 +1157,24 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case user.EdgeFriends:
+		ids := make([]ent.Value, 0, len(m.removedfriends))
+		for id := range m.removedfriends {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedcity {
 		edges = append(edges, user.EdgeCity)
+	}
+	if m.clearedfriends {
+		edges = append(edges, user.EdgeFriends)
 	}
 	return edges
 }
@@ -1107,6 +1185,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
 	case user.EdgeCity:
 		return m.clearedcity
+	case user.EdgeFriends:
+		return m.clearedfriends
 	}
 	return false
 }
@@ -1128,6 +1208,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
 	case user.EdgeCity:
 		m.ResetCity()
+		return nil
+	case user.EdgeFriends:
+		m.ResetFriends()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

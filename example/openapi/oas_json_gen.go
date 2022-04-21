@@ -366,15 +366,26 @@ func (s User) encodeFields(e *jx.Encoder) {
 		e.FieldStart("city")
 		s.City.Encode(e)
 	}
+	{
+		if s.Friends != nil {
+			e.FieldStart("friends")
+			e.ArrStart()
+			for _, elem := range s.Friends {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfUser = [6]string{
+var jsonFieldsNameOfUser = [7]string{
 	0: "id",
 	1: "first_name",
 	2: "last_name",
 	3: "username",
 	4: "optional_nullable_bool",
 	5: "city",
+	6: "friends",
 }
 
 // Decode decodes User from json.
@@ -453,6 +464,23 @@ func (s *User) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"city\"")
+			}
+		case "friends":
+			if err := func() error {
+				s.Friends = make([]User, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem User
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Friends = append(s.Friends, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"friends\"")
 			}
 		default:
 			return d.Skip()

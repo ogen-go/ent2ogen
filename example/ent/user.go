@@ -42,9 +42,11 @@ type User struct {
 type UserEdges struct {
 	// City holds the value of the city edge.
 	City *City `json:"city,omitempty"`
+	// Friends holds the value of the friends edge.
+	Friends []*User `json:"friends,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // CityOrErr returns the City value or an error if the edge
@@ -59,6 +61,15 @@ func (e UserEdges) CityOrErr() (*City, error) {
 		return e.City, nil
 	}
 	return nil, &NotLoadedError{edge: "city"}
+}
+
+// FriendsOrErr returns the Friends value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FriendsOrErr() ([]*User, error) {
+	if e.loadedTypes[1] {
+		return e.Friends, nil
+	}
+	return nil, &NotLoadedError{edge: "friends"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -149,6 +160,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 // QueryCity queries the "city" edge of the User entity.
 func (u *User) QueryCity() *CityQuery {
 	return (&UserClient{config: u.config}).QueryCity(u)
+}
+
+// QueryFriends queries the "friends" edge of the User entity.
+func (u *User) QueryFriends() *UserQuery {
+	return (&UserClient{config: u.config}).QueryFriends(u)
 }
 
 // Update returns a builder for updating this User.

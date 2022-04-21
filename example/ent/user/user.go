@@ -27,6 +27,8 @@ const (
 	FieldOptionalNullableBool = "optional_nullable_bool"
 	// EdgeCity holds the string denoting the city edge name in mutations.
 	EdgeCity = "city"
+	// EdgeFriends holds the string denoting the friends edge name in mutations.
+	EdgeFriends = "friends"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CityTable is the table that holds the city relation/edge.
@@ -36,6 +38,8 @@ const (
 	CityInverseTable = "cities"
 	// CityColumn is the table column denoting the city relation/edge.
 	CityColumn = "user_city"
+	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
+	FriendsTable = "user_friends"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -54,6 +58,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"user_city",
 }
+
+var (
+	// FriendsPrimaryKey and FriendsColumn2 are the table columns denoting the
+	// primary key for the friends relation (M2M).
+	FriendsPrimaryKey = []string{"user_id", "friend_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

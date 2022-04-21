@@ -163,4 +163,5 @@ type User struct {
 	Username             string     "json:\"username\""
 	OptionalNullableBool OptNilBool "json:\"optional_nullable_bool\""
 	City                 City       "json:\"city\""
+	Friends              []User     "json:\"friends\""
 }

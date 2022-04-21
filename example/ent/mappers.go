@@ -27,11 +27,25 @@ func (e *User) ToOpenAPI() (t openapi.User, err error) {
 		if err != nil {
 			return t, fmt.Errorf("load 'city' edge: %w", err)
 		}
-
 		t.City, err = v.ToOpenAPI()
 		if err != nil {
 			return t, fmt.Errorf("convert 'city' type: %w", err)
 		}
+	}
+	// Edge 'friends'.
+	{
+		v, err := e.Edges.FriendsOrErr()
+		if err != nil {
+			return t, fmt.Errorf("load 'friends' edge: %w", err)
+		}
+		items := make([]openapi.User, len(v))
+		for i, item := range v {
+			items[i], err = item.ToOpenAPI()
+			if err != nil {
+				return t, fmt.Errorf("convert 'friends' edge type: %w", err)
+			}
+		}
+		t.Friends = items
 	}
 	return t, nil
 }

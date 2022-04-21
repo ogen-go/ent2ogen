@@ -46,13 +46,41 @@ var (
 			},
 		},
 	}
+	// UserFriendsColumns holds the columns for the "user_friends" table.
+	UserFriendsColumns = []*schema.Column{
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "friend_id", Type: field.TypeUUID},
+	}
+	// UserFriendsTable holds the schema information for the "user_friends" table.
+	UserFriendsTable = &schema.Table{
+		Name:       "user_friends",
+		Columns:    UserFriendsColumns,
+		PrimaryKey: []*schema.Column{UserFriendsColumns[0], UserFriendsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_friends_user_id",
+				Columns:    []*schema.Column{UserFriendsColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "user_friends_friend_id",
+				Columns:    []*schema.Column{UserFriendsColumns[1]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CitiesTable,
 		UsersTable,
+		UserFriendsTable,
 	}
 )
 
 func init() {
 	UsersTable.ForeignKeys[0].RefTable = CitiesTable
+	UserFriendsTable.ForeignKeys[0].RefTable = UsersTable
+	UserFriendsTable.ForeignKeys[1].RefTable = UsersTable
 }

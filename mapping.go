@@ -30,10 +30,11 @@ type EdgeMapping struct {
 }
 
 func (e *Extension) createMapping(from *gen.Type, to *ir.Type) error {
-	if _, ok := e.cfg.Mappings[from]; ok {
-		return fmt.Errorf("mapping already created")
+	if _, ok := e.recur[from]; ok {
+		return nil
 	}
 
+	e.recur[from] = struct{}{}
 	m := &Mapping{
 		From: from,
 		To:   to,
@@ -66,7 +67,7 @@ func (m *Mapping) checkCompatibility() error {
 			}
 
 			if err := m.createEdgeMapping(e, field); err != nil {
-				return fmt.Errorf("edge %q: %w", f.Name, err)
+				return fmt.Errorf("edge %q: %w", e.Name, err)
 			}
 
 			continue
@@ -158,26 +159,31 @@ func (m *Mapping) lookupEdge(name string) (*gen.Edge, bool) {
 	return nil, false
 }
 
-func (m *Mapping) createEdgeMapping(from *gen.Edge, to *ir.Field) error {
-	if to.Spec == nil || to.Spec.Schema == nil {
+func (m *Mapping) createEdgeMapping(edge *gen.Edge, field *ir.Field) error {
+	if field.Spec == nil || field.Spec.Schema == nil {
 		return fmt.Errorf("spec cannot be nil")
 	}
 
-	if from.Optional != false {
-		return fmt.Errorf("optional edges are not supported")
+	if edge.Optional && edge.Unique {
+		return fmt.Errorf("optional unique edges are not supported")
 	}
 
-	if !from.Unique {
-		return fmt.Errorf("only unique edges are supported")
+	typ := field.Type
+	if !edge.Unique {
+		if !typ.IsArray() {
+			return fmt.Errorf("edge is not unique, schema must be an array, not %q", typ.Kind)
+		}
+
+		typ = typ.Item
 	}
 
-	if err := m.ext.createMapping(from.Type, to.Type); err != nil {
-		return fmt.Errorf("edge %q: %w", from.Name, err)
+	if err := m.ext.createMapping(edge.Type, typ); err != nil {
+		return fmt.Errorf("edge %q: %w", edge.Name, err)
 	}
 
 	m.EdgeMappings = append(m.EdgeMappings, EdgeMapping{
-		From: from,
-		To:   to,
+		From: edge,
+		To:   field,
 	})
 
 	return nil

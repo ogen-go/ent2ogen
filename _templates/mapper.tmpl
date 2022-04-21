@@ -30,10 +30,21 @@ func (e *{{ $m.From.Name }}) ToOpenAPI() (t {{ $rtype }}, err error) {
             return t, fmt.Errorf("load '{{ $e.From.Name }}' edge: %w", err)
         }
 
-        t.{{ $e.To.Name }}, err = v.ToOpenAPI()
-        if err != nil {
-            return t, fmt.Errorf("convert '{{ $e.From.Name }}' type: %w", err)
-        }
+        {{- if $e.From.Unique }}
+            t.{{ $e.To.Name }}, err = v.ToOpenAPI()
+            if err != nil {
+                return t, fmt.Errorf("convert '{{ $e.From.Name }}' type: %w", err)
+            }
+        {{- else }}
+            items := make([]openapi.{{ $e.To.Type.Item.Go }}, len(v))
+            for i, item := range v {
+                items[i], err = item.ToOpenAPI()
+                if err != nil {
+                    return t, fmt.Errorf("convert '{{ $e.From.Name }}' edge type: %w", err)
+                }
+            }
+            t.{{ $e.To.Name }} = items
+        {{- end }}
     }
     {{- end }}
     return t, nil

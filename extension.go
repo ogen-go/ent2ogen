@@ -14,6 +14,7 @@ type Extension struct {
 	entc.DefaultExtension
 	api   *openapi.API
 	index map[*jsonschema.Schema]*ir.Type
+	recur map[*gen.Type]struct{}
 	cfg   *Config
 }
 
@@ -56,6 +57,7 @@ func NewExtension(cfg ExtensionConfig) (*Extension, error) {
 	return &Extension{
 		api:   cfg.API,
 		index: index,
+		recur: map[*gen.Type]struct{}{},
 		cfg: &Config{
 			OgenPackage: cfg.OgenPackage,
 			Mappings:    map[*gen.Type]*Mapping{},

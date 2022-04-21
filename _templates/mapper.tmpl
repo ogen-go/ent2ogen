@@ -1,5 +1,5 @@
 {{ define "mappers" }}
-{{ template "header" . }}
+{{ template "header" $ }}
 
 {{- $cfg := $.Config.Annotations.Ent2ogen }}
 
@@ -7,8 +7,7 @@ import openapi "{{ $cfg.OgenPackage }}"
 
 {{- range $_, $m := $cfg.Mappings }}
 
-{{- $rtype := sprintf "openapi.%s" $m.From.Name }}
-func (e *{{ $m.From.Name }}) ToOpenAPI() (t {{ $rtype }}, err error) {
+func (e *{{ $m.From.Name }}) ToOpenAPI() (t openapi.{{ $m.To.Name }}, err error) {
     {{- range $f := $m.FieldMappings }}
         {{- $entField  := $f.From }}
         {{- $ogenField := $f.To }}
@@ -25,25 +24,27 @@ func (e *{{ $m.From.Name }}) ToOpenAPI() (t {{ $rtype }}, err error) {
     {{- range $e := $m.EdgeMappings }}
     // Edge '{{ $e.From.Name }}'.
     {
-        v, err := e.Edges.{{ $e.From.StructField }}OrErr()
+        {{- $edge  := $e.From }}
+        {{- $field := $e.To }}
+        v, err := e.Edges.{{ $edge.StructField }}OrErr()
         if err != nil {
-            return t, fmt.Errorf("load '{{ $e.From.Name }}' edge: %w", err)
+            return t, fmt.Errorf("load '{{ $edge.Name }}' edge: %w", err)
         }
 
-        {{- if $e.From.Unique }}
-            t.{{ $e.To.Name }}, err = v.ToOpenAPI()
+        {{- if $edge.Unique }}
+            t.{{ $field.Name }}, err = v.ToOpenAPI()
             if err != nil {
-                return t, fmt.Errorf("convert '{{ $e.From.Name }}' type: %w", err)
+                return t, fmt.Errorf("convert '{{ $edge.Name }}' type: %w", err)
             }
         {{- else }}
-            items := make([]openapi.{{ $e.To.Type.Item.Go }}, len(v))
+            items := make([]openapi.{{ $field.Type.Item.Go }}, len(v))
             for i, item := range v {
                 items[i], err = item.ToOpenAPI()
                 if err != nil {
-                    return t, fmt.Errorf("convert '{{ $e.From.Name }}' edge type: %w", err)
+                    return t, fmt.Errorf("convert '{{ $edge.Name }}' edge type: %w", err)
                 }
             }
-            t.{{ $e.To.Name }} = items
+            t.{{ $field.Name }} = items
         {{- end }}
     }
     {{- end }}

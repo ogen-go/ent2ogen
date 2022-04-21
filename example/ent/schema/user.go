@@ -24,6 +24,7 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("city", City.Type).Unique().Required(),
+		edge.To("friends", User.Type),
 	}
 }
 

@@ -45,7 +45,7 @@ func (e *User) ToOpenAPI() (t openapi.User, err error) {
 	t.ID = e.ID
 	t.FirstName = e.FirstName
 	t.LastName = e.LastName
-	t.Username = e.Username
+	t.Username = e.UserName
 	if e.OptionalNullableBool != nil {
 		t.OptionalNullableBool.SetTo(*e.OptionalNullableBool)
 	}
@@ -60,15 +60,15 @@ func (e *User) ToOpenAPI() (t openapi.User, err error) {
 			return t, fmt.Errorf("convert 'city' type: %w", err)
 		}
 	}
-	// Edge 'friends'.
+	// Edge 'friend_list'.
 	{
-		v, err := e.Edges.FriendsOrErr()
+		v, err := e.Edges.FriendListOrErr()
 		if err != nil {
-			return t, fmt.Errorf("load 'friends' edge: %w", err)
+			return t, fmt.Errorf("load 'friend_list' edge: %w", err)
 		}
 		t.Friends, err = UserSlice(v).ToOpenAPI()
 		if err != nil {
-			return t, fmt.Errorf("convert 'friends' edge: %w", err)
+			return t, fmt.Errorf("convert 'friend_list' edge: %w", err)
 		}
 	}
 	return t, nil

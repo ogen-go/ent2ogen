@@ -21,14 +21,14 @@ const (
 	FieldFirstName = "first_name"
 	// FieldLastName holds the string denoting the last_name field in the database.
 	FieldLastName = "last_name"
-	// FieldUsername holds the string denoting the username field in the database.
-	FieldUsername = "username"
+	// FieldUserName holds the string denoting the user_name field in the database.
+	FieldUserName = "user_name"
 	// FieldOptionalNullableBool holds the string denoting the optional_nullable_bool field in the database.
 	FieldOptionalNullableBool = "optional_nullable_bool"
 	// EdgeCity holds the string denoting the city edge name in mutations.
 	EdgeCity = "city"
-	// EdgeFriends holds the string denoting the friends edge name in mutations.
-	EdgeFriends = "friends"
+	// EdgeFriendList holds the string denoting the friend_list edge name in mutations.
+	EdgeFriendList = "friend_list"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CityTable is the table that holds the city relation/edge.
@@ -38,8 +38,8 @@ const (
 	CityInverseTable = "cities"
 	// CityColumn is the table column denoting the city relation/edge.
 	CityColumn = "user_city"
-	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
-	FriendsTable = "user_friends"
+	// FriendListTable is the table that holds the friend_list relation/edge. The primary key declared below.
+	FriendListTable = "user_friend_list"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -49,7 +49,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldFirstName,
 	FieldLastName,
-	FieldUsername,
+	FieldUserName,
 	FieldOptionalNullableBool,
 }
 
@@ -60,9 +60,9 @@ var ForeignKeys = []string{
 }
 
 var (
-	// FriendsPrimaryKey and FriendsColumn2 are the table columns denoting the
-	// primary key for the friends relation (M2M).
-	FriendsPrimaryKey = []string{"user_id", "friend_id"}
+	// FriendListPrimaryKey and FriendListColumn2 are the table columns denoting the
+	// primary key for the friend_list relation (M2M).
+	FriendListPrimaryKey = []string{"user_id", "friend_list_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

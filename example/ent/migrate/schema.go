@@ -28,7 +28,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
-		{Name: "username", Type: field.TypeString, Unique: true},
+		{Name: "user_name", Type: field.TypeString, Unique: true},
 		{Name: "optional_nullable_bool", Type: field.TypeBool, Nullable: true},
 		{Name: "user_city", Type: field.TypeUUID},
 	}
@@ -46,26 +46,26 @@ var (
 			},
 		},
 	}
-	// UserFriendsColumns holds the columns for the "user_friends" table.
-	UserFriendsColumns = []*schema.Column{
+	// UserFriendListColumns holds the columns for the "user_friend_list" table.
+	UserFriendListColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeUUID},
-		{Name: "friend_id", Type: field.TypeUUID},
+		{Name: "friend_list_id", Type: field.TypeUUID},
 	}
-	// UserFriendsTable holds the schema information for the "user_friends" table.
-	UserFriendsTable = &schema.Table{
-		Name:       "user_friends",
-		Columns:    UserFriendsColumns,
-		PrimaryKey: []*schema.Column{UserFriendsColumns[0], UserFriendsColumns[1]},
+	// UserFriendListTable holds the schema information for the "user_friend_list" table.
+	UserFriendListTable = &schema.Table{
+		Name:       "user_friend_list",
+		Columns:    UserFriendListColumns,
+		PrimaryKey: []*schema.Column{UserFriendListColumns[0], UserFriendListColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "user_friends_user_id",
-				Columns:    []*schema.Column{UserFriendsColumns[0]},
+				Symbol:     "user_friend_list_user_id",
+				Columns:    []*schema.Column{UserFriendListColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "user_friends_friend_id",
-				Columns:    []*schema.Column{UserFriendsColumns[1]},
+				Symbol:     "user_friend_list_friend_list_id",
+				Columns:    []*schema.Column{UserFriendListColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -75,12 +75,12 @@ var (
 	Tables = []*schema.Table{
 		CitiesTable,
 		UsersTable,
-		UserFriendsTable,
+		UserFriendListTable,
 	}
 )
 
 func init() {
 	UsersTable.ForeignKeys[0].RefTable = CitiesTable
-	UserFriendsTable.ForeignKeys[0].RefTable = UsersTable
-	UserFriendsTable.ForeignKeys[1].RefTable = UsersTable
+	UserFriendListTable.ForeignKeys[0].RefTable = UsersTable
+	UserFriendListTable.ForeignKeys[1].RefTable = UsersTable
 }

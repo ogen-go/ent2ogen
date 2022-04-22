@@ -322,15 +322,15 @@ func (c *UserClient) QueryCity(u *User) *CityQuery {
 	return query
 }
 
-// QueryFriends queries the friends edge of a User.
-func (c *UserClient) QueryFriends(u *User) *UserQuery {
+// QueryFriendList queries the friend_list edge of a User.
+func (c *UserClient) QueryFriendList(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendListTable, user.FriendListPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

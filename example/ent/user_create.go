@@ -65,9 +65,9 @@ func (uc *UserCreate) SetLastName(s string) *UserCreate {
 	return uc
 }
 
-// SetUsername sets the "username" field.
-func (uc *UserCreate) SetUsername(s string) *UserCreate {
-	uc.mutation.SetUsername(s)
+// SetUserName sets the "user_name" field.
+func (uc *UserCreate) SetUserName(s string) *UserCreate {
+	uc.mutation.SetUserName(s)
 	return uc
 }
 
@@ -110,19 +110,19 @@ func (uc *UserCreate) SetCity(c *City) *UserCreate {
 	return uc.SetCityID(c.ID)
 }
 
-// AddFriendIDs adds the "friends" edge to the User entity by IDs.
-func (uc *UserCreate) AddFriendIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddFriendIDs(ids...)
+// AddFriendListIDs adds the "friend_list" edge to the User entity by IDs.
+func (uc *UserCreate) AddFriendListIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddFriendListIDs(ids...)
 	return uc
 }
 
-// AddFriends adds the "friends" edges to the User entity.
-func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
+// AddFriendList adds the "friend_list" edges to the User entity.
+func (uc *UserCreate) AddFriendList(u ...*User) *UserCreate {
 	ids := make([]uuid.UUID, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uc.AddFriendIDs(ids...)
+	return uc.AddFriendListIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -234,8 +234,8 @@ func (uc *UserCreate) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`ent: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
-	if _, ok := uc.mutation.Username(); !ok {
-		return &ValidationError{Name: "username", err: errors.New(`ent: missing required field "User.username"`)}
+	if _, ok := uc.mutation.UserName(); !ok {
+		return &ValidationError{Name: "user_name", err: errors.New(`ent: missing required field "User.user_name"`)}
 	}
 	if _, ok := uc.mutation.CityID(); !ok {
 		return &ValidationError{Name: "city", err: errors.New(`ent: missing required edge "User.city"`)}
@@ -309,13 +309,13 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.LastName = value
 	}
-	if value, ok := uc.mutation.Username(); ok {
+	if value, ok := uc.mutation.UserName(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: user.FieldUsername,
+			Column: user.FieldUserName,
 		})
-		_node.Username = value
+		_node.UserName = value
 	}
 	if value, ok := uc.mutation.OptionalNullableBool(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -345,12 +345,12 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.user_city = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.FriendListIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   user.FriendsTable,
-			Columns: user.FriendsPrimaryKey,
+			Table:   user.FriendListTable,
+			Columns: user.FriendListPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -466,15 +466,15 @@ func (u *UserUpsert) UpdateLastName() *UserUpsert {
 	return u
 }
 
-// SetUsername sets the "username" field.
-func (u *UserUpsert) SetUsername(v string) *UserUpsert {
-	u.Set(user.FieldUsername, v)
+// SetUserName sets the "user_name" field.
+func (u *UserUpsert) SetUserName(v string) *UserUpsert {
+	u.Set(user.FieldUserName, v)
 	return u
 }
 
-// UpdateUsername sets the "username" field to the value that was provided on create.
-func (u *UserUpsert) UpdateUsername() *UserUpsert {
-	u.SetExcluded(user.FieldUsername)
+// UpdateUserName sets the "user_name" field to the value that was provided on create.
+func (u *UserUpsert) UpdateUserName() *UserUpsert {
+	u.SetExcluded(user.FieldUserName)
 	return u
 }
 
@@ -605,17 +605,17 @@ func (u *UserUpsertOne) UpdateLastName() *UserUpsertOne {
 	})
 }
 
-// SetUsername sets the "username" field.
-func (u *UserUpsertOne) SetUsername(v string) *UserUpsertOne {
+// SetUserName sets the "user_name" field.
+func (u *UserUpsertOne) SetUserName(v string) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.SetUsername(v)
+		s.SetUserName(v)
 	})
 }
 
-// UpdateUsername sets the "username" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateUsername() *UserUpsertOne {
+// UpdateUserName sets the "user_name" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateUserName() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdateUsername()
+		s.UpdateUserName()
 	})
 }
 
@@ -915,17 +915,17 @@ func (u *UserUpsertBulk) UpdateLastName() *UserUpsertBulk {
 	})
 }
 
-// SetUsername sets the "username" field.
-func (u *UserUpsertBulk) SetUsername(v string) *UserUpsertBulk {
+// SetUserName sets the "user_name" field.
+func (u *UserUpsertBulk) SetUserName(v string) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.SetUsername(v)
+		s.SetUserName(v)
 	})
 }
 
-// UpdateUsername sets the "username" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateUsername() *UserUpsertBulk {
+// UpdateUserName sets the "user_name" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateUserName() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdateUsername()
+		s.UpdateUserName()
 	})
 }
 

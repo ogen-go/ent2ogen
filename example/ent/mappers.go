@@ -8,9 +8,37 @@ import (
 	openapi "github.com/ogen-go/ent2ogen/example/openapi"
 )
 
+type CitySlice []*City
+
+func (s CitySlice) ToOpenAPI() (_ []openapi.City, err error) {
+	result := make([]openapi.City, len(s))
+	for i, v := range s {
+		result[i], err = v.ToOpenAPI()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
+}
+
 func (e *City) ToOpenAPI() (t openapi.City, err error) {
 	t.Name = e.Name
 	return t, nil
+}
+
+type UserSlice []*User
+
+func (s UserSlice) ToOpenAPI() (_ []openapi.User, err error) {
+	result := make([]openapi.User, len(s))
+	for i, v := range s {
+		result[i], err = v.ToOpenAPI()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
 }
 
 func (e *User) ToOpenAPI() (t openapi.User, err error) {
@@ -38,14 +66,10 @@ func (e *User) ToOpenAPI() (t openapi.User, err error) {
 		if err != nil {
 			return t, fmt.Errorf("load 'friends' edge: %w", err)
 		}
-		items := make([]openapi.User, len(v))
-		for i, item := range v {
-			items[i], err = item.ToOpenAPI()
-			if err != nil {
-				return t, fmt.Errorf("convert 'friends' edge type: %w", err)
-			}
+		t.Friends, err = UserSlice(v).ToOpenAPI()
+		if err != nil {
+			return t, fmt.Errorf("convert 'friends' edge: %w", err)
 		}
-		t.Friends = items
 	}
 	return t, nil
 }

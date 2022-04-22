@@ -59,9 +59,17 @@ func (m *Mapping) checkCompatibility() error {
 			return fmt.Errorf("field %q has no spec", field.Name)
 		}
 
-		f, ok := m.lookupField(field.Spec.Name)
+		f, ok, err := m.lookupField(field.Spec.Name)
+		if err != nil {
+			return fmt.Errorf("lookup for field with name %q: %w", field.Spec.Name, err)
+		}
+
 		if !ok {
-			e, ok := m.lookupEdge(field.Spec.Name)
+			e, ok, err := m.lookupEdge(field.Spec.Name)
+			if err != nil {
+				return fmt.Errorf("lookup for edge with name %q: %w", field.Spec.Name, err)
+			}
+
 			if !ok {
 				return fmt.Errorf("property %q not found in ent schema", field.Spec.Name)
 			}
@@ -81,14 +89,38 @@ func (m *Mapping) checkCompatibility() error {
 	return nil
 }
 
-func (m *Mapping) lookupField(name string) (*gen.Field, bool) {
+func (m *Mapping) lookupField(name string) (*gen.Field, bool, error) {
+	var matches []*gen.Field
 	for _, f := range m.EntFields() {
+		ant, err := annotation(f.Annotations)
+		if err != nil {
+			return nil, false, fmt.Errorf("read field %q annotation: %w", f.Name, err)
+		}
+
+		if ant != nil && ant.BindTo == name {
+			matches = append(matches, f)
+			continue
+		}
+
 		if f.Name == name {
-			return f, true
+			matches = append(matches, f)
 		}
 	}
 
-	return nil, false
+	switch {
+	case len(matches) == 0:
+		return nil, false, nil
+
+	case len(matches) == 1:
+		return matches[0], true, nil
+
+	default:
+		var names []string
+		for _, m := range matches {
+			names = append(names, m.Name)
+		}
+		return nil, false, fmt.Errorf("matched multiple fields: %v", names)
+	}
 }
 
 func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) error {
@@ -149,14 +181,38 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 	return nil
 }
 
-func (m *Mapping) lookupEdge(name string) (*gen.Edge, bool) {
+func (m *Mapping) lookupEdge(name string) (*gen.Edge, bool, error) {
+	var matches []*gen.Edge
 	for _, e := range m.From.Edges {
+		ant, err := annotation(e.Annotations)
+		if err != nil {
+			return nil, false, fmt.Errorf("read edge %q annotation: %w", e.Name, err)
+		}
+
+		if ant != nil && ant.BindTo == name {
+			matches = append(matches, e)
+			continue
+		}
+
 		if e.Name == name {
-			return e, true
+			matches = append(matches, e)
 		}
 	}
 
-	return nil, false
+	switch {
+	case len(matches) == 0:
+		return nil, false, nil
+
+	case len(matches) == 1:
+		return matches[0], true, nil
+
+	default:
+		var names []string
+		for _, m := range matches {
+			names = append(names, m.Name)
+		}
+		return nil, false, fmt.Errorf("matched multiple edges: %v", names)
+	}
 }
 
 func (m *Mapping) createEdgeMapping(edge *gen.Edge, field *ir.Field) error {

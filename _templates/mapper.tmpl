@@ -7,6 +7,20 @@ import openapi "{{ $cfg.OgenPackage }}"
 
 {{- range $_, $m := $cfg.Mappings }}
 
+type {{ $m.From.Name }}Slice []*{{ $m.From.Name }}
+
+func (s {{ $m.From.Name }}Slice) ToOpenAPI() (_ []openapi.{{ $m.To.Name }}, err error) {
+    result := make([]openapi.{{ $m.To.Name }}, len(s))
+    for i, v := range s {
+        result[i], err = v.ToOpenAPI()
+        if err != nil {
+            return nil, err
+        }
+    }
+
+    return result, nil
+}
+
 func (e *{{ $m.From.Name }}) ToOpenAPI() (t openapi.{{ $m.To.Name }}, err error) {
     {{- range $f := $m.FieldMappings }}
         {{- $entField  := $f.From }}
@@ -37,14 +51,10 @@ func (e *{{ $m.From.Name }}) ToOpenAPI() (t openapi.{{ $m.To.Name }}, err error)
                 return t, fmt.Errorf("convert '{{ $edge.Name }}' type: %w", err)
             }
         {{- else }}
-            items := make([]openapi.{{ $field.Type.Item.Go }}, len(v))
-            for i, item := range v {
-                items[i], err = item.ToOpenAPI()
-                if err != nil {
-                    return t, fmt.Errorf("convert '{{ $edge.Name }}' edge type: %w", err)
-                }
+            t.{{ $field.Name }}, err = {{ $edge.Type.Name }}Slice(v).ToOpenAPI()
+            if err != nil {
+                return t, fmt.Errorf("convert '{{ $edge.Name }}' edge: %w", err)
             }
-            t.{{ $field.Name }} = items
         {{- end }}
     }
     {{- end }}

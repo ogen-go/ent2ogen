@@ -16,7 +16,8 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("first_name").NotEmpty(),
 		field.String("last_name").NotEmpty(),
-		field.String("username").Unique(),
+		field.String("user_name").Unique().
+			Annotations(ent2ogen.BindTo("username")),
 		field.Bool("optional_nullable_bool").Optional().Nillable(),
 	}
 }
@@ -24,7 +25,8 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("city", City.Type).Unique().Required(),
-		edge.To("friends", User.Type),
+		edge.To("friend_list", User.Type).
+			Annotations(ent2ogen.BindTo("friends")),
 	}
 }
 

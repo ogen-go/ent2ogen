@@ -120,11 +120,7 @@ func (ex *Extension) generateMapping(n *gen.Type) error {
 		return fmt.Errorf("schema %q: ir type not found", schemaName)
 	}
 
-	if err := ex.createMapping(n, t); err != nil {
-		return fmt.Errorf("type %q: %w", n.Name, err)
-	}
-
-	return nil
+	return ex.createMapping(n, t)
 }
 
 func (ex *Extension) findComponent(name string) (*jsonschema.Schema, error) {

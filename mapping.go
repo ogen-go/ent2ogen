@@ -234,7 +234,7 @@ func (m *Mapping) createEdgeMapping(edge *gen.Edge, field *ir.Field) error {
 	}
 
 	if err := m.ext.createMapping(edge.Type, typ); err != nil {
-		return fmt.Errorf("edge %q: %w", edge.Name, err)
+		return err
 	}
 
 	m.EdgeMappings = append(m.EdgeMappings, EdgeMapping{

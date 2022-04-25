@@ -17,6 +17,7 @@ var (
 		"errorf": func(format string, args ...interface{}) (interface{}, error) {
 			return nil, fmt.Errorf(format, args...)
 		},
+		"assign": assign,
 	}
 	// templates holds all templates used by ent2ogen.
 	templates = gen.MustParse(gen.NewTemplate("ent2ogen").Funcs(funcMap).ParseFS(templateDir, "_templates/*.tmpl"))

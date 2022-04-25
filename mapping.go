@@ -130,23 +130,18 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 
 	ogenSchema := ogenField.Spec.Schema
 
-	if entField.Optional != !ogenField.Spec.Required {
-		return fmt.Errorf("optionality mismatch")
+	if entField.Optional && !entField.Nillable {
+		return fmt.Errorf("optional fields are not supported")
 	}
 
 	if entField.Nillable != ogenSchema.Nullable {
 		return fmt.Errorf("nullability mismatch")
 	}
 
-	if entField.Optional && !entField.Nillable {
-		return fmt.Errorf("optional fields are not supported")
-	}
-
 	type tf struct {
 		Type   jsonschema.SchemaType
 		Format string
 	}
-
 	mapping := map[field.Type]tf{
 		field.TypeBool:   {jsonschema.Boolean, ""},
 		field.TypeString: {jsonschema.String, ""},
@@ -154,11 +149,12 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 		field.TypeInt64:  {jsonschema.Integer, "int64"},
 		field.TypeTime:   {jsonschema.String, "date-time"},
 		field.TypeUUID:   {jsonschema.String, "uuid"},
+		field.TypeEnum:   {jsonschema.String, ""},
 	}
 
 	v, ok := mapping[entField.Type.Type]
 	if !ok {
-		return fmt.Errorf("unsupported ent type: %q", entField.Type.Type)
+		return fmt.Errorf("unsupported ent type: %s", entField.Type.ConstName())
 	}
 
 	if ogenSchema.Type != v.Type {
@@ -169,8 +165,26 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 		return fmt.Errorf("type format mismatch: expected %q but have %q", v.Format, ogenSchema.Format)
 	}
 
-	if entField.Enums != nil {
-		return fmt.Errorf("enum is not supported")
+	if entField.Type.Type == field.TypeEnum {
+		if len(ogenSchema.Enum) != len(entField.EnumValues()) {
+			return fmt.Errorf("enum mismatch")
+		}
+
+		dbEnums := map[string]struct{}{}
+		for _, enum := range entField.EnumValues() {
+			dbEnums[enum] = struct{}{}
+		}
+
+		for _, enum := range ogenSchema.Enum {
+			str, ok := enum.(string)
+			if !ok {
+				return fmt.Errorf("unexpected enum value type: %T", enum)
+			}
+
+			if _, ok := dbEnums[str]; !ok {
+				return fmt.Errorf("enum value %q not found in ent schema", str)
+			}
+		}
 	}
 
 	m.FieldMappings = append(m.FieldMappings, FieldMapping{
@@ -251,4 +265,31 @@ func (m *Mapping) EntFields() []*gen.Field {
 	fields = append(fields, m.From.ID)
 	fields = append(fields, m.From.Fields...)
 	return fields
+}
+
+func assign(dst *ir.Field, src *gen.Field) (string, error) {
+	var (
+		assignT = "t." + dst.Name
+		srcT    = "e." + src.StructField()
+	)
+
+	if src.Nillable {
+		srcT = "*" + srcT
+	}
+
+	if dst.Type.IsGeneric() {
+		if dst.Type.GenericOf.IsPrimitive() {
+			return assignT + ".SetTo(" + srcT + ")", nil
+		}
+
+		gotyp := dst.Type.GenericOf.Go()
+		return fmt.Sprintf("%s.SetTo(openapi.%s(%s))", assignT, gotyp, srcT), nil
+	}
+
+	if dst.Type.IsEnum() {
+		gotyp := dst.Type.Go()
+		return fmt.Sprintf("%s = openapi.%s(%s)", assignT, gotyp, srcT), nil
+	}
+
+	return fmt.Sprintf("%s = %s", assignT, srcT), nil
 }

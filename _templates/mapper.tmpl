@@ -28,10 +28,10 @@ func (e *{{ $m.From.Name }}) ToOpenAPI() (t openapi.{{ $m.To.Name }}, err error)
 
         {{- if $entField.Nillable }}
         if e.{{ $entField.StructField }} != nil {
-            t.{{ $ogenField.Name }}.SetTo(*e.{{ $entField.StructField }})
+            {{ assign $ogenField $entField }}
         }
         {{- else }}
-        t.{{ $ogenField.Name }} = e.{{ $entField.StructField }}
+        {{ assign $ogenField $entField }}
         {{- end }}
     {{- end }}
 

@@ -80,3 +80,98 @@ var (
 	_ = uri.PathEncoder{}
 	_ = validate.Int{}
 )
+
+func (s City) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.RequiredEnum.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "required_enum",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.NullableEnum.Value.Validate(); err != nil {
+			return err
+		}
+		return nil
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "nullable_enum",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+func (s CityNullableEnum) Validate() error {
+	switch s {
+	case "c":
+		return nil
+	case "d":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+func (s CityRequiredEnum) Validate() error {
+	switch s {
+	case "a":
+		return nil
+	case "b":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s User) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.City.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "city",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Friends {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "friends",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}

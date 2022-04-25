@@ -14,6 +14,8 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
+		{Name: "required_enum", Type: field.TypeEnum, Enums: []string{"a", "b"}},
+		{Name: "nullable_enum", Type: field.TypeEnum, Nullable: true, Enums: []string{"c", "d"}},
 	}
 	// CitiesTable holds the schema information for the "cities" table.
 	CitiesTable = &schema.Table{

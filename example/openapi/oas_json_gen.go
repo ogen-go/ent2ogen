@@ -95,10 +95,22 @@ func (s City) encodeFields(e *jx.Encoder) {
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
+	{
+
+		e.FieldStart("required_enum")
+		s.RequiredEnum.Encode(e)
+	}
+	{
+
+		e.FieldStart("nullable_enum")
+		s.NullableEnum.Encode(e)
+	}
 }
 
-var jsonFieldsNameOfCity = [1]string{
+var jsonFieldsNameOfCity = [3]string{
 	0: "name",
+	1: "required_enum",
+	2: "nullable_enum",
 }
 
 // Decode decodes City from json.
@@ -122,6 +134,26 @@ func (s *City) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
+		case "required_enum":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.RequiredEnum.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"required_enum\"")
+			}
+		case "nullable_enum":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.NullableEnum.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"nullable_enum\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -132,7 +164,7 @@ func (s *City) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -174,6 +206,86 @@ func (s City) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *City) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CityNullableEnum as json.
+func (s CityNullableEnum) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes CityNullableEnum from json.
+func (s *CityNullableEnum) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CityNullableEnum to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch CityNullableEnum(v) {
+	case CityNullableEnumC:
+		*s = CityNullableEnumC
+	case CityNullableEnumD:
+		*s = CityNullableEnumD
+	default:
+		*s = CityNullableEnum(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s CityNullableEnum) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CityNullableEnum) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CityRequiredEnum as json.
+func (s CityRequiredEnum) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes CityRequiredEnum from json.
+func (s *CityRequiredEnum) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CityRequiredEnum to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch CityRequiredEnum(v) {
+	case CityRequiredEnumA:
+		*s = CityRequiredEnumA
+	case CityRequiredEnumB:
+		*s = CityRequiredEnumB
+	default:
+		*s = CityRequiredEnum(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s CityRequiredEnum) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CityRequiredEnum) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -271,6 +383,50 @@ func (s ErrorResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ErrorResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CityNullableEnum as json.
+func (o NilCityNullableEnum) Encode(e *jx.Encoder) {
+	if o.Null {
+		e.Null()
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes CityNullableEnum from json.
+func (o *NilCityNullableEnum) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode NilCityNullableEnum to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v CityNullableEnum
+		o.Value = v
+		o.Null = true
+		return nil
+	}
+	o.Null = false
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NilCityNullableEnum) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NilCityNullableEnum) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

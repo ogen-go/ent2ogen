@@ -87,8 +87,24 @@ func (s *ErrorResponseStatusCode) Error() string {
 
 // Ref: #/components/schemas/City
 type City struct {
-	Name string "json:\"name\""
+	Name         string              "json:\"name\""
+	RequiredEnum CityRequiredEnum    "json:\"required_enum\""
+	NullableEnum NilCityNullableEnum "json:\"nullable_enum\""
 }
+
+type CityNullableEnum string
+
+const (
+	CityNullableEnumC CityNullableEnum = "c"
+	CityNullableEnumD CityNullableEnum = "d"
+)
+
+type CityRequiredEnum string
+
+const (
+	CityRequiredEnumA CityRequiredEnum = "a"
+	CityRequiredEnumB CityRequiredEnum = "b"
+)
 
 type ErrorResponse struct {
 	ErrorMessage string "json:\"error_message\""
@@ -98,6 +114,44 @@ type ErrorResponse struct {
 type ErrorResponseStatusCode struct {
 	StatusCode int
 	Response   ErrorResponse
+}
+
+// NewNilCityNullableEnum returns new NilCityNullableEnum with value set to v.
+func NewNilCityNullableEnum(v CityNullableEnum) NilCityNullableEnum {
+	return NilCityNullableEnum{
+		Value: v,
+	}
+}
+
+// NilCityNullableEnum is nullable CityNullableEnum.
+type NilCityNullableEnum struct {
+	Value CityNullableEnum
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilCityNullableEnum) SetTo(v CityNullableEnum) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsSet returns true if value is Null.
+func (o NilCityNullableEnum) IsNull() bool { return o.Null }
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilCityNullableEnum) Get() (v CityNullableEnum, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilCityNullableEnum) Or(d CityNullableEnum) CityNullableEnum {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
 }
 
 // NewOptNilBool returns new OptNilBool with value set to v.

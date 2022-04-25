@@ -24,6 +24,10 @@ func (s CitySlice) ToOpenAPI() (_ []openapi.City, err error) {
 
 func (e *City) ToOpenAPI() (t openapi.City, err error) {
 	t.Name = e.Name
+	t.RequiredEnum = openapi.CityRequiredEnum(e.RequiredEnum)
+	if e.NullableEnum != nil {
+		t.NullableEnum.SetTo(openapi.CityNullableEnum(*e.NullableEnum))
+	}
 	return t, nil
 }
 

@@ -40,6 +40,32 @@ func (cu *CityUpdate) SetName(s string) *CityUpdate {
 	return cu
 }
 
+// SetRequiredEnum sets the "required_enum" field.
+func (cu *CityUpdate) SetRequiredEnum(ce city.RequiredEnum) *CityUpdate {
+	cu.mutation.SetRequiredEnum(ce)
+	return cu
+}
+
+// SetNullableEnum sets the "nullable_enum" field.
+func (cu *CityUpdate) SetNullableEnum(ce city.NullableEnum) *CityUpdate {
+	cu.mutation.SetNullableEnum(ce)
+	return cu
+}
+
+// SetNillableNullableEnum sets the "nullable_enum" field if the given value is not nil.
+func (cu *CityUpdate) SetNillableNullableEnum(ce *city.NullableEnum) *CityUpdate {
+	if ce != nil {
+		cu.SetNullableEnum(*ce)
+	}
+	return cu
+}
+
+// ClearNullableEnum clears the value of the "nullable_enum" field.
+func (cu *CityUpdate) ClearNullableEnum() *CityUpdate {
+	cu.mutation.ClearNullableEnum()
+	return cu
+}
+
 // Mutation returns the CityMutation object of the builder.
 func (cu *CityUpdate) Mutation() *CityMutation {
 	return cu.mutation
@@ -121,6 +147,16 @@ func (cu *CityUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "City.name": %w`, err)}
 		}
 	}
+	if v, ok := cu.mutation.RequiredEnum(); ok {
+		if err := city.RequiredEnumValidator(v); err != nil {
+			return &ValidationError{Name: "required_enum", err: fmt.Errorf(`ent: validator failed for field "City.required_enum": %w`, err)}
+		}
+	}
+	if v, ok := cu.mutation.NullableEnum(); ok {
+		if err := city.NullableEnumValidator(v); err != nil {
+			return &ValidationError{Name: "nullable_enum", err: fmt.Errorf(`ent: validator failed for field "City.nullable_enum": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -156,6 +192,26 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: city.FieldName,
 		})
 	}
+	if value, ok := cu.mutation.RequiredEnum(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: city.FieldRequiredEnum,
+		})
+	}
+	if value, ok := cu.mutation.NullableEnum(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: city.FieldNullableEnum,
+		})
+	}
+	if cu.mutation.NullableEnumCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: city.FieldNullableEnum,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{city.Label}
@@ -184,6 +240,32 @@ func (cuo *CityUpdateOne) SetUpdatedAt(t time.Time) *CityUpdateOne {
 // SetName sets the "name" field.
 func (cuo *CityUpdateOne) SetName(s string) *CityUpdateOne {
 	cuo.mutation.SetName(s)
+	return cuo
+}
+
+// SetRequiredEnum sets the "required_enum" field.
+func (cuo *CityUpdateOne) SetRequiredEnum(ce city.RequiredEnum) *CityUpdateOne {
+	cuo.mutation.SetRequiredEnum(ce)
+	return cuo
+}
+
+// SetNullableEnum sets the "nullable_enum" field.
+func (cuo *CityUpdateOne) SetNullableEnum(ce city.NullableEnum) *CityUpdateOne {
+	cuo.mutation.SetNullableEnum(ce)
+	return cuo
+}
+
+// SetNillableNullableEnum sets the "nullable_enum" field if the given value is not nil.
+func (cuo *CityUpdateOne) SetNillableNullableEnum(ce *city.NullableEnum) *CityUpdateOne {
+	if ce != nil {
+		cuo.SetNullableEnum(*ce)
+	}
+	return cuo
+}
+
+// ClearNullableEnum clears the value of the "nullable_enum" field.
+func (cuo *CityUpdateOne) ClearNullableEnum() *CityUpdateOne {
+	cuo.mutation.ClearNullableEnum()
 	return cuo
 }
 
@@ -275,6 +357,16 @@ func (cuo *CityUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "City.name": %w`, err)}
 		}
 	}
+	if v, ok := cuo.mutation.RequiredEnum(); ok {
+		if err := city.RequiredEnumValidator(v); err != nil {
+			return &ValidationError{Name: "required_enum", err: fmt.Errorf(`ent: validator failed for field "City.required_enum": %w`, err)}
+		}
+	}
+	if v, ok := cuo.mutation.NullableEnum(); ok {
+		if err := city.NullableEnumValidator(v); err != nil {
+			return &ValidationError{Name: "nullable_enum", err: fmt.Errorf(`ent: validator failed for field "City.nullable_enum": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -325,6 +417,26 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 			Type:   field.TypeString,
 			Value:  value,
 			Column: city.FieldName,
+		})
+	}
+	if value, ok := cuo.mutation.RequiredEnum(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: city.FieldRequiredEnum,
+		})
+	}
+	if value, ok := cuo.mutation.NullableEnum(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: city.FieldNullableEnum,
+		})
+	}
+	if cuo.mutation.NullableEnumCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: city.FieldNullableEnum,
 		})
 	}
 	_node = &City{config: cuo.config}

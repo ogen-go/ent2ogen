@@ -25,6 +25,10 @@ type City struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// RequiredEnum holds the value of the "required_enum" field.
+	RequiredEnum city.RequiredEnum `json:"required_enum,omitempty"`
+	// NullableEnum holds the value of the "nullable_enum" field.
+	NullableEnum *city.NullableEnum `json:"nullable_enum,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -32,7 +36,7 @@ func (*City) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case city.FieldName:
+		case city.FieldName, city.FieldRequiredEnum, city.FieldNullableEnum:
 			values[i] = new(sql.NullString)
 		case city.FieldCreatedAt, city.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -77,6 +81,19 @@ func (c *City) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.Name = value.String
 			}
+		case city.FieldRequiredEnum:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field required_enum", values[i])
+			} else if value.Valid {
+				c.RequiredEnum = city.RequiredEnum(value.String)
+			}
+		case city.FieldNullableEnum:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field nullable_enum", values[i])
+			} else if value.Valid {
+				c.NullableEnum = new(city.NullableEnum)
+				*c.NullableEnum = city.NullableEnum(value.String)
+			}
 		}
 	}
 	return nil
@@ -111,6 +128,12 @@ func (c *City) String() string {
 	builder.WriteString(c.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", name=")
 	builder.WriteString(c.Name)
+	builder.WriteString(", required_enum=")
+	builder.WriteString(fmt.Sprintf("%v", c.RequiredEnum))
+	if v := c.NullableEnum; v != nil {
+		builder.WriteString(", nullable_enum=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

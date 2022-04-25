@@ -58,6 +58,26 @@ func (cc *CityCreate) SetName(s string) *CityCreate {
 	return cc
 }
 
+// SetRequiredEnum sets the "required_enum" field.
+func (cc *CityCreate) SetRequiredEnum(ce city.RequiredEnum) *CityCreate {
+	cc.mutation.SetRequiredEnum(ce)
+	return cc
+}
+
+// SetNullableEnum sets the "nullable_enum" field.
+func (cc *CityCreate) SetNullableEnum(ce city.NullableEnum) *CityCreate {
+	cc.mutation.SetNullableEnum(ce)
+	return cc
+}
+
+// SetNillableNullableEnum sets the "nullable_enum" field if the given value is not nil.
+func (cc *CityCreate) SetNillableNullableEnum(ce *city.NullableEnum) *CityCreate {
+	if ce != nil {
+		cc.SetNullableEnum(*ce)
+	}
+	return cc
+}
+
 // SetID sets the "id" field.
 func (cc *CityCreate) SetID(u uuid.UUID) *CityCreate {
 	cc.mutation.SetID(u)
@@ -173,6 +193,19 @@ func (cc *CityCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "City.name": %w`, err)}
 		}
 	}
+	if _, ok := cc.mutation.RequiredEnum(); !ok {
+		return &ValidationError{Name: "required_enum", err: errors.New(`ent: missing required field "City.required_enum"`)}
+	}
+	if v, ok := cc.mutation.RequiredEnum(); ok {
+		if err := city.RequiredEnumValidator(v); err != nil {
+			return &ValidationError{Name: "required_enum", err: fmt.Errorf(`ent: validator failed for field "City.required_enum": %w`, err)}
+		}
+	}
+	if v, ok := cc.mutation.NullableEnum(); ok {
+		if err := city.NullableEnumValidator(v); err != nil {
+			return &ValidationError{Name: "nullable_enum", err: fmt.Errorf(`ent: validator failed for field "City.nullable_enum": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -233,6 +266,22 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 			Column: city.FieldName,
 		})
 		_node.Name = value
+	}
+	if value, ok := cc.mutation.RequiredEnum(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: city.FieldRequiredEnum,
+		})
+		_node.RequiredEnum = value
+	}
+	if value, ok := cc.mutation.NullableEnum(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: city.FieldNullableEnum,
+		})
+		_node.NullableEnum = &value
 	}
 	return _node, _spec
 }
@@ -321,6 +370,36 @@ func (u *CityUpsert) SetName(v string) *CityUpsert {
 // UpdateName sets the "name" field to the value that was provided on create.
 func (u *CityUpsert) UpdateName() *CityUpsert {
 	u.SetExcluded(city.FieldName)
+	return u
+}
+
+// SetRequiredEnum sets the "required_enum" field.
+func (u *CityUpsert) SetRequiredEnum(v city.RequiredEnum) *CityUpsert {
+	u.Set(city.FieldRequiredEnum, v)
+	return u
+}
+
+// UpdateRequiredEnum sets the "required_enum" field to the value that was provided on create.
+func (u *CityUpsert) UpdateRequiredEnum() *CityUpsert {
+	u.SetExcluded(city.FieldRequiredEnum)
+	return u
+}
+
+// SetNullableEnum sets the "nullable_enum" field.
+func (u *CityUpsert) SetNullableEnum(v city.NullableEnum) *CityUpsert {
+	u.Set(city.FieldNullableEnum, v)
+	return u
+}
+
+// UpdateNullableEnum sets the "nullable_enum" field to the value that was provided on create.
+func (u *CityUpsert) UpdateNullableEnum() *CityUpsert {
+	u.SetExcluded(city.FieldNullableEnum)
+	return u
+}
+
+// ClearNullableEnum clears the value of the "nullable_enum" field.
+func (u *CityUpsert) ClearNullableEnum() *CityUpsert {
+	u.SetNull(city.FieldNullableEnum)
 	return u
 }
 
@@ -416,6 +495,41 @@ func (u *CityUpsertOne) SetName(v string) *CityUpsertOne {
 func (u *CityUpsertOne) UpdateName() *CityUpsertOne {
 	return u.Update(func(s *CityUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetRequiredEnum sets the "required_enum" field.
+func (u *CityUpsertOne) SetRequiredEnum(v city.RequiredEnum) *CityUpsertOne {
+	return u.Update(func(s *CityUpsert) {
+		s.SetRequiredEnum(v)
+	})
+}
+
+// UpdateRequiredEnum sets the "required_enum" field to the value that was provided on create.
+func (u *CityUpsertOne) UpdateRequiredEnum() *CityUpsertOne {
+	return u.Update(func(s *CityUpsert) {
+		s.UpdateRequiredEnum()
+	})
+}
+
+// SetNullableEnum sets the "nullable_enum" field.
+func (u *CityUpsertOne) SetNullableEnum(v city.NullableEnum) *CityUpsertOne {
+	return u.Update(func(s *CityUpsert) {
+		s.SetNullableEnum(v)
+	})
+}
+
+// UpdateNullableEnum sets the "nullable_enum" field to the value that was provided on create.
+func (u *CityUpsertOne) UpdateNullableEnum() *CityUpsertOne {
+	return u.Update(func(s *CityUpsert) {
+		s.UpdateNullableEnum()
+	})
+}
+
+// ClearNullableEnum clears the value of the "nullable_enum" field.
+func (u *CityUpsertOne) ClearNullableEnum() *CityUpsertOne {
+	return u.Update(func(s *CityUpsert) {
+		s.ClearNullableEnum()
 	})
 }
 
@@ -677,6 +791,41 @@ func (u *CityUpsertBulk) SetName(v string) *CityUpsertBulk {
 func (u *CityUpsertBulk) UpdateName() *CityUpsertBulk {
 	return u.Update(func(s *CityUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetRequiredEnum sets the "required_enum" field.
+func (u *CityUpsertBulk) SetRequiredEnum(v city.RequiredEnum) *CityUpsertBulk {
+	return u.Update(func(s *CityUpsert) {
+		s.SetRequiredEnum(v)
+	})
+}
+
+// UpdateRequiredEnum sets the "required_enum" field to the value that was provided on create.
+func (u *CityUpsertBulk) UpdateRequiredEnum() *CityUpsertBulk {
+	return u.Update(func(s *CityUpsert) {
+		s.UpdateRequiredEnum()
+	})
+}
+
+// SetNullableEnum sets the "nullable_enum" field.
+func (u *CityUpsertBulk) SetNullableEnum(v city.NullableEnum) *CityUpsertBulk {
+	return u.Update(func(s *CityUpsert) {
+		s.SetNullableEnum(v)
+	})
+}
+
+// UpdateNullableEnum sets the "nullable_enum" field to the value that was provided on create.
+func (u *CityUpsertBulk) UpdateNullableEnum() *CityUpsertBulk {
+	return u.Update(func(s *CityUpsert) {
+		s.UpdateNullableEnum()
+	})
+}
+
+// ClearNullableEnum clears the value of the "nullable_enum" field.
+func (u *CityUpsertBulk) ClearNullableEnum() *CityUpsertBulk {
+	return u.Update(func(s *CityUpsert) {
+		s.ClearNullableEnum()
 	})
 }
 

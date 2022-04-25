@@ -377,6 +377,116 @@ func NameContainsFold(v string) predicate.City {
 	})
 }
 
+// RequiredEnumEQ applies the EQ predicate on the "required_enum" field.
+func RequiredEnumEQ(v RequiredEnum) predicate.City {
+	return predicate.City(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRequiredEnum), v))
+	})
+}
+
+// RequiredEnumNEQ applies the NEQ predicate on the "required_enum" field.
+func RequiredEnumNEQ(v RequiredEnum) predicate.City {
+	return predicate.City(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRequiredEnum), v))
+	})
+}
+
+// RequiredEnumIn applies the In predicate on the "required_enum" field.
+func RequiredEnumIn(vs ...RequiredEnum) predicate.City {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.City(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldRequiredEnum), v...))
+	})
+}
+
+// RequiredEnumNotIn applies the NotIn predicate on the "required_enum" field.
+func RequiredEnumNotIn(vs ...RequiredEnum) predicate.City {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.City(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldRequiredEnum), v...))
+	})
+}
+
+// NullableEnumEQ applies the EQ predicate on the "nullable_enum" field.
+func NullableEnumEQ(v NullableEnum) predicate.City {
+	return predicate.City(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNullableEnum), v))
+	})
+}
+
+// NullableEnumNEQ applies the NEQ predicate on the "nullable_enum" field.
+func NullableEnumNEQ(v NullableEnum) predicate.City {
+	return predicate.City(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNullableEnum), v))
+	})
+}
+
+// NullableEnumIn applies the In predicate on the "nullable_enum" field.
+func NullableEnumIn(vs ...NullableEnum) predicate.City {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.City(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldNullableEnum), v...))
+	})
+}
+
+// NullableEnumNotIn applies the NotIn predicate on the "nullable_enum" field.
+func NullableEnumNotIn(vs ...NullableEnum) predicate.City {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.City(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldNullableEnum), v...))
+	})
+}
+
+// NullableEnumIsNil applies the IsNil predicate on the "nullable_enum" field.
+func NullableEnumIsNil() predicate.City {
+	return predicate.City(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNullableEnum)))
+	})
+}
+
+// NullableEnumNotNil applies the NotNil predicate on the "nullable_enum" field.
+func NullableEnumNotNil() predicate.City {
+	return predicate.City(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNullableEnum)))
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.City) predicate.City {
 	return predicate.City(func(s *sql.Selector) {

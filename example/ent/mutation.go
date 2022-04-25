@@ -39,6 +39,8 @@ type CityMutation struct {
 	created_at    *time.Time
 	updated_at    *time.Time
 	name          *string
+	required_enum *city.RequiredEnum
+	nullable_enum *city.NullableEnum
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*City, error)
@@ -257,6 +259,91 @@ func (m *CityMutation) ResetName() {
 	m.name = nil
 }
 
+// SetRequiredEnum sets the "required_enum" field.
+func (m *CityMutation) SetRequiredEnum(ce city.RequiredEnum) {
+	m.required_enum = &ce
+}
+
+// RequiredEnum returns the value of the "required_enum" field in the mutation.
+func (m *CityMutation) RequiredEnum() (r city.RequiredEnum, exists bool) {
+	v := m.required_enum
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequiredEnum returns the old "required_enum" field's value of the City entity.
+// If the City object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CityMutation) OldRequiredEnum(ctx context.Context) (v city.RequiredEnum, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequiredEnum is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequiredEnum requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequiredEnum: %w", err)
+	}
+	return oldValue.RequiredEnum, nil
+}
+
+// ResetRequiredEnum resets all changes to the "required_enum" field.
+func (m *CityMutation) ResetRequiredEnum() {
+	m.required_enum = nil
+}
+
+// SetNullableEnum sets the "nullable_enum" field.
+func (m *CityMutation) SetNullableEnum(ce city.NullableEnum) {
+	m.nullable_enum = &ce
+}
+
+// NullableEnum returns the value of the "nullable_enum" field in the mutation.
+func (m *CityMutation) NullableEnum() (r city.NullableEnum, exists bool) {
+	v := m.nullable_enum
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNullableEnum returns the old "nullable_enum" field's value of the City entity.
+// If the City object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CityMutation) OldNullableEnum(ctx context.Context) (v *city.NullableEnum, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNullableEnum is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNullableEnum requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNullableEnum: %w", err)
+	}
+	return oldValue.NullableEnum, nil
+}
+
+// ClearNullableEnum clears the value of the "nullable_enum" field.
+func (m *CityMutation) ClearNullableEnum() {
+	m.nullable_enum = nil
+	m.clearedFields[city.FieldNullableEnum] = struct{}{}
+}
+
+// NullableEnumCleared returns if the "nullable_enum" field was cleared in this mutation.
+func (m *CityMutation) NullableEnumCleared() bool {
+	_, ok := m.clearedFields[city.FieldNullableEnum]
+	return ok
+}
+
+// ResetNullableEnum resets all changes to the "nullable_enum" field.
+func (m *CityMutation) ResetNullableEnum() {
+	m.nullable_enum = nil
+	delete(m.clearedFields, city.FieldNullableEnum)
+}
+
 // Where appends a list predicates to the CityMutation builder.
 func (m *CityMutation) Where(ps ...predicate.City) {
 	m.predicates = append(m.predicates, ps...)
@@ -276,7 +363,7 @@ func (m *CityMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CityMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
 		fields = append(fields, city.FieldCreatedAt)
 	}
@@ -285,6 +372,12 @@ func (m *CityMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, city.FieldName)
+	}
+	if m.required_enum != nil {
+		fields = append(fields, city.FieldRequiredEnum)
+	}
+	if m.nullable_enum != nil {
+		fields = append(fields, city.FieldNullableEnum)
 	}
 	return fields
 }
@@ -300,6 +393,10 @@ func (m *CityMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case city.FieldName:
 		return m.Name()
+	case city.FieldRequiredEnum:
+		return m.RequiredEnum()
+	case city.FieldNullableEnum:
+		return m.NullableEnum()
 	}
 	return nil, false
 }
@@ -315,6 +412,10 @@ func (m *CityMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUpdatedAt(ctx)
 	case city.FieldName:
 		return m.OldName(ctx)
+	case city.FieldRequiredEnum:
+		return m.OldRequiredEnum(ctx)
+	case city.FieldNullableEnum:
+		return m.OldNullableEnum(ctx)
 	}
 	return nil, fmt.Errorf("unknown City field %s", name)
 }
@@ -345,6 +446,20 @@ func (m *CityMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case city.FieldRequiredEnum:
+		v, ok := value.(city.RequiredEnum)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequiredEnum(v)
+		return nil
+	case city.FieldNullableEnum:
+		v, ok := value.(city.NullableEnum)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNullableEnum(v)
+		return nil
 	}
 	return fmt.Errorf("unknown City field %s", name)
 }
@@ -374,7 +489,11 @@ func (m *CityMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CityMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(city.FieldNullableEnum) {
+		fields = append(fields, city.FieldNullableEnum)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -387,6 +506,11 @@ func (m *CityMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CityMutation) ClearField(name string) error {
+	switch name {
+	case city.FieldNullableEnum:
+		m.ClearNullableEnum()
+		return nil
+	}
 	return fmt.Errorf("unknown City nullable field %s", name)
 }
 
@@ -402,6 +526,12 @@ func (m *CityMutation) ResetField(name string) error {
 		return nil
 	case city.FieldName:
 		m.ResetName()
+		return nil
+	case city.FieldRequiredEnum:
+		m.ResetRequiredEnum()
+		return nil
+	case city.FieldNullableEnum:
+		m.ResetNullableEnum()
 		return nil
 	}
 	return fmt.Errorf("unknown City field %s", name)

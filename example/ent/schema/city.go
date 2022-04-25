@@ -13,6 +13,16 @@ type City struct {
 func (City) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").NotEmpty(),
+
+		field.Enum("required_enum").Values(
+			"a",
+			"b",
+		),
+
+		field.Enum("nullable_enum").Values(
+			"c",
+			"d",
+		).Optional().Nillable(),
 	}
 }
 

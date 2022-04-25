@@ -65,11 +65,28 @@
             "City": {
                 "type": "object",
                 "required": [
-                    "name"
+                    "name",
+                    "required_enum",
+                    "nullable_enum"
                 ],
                 "properties": {
                     "name": {
                         "type": "string"
+                    },
+                    "required_enum": {
+                        "type": "string",
+                        "enum": [
+                            "a",
+                            "b"
+                        ]
+                    },
+                    "nullable_enum": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "c",
+                            "d"
+                        ]
                     }
                 }
             }

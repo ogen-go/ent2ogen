@@ -20,8 +20,14 @@ type Mapping struct {
 }
 
 type FieldMapping struct {
-	From *gen.Field
-	To   *ir.Field
+	From  *gen.Field
+	To    *ir.Field
+	Enums []EnumMapping // only for enum fields
+}
+
+type EnumMapping struct {
+	From gen.Enum
+	To   *ir.EnumVariant
 }
 
 type EdgeMapping struct {
@@ -165,31 +171,44 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 		return fmt.Errorf("type format mismatch: expected %q but have %q", v.Format, ogenSchema.Format)
 	}
 
+	var enumMappings []EnumMapping
 	if entField.Type.Type == field.TypeEnum {
 		if len(ogenSchema.Enum) != len(entField.EnumValues()) {
 			return fmt.Errorf("enum mismatch")
 		}
 
-		dbEnums := map[string]struct{}{}
-		for _, enum := range entField.EnumValues() {
-			dbEnums[enum] = struct{}{}
+		dbEnums := map[string]gen.Enum{}
+		for _, enum := range entField.Enums {
+			dbEnums[enum.Value] = enum
 		}
 
-		for _, enum := range ogenSchema.Enum {
-			str, ok := enum.(string)
+		typ := ogenField.Type
+		if typ.IsGeneric() { // Nullable enums.
+			typ = typ.GenericOf
+		}
+
+		for _, ogenEnum := range typ.EnumVariants {
+			val, ok := ogenEnum.Value.(string)
 			if !ok {
-				return fmt.Errorf("unexpected enum value type: %T", enum)
+				return fmt.Errorf("unexpected enum value type: %T", ogenEnum.Value)
 			}
 
-			if _, ok := dbEnums[str]; !ok {
-				return fmt.Errorf("enum value %q not found in ent schema", str)
+			dbEnum, ok := dbEnums[val]
+			if !ok {
+				return fmt.Errorf("enum value %q not found in ent schema", val)
 			}
+
+			enumMappings = append(enumMappings, EnumMapping{
+				From: dbEnum,
+				To:   ogenEnum,
+			})
 		}
 	}
 
 	m.FieldMappings = append(m.FieldMappings, FieldMapping{
-		From: entField,
-		To:   ogenField,
+		From:  entField,
+		To:    ogenField,
+		Enums: enumMappings,
 	})
 
 	return nil

@@ -24,7 +24,8 @@ func (User) Fields() []ent.Field {
 
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("city", City.Type).Unique().Required(),
+		edge.To("required_city", City.Type).Unique().Required(),
+		edge.To("optional_city", City.Type).Unique(),
 		edge.To("friend_list", User.Type).
 			Annotations(ent2ogen.BindTo("friends")),
 	}

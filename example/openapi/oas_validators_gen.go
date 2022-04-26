@@ -64,13 +64,32 @@ func (s CityRequiredEnum) Validate() error {
 func (s User) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.City.Validate(); err != nil {
+		if err := s.RequiredCity.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "city",
+			Name:  "required_city",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.OptionalCity.Set {
+			if err := func() error {
+				if err := s.OptionalCity.Value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "optional_city",
 			Error: err,
 		})
 	}

@@ -53,26 +53,43 @@ func (e *User) ToOpenAPI() (t openapi.User, err error) {
 	if e.OptionalNullableBool != nil {
 		t.OptionalNullableBool.SetTo(*e.OptionalNullableBool)
 	}
-	// Edge 'city'.
+	// Edge 'required_city'.
 	{
-		v, err := e.Edges.CityOrErr()
-		if err != nil {
-			return t, fmt.Errorf("load 'city' edge: %w", err)
+		v, err := e.Edges.RequiredCityOrErr()
+		if err == nil {
+			converted, err := v.ToOpenAPI()
+			if err != nil {
+				return t, fmt.Errorf("convert 'required_city' edge: %w", err)
+			}
+			t.RequiredCity = converted
+		} else {
+			return t, fmt.Errorf("load 'required_city' edge: %w", err)
 		}
-		t.City, err = v.ToOpenAPI()
-		if err != nil {
-			return t, fmt.Errorf("convert 'city' type: %w", err)
+	}
+	// Edge 'optional_city'.
+	{
+		v, err := e.Edges.OptionalCityOrErr()
+		if err == nil {
+			converted, err := v.ToOpenAPI()
+			if err != nil {
+				return t, fmt.Errorf("convert 'optional_city' edge: %w", err)
+			}
+			t.OptionalCity.SetTo(converted)
+		} else if !IsNotFound(err) {
+			return t, fmt.Errorf("load 'optional_city' edge: %w", err)
 		}
 	}
 	// Edge 'friend_list'.
 	{
 		v, err := e.Edges.FriendListOrErr()
-		if err != nil {
+		if err == nil {
+			converted, err := UserSlice(v).ToOpenAPI()
+			if err != nil {
+				return t, fmt.Errorf("convert 'friend_list' edge: %w", err)
+			}
+			t.Friends = converted
+		} else if !IsNotFound(err) {
 			return t, fmt.Errorf("load 'friend_list' edge: %w", err)
-		}
-		t.Friends, err = UserSlice(v).ToOpenAPI()
-		if err != nil {
-			return t, fmt.Errorf("convert 'friend_list' edge: %w", err)
 		}
 	}
 	return t, nil

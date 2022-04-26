@@ -25,19 +25,28 @@ const (
 	FieldUserName = "user_name"
 	// FieldOptionalNullableBool holds the string denoting the optional_nullable_bool field in the database.
 	FieldOptionalNullableBool = "optional_nullable_bool"
-	// EdgeCity holds the string denoting the city edge name in mutations.
-	EdgeCity = "city"
+	// EdgeRequiredCity holds the string denoting the required_city edge name in mutations.
+	EdgeRequiredCity = "required_city"
+	// EdgeOptionalCity holds the string denoting the optional_city edge name in mutations.
+	EdgeOptionalCity = "optional_city"
 	// EdgeFriendList holds the string denoting the friend_list edge name in mutations.
 	EdgeFriendList = "friend_list"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// CityTable is the table that holds the city relation/edge.
-	CityTable = "users"
-	// CityInverseTable is the table name for the City entity.
+	// RequiredCityTable is the table that holds the required_city relation/edge.
+	RequiredCityTable = "users"
+	// RequiredCityInverseTable is the table name for the City entity.
 	// It exists in this package in order to avoid circular dependency with the "city" package.
-	CityInverseTable = "cities"
-	// CityColumn is the table column denoting the city relation/edge.
-	CityColumn = "user_city"
+	RequiredCityInverseTable = "cities"
+	// RequiredCityColumn is the table column denoting the required_city relation/edge.
+	RequiredCityColumn = "user_required_city"
+	// OptionalCityTable is the table that holds the optional_city relation/edge.
+	OptionalCityTable = "users"
+	// OptionalCityInverseTable is the table name for the City entity.
+	// It exists in this package in order to avoid circular dependency with the "city" package.
+	OptionalCityInverseTable = "cities"
+	// OptionalCityColumn is the table column denoting the optional_city relation/edge.
+	OptionalCityColumn = "user_optional_city"
 	// FriendListTable is the table that holds the friend_list relation/edge. The primary key declared below.
 	FriendListTable = "user_friend_list"
 )
@@ -56,7 +65,8 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "users"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"user_city",
+	"user_required_city",
+	"user_optional_city",
 }
 
 var (

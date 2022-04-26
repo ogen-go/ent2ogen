@@ -39,7 +39,8 @@ func _() {
 		LastName             string
 		Username             string
 		OptionalNullableBool openapi.OptNilBool
-		City                 openapi.City
+		RequiredCity         openapi.City
+		OptionalCity         openapi.OptCity
 		Friends              []openapi.User
 	}(openapi.User{})
 }

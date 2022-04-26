@@ -99,15 +99,34 @@ func (uc *UserCreate) SetNillableID(u *uuid.UUID) *UserCreate {
 	return uc
 }
 
-// SetCityID sets the "city" edge to the City entity by ID.
-func (uc *UserCreate) SetCityID(id uuid.UUID) *UserCreate {
-	uc.mutation.SetCityID(id)
+// SetRequiredCityID sets the "required_city" edge to the City entity by ID.
+func (uc *UserCreate) SetRequiredCityID(id uuid.UUID) *UserCreate {
+	uc.mutation.SetRequiredCityID(id)
 	return uc
 }
 
-// SetCity sets the "city" edge to the City entity.
-func (uc *UserCreate) SetCity(c *City) *UserCreate {
-	return uc.SetCityID(c.ID)
+// SetRequiredCity sets the "required_city" edge to the City entity.
+func (uc *UserCreate) SetRequiredCity(c *City) *UserCreate {
+	return uc.SetRequiredCityID(c.ID)
+}
+
+// SetOptionalCityID sets the "optional_city" edge to the City entity by ID.
+func (uc *UserCreate) SetOptionalCityID(id uuid.UUID) *UserCreate {
+	uc.mutation.SetOptionalCityID(id)
+	return uc
+}
+
+// SetNillableOptionalCityID sets the "optional_city" edge to the City entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableOptionalCityID(id *uuid.UUID) *UserCreate {
+	if id != nil {
+		uc = uc.SetOptionalCityID(*id)
+	}
+	return uc
+}
+
+// SetOptionalCity sets the "optional_city" edge to the City entity.
+func (uc *UserCreate) SetOptionalCity(c *City) *UserCreate {
+	return uc.SetOptionalCityID(c.ID)
 }
 
 // AddFriendListIDs adds the "friend_list" edge to the User entity by IDs.
@@ -237,8 +256,8 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.UserName(); !ok {
 		return &ValidationError{Name: "user_name", err: errors.New(`ent: missing required field "User.user_name"`)}
 	}
-	if _, ok := uc.mutation.CityID(); !ok {
-		return &ValidationError{Name: "city", err: errors.New(`ent: missing required edge "User.city"`)}
+	if _, ok := uc.mutation.RequiredCityID(); !ok {
+		return &ValidationError{Name: "required_city", err: errors.New(`ent: missing required edge "User.required_city"`)}
 	}
 	return nil
 }
@@ -325,12 +344,12 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.OptionalNullableBool = &value
 	}
-	if nodes := uc.mutation.CityIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.RequiredCityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   user.CityTable,
-			Columns: []string{user.CityColumn},
+			Table:   user.RequiredCityTable,
+			Columns: []string{user.RequiredCityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -342,7 +361,27 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_city = &nodes[0]
+		_node.user_required_city = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.OptionalCityIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.OptionalCityTable,
+			Columns: []string{user.OptionalCityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: city.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_optional_city = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.FriendListIDs(); len(nodes) > 0 {

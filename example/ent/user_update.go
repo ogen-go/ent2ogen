@@ -74,15 +74,34 @@ func (uu *UserUpdate) ClearOptionalNullableBool() *UserUpdate {
 	return uu
 }
 
-// SetCityID sets the "city" edge to the City entity by ID.
-func (uu *UserUpdate) SetCityID(id uuid.UUID) *UserUpdate {
-	uu.mutation.SetCityID(id)
+// SetRequiredCityID sets the "required_city" edge to the City entity by ID.
+func (uu *UserUpdate) SetRequiredCityID(id uuid.UUID) *UserUpdate {
+	uu.mutation.SetRequiredCityID(id)
 	return uu
 }
 
-// SetCity sets the "city" edge to the City entity.
-func (uu *UserUpdate) SetCity(c *City) *UserUpdate {
-	return uu.SetCityID(c.ID)
+// SetRequiredCity sets the "required_city" edge to the City entity.
+func (uu *UserUpdate) SetRequiredCity(c *City) *UserUpdate {
+	return uu.SetRequiredCityID(c.ID)
+}
+
+// SetOptionalCityID sets the "optional_city" edge to the City entity by ID.
+func (uu *UserUpdate) SetOptionalCityID(id uuid.UUID) *UserUpdate {
+	uu.mutation.SetOptionalCityID(id)
+	return uu
+}
+
+// SetNillableOptionalCityID sets the "optional_city" edge to the City entity by ID if the given value is not nil.
+func (uu *UserUpdate) SetNillableOptionalCityID(id *uuid.UUID) *UserUpdate {
+	if id != nil {
+		uu = uu.SetOptionalCityID(*id)
+	}
+	return uu
+}
+
+// SetOptionalCity sets the "optional_city" edge to the City entity.
+func (uu *UserUpdate) SetOptionalCity(c *City) *UserUpdate {
+	return uu.SetOptionalCityID(c.ID)
 }
 
 // AddFriendListIDs adds the "friend_list" edge to the User entity by IDs.
@@ -105,9 +124,15 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearCity clears the "city" edge to the City entity.
-func (uu *UserUpdate) ClearCity() *UserUpdate {
-	uu.mutation.ClearCity()
+// ClearRequiredCity clears the "required_city" edge to the City entity.
+func (uu *UserUpdate) ClearRequiredCity() *UserUpdate {
+	uu.mutation.ClearRequiredCity()
+	return uu
+}
+
+// ClearOptionalCity clears the "optional_city" edge to the City entity.
+func (uu *UserUpdate) ClearOptionalCity() *UserUpdate {
+	uu.mutation.ClearOptionalCity()
 	return uu
 }
 
@@ -213,8 +238,8 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`ent: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
-	if _, ok := uu.mutation.CityID(); uu.mutation.CityCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "User.city"`)
+	if _, ok := uu.mutation.RequiredCityID(); uu.mutation.RequiredCityCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "User.required_city"`)
 	}
 	return nil
 }
@@ -278,12 +303,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldOptionalNullableBool,
 		})
 	}
-	if uu.mutation.CityCleared() {
+	if uu.mutation.RequiredCityCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   user.CityTable,
-			Columns: []string{user.CityColumn},
+			Table:   user.RequiredCityTable,
+			Columns: []string{user.RequiredCityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -294,12 +319,47 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.CityIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.RequiredCityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   user.CityTable,
-			Columns: []string{user.CityColumn},
+			Table:   user.RequiredCityTable,
+			Columns: []string{user.RequiredCityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: city.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.OptionalCityCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.OptionalCityTable,
+			Columns: []string{user.OptionalCityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: city.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.OptionalCityIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.OptionalCityTable,
+			Columns: []string{user.OptionalCityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -430,15 +490,34 @@ func (uuo *UserUpdateOne) ClearOptionalNullableBool() *UserUpdateOne {
 	return uuo
 }
 
-// SetCityID sets the "city" edge to the City entity by ID.
-func (uuo *UserUpdateOne) SetCityID(id uuid.UUID) *UserUpdateOne {
-	uuo.mutation.SetCityID(id)
+// SetRequiredCityID sets the "required_city" edge to the City entity by ID.
+func (uuo *UserUpdateOne) SetRequiredCityID(id uuid.UUID) *UserUpdateOne {
+	uuo.mutation.SetRequiredCityID(id)
 	return uuo
 }
 
-// SetCity sets the "city" edge to the City entity.
-func (uuo *UserUpdateOne) SetCity(c *City) *UserUpdateOne {
-	return uuo.SetCityID(c.ID)
+// SetRequiredCity sets the "required_city" edge to the City entity.
+func (uuo *UserUpdateOne) SetRequiredCity(c *City) *UserUpdateOne {
+	return uuo.SetRequiredCityID(c.ID)
+}
+
+// SetOptionalCityID sets the "optional_city" edge to the City entity by ID.
+func (uuo *UserUpdateOne) SetOptionalCityID(id uuid.UUID) *UserUpdateOne {
+	uuo.mutation.SetOptionalCityID(id)
+	return uuo
+}
+
+// SetNillableOptionalCityID sets the "optional_city" edge to the City entity by ID if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableOptionalCityID(id *uuid.UUID) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetOptionalCityID(*id)
+	}
+	return uuo
+}
+
+// SetOptionalCity sets the "optional_city" edge to the City entity.
+func (uuo *UserUpdateOne) SetOptionalCity(c *City) *UserUpdateOne {
+	return uuo.SetOptionalCityID(c.ID)
 }
 
 // AddFriendListIDs adds the "friend_list" edge to the User entity by IDs.
@@ -461,9 +540,15 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearCity clears the "city" edge to the City entity.
-func (uuo *UserUpdateOne) ClearCity() *UserUpdateOne {
-	uuo.mutation.ClearCity()
+// ClearRequiredCity clears the "required_city" edge to the City entity.
+func (uuo *UserUpdateOne) ClearRequiredCity() *UserUpdateOne {
+	uuo.mutation.ClearRequiredCity()
+	return uuo
+}
+
+// ClearOptionalCity clears the "optional_city" edge to the City entity.
+func (uuo *UserUpdateOne) ClearOptionalCity() *UserUpdateOne {
+	uuo.mutation.ClearOptionalCity()
 	return uuo
 }
 
@@ -576,8 +661,8 @@ func (uuo *UserUpdateOne) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`ent: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
-	if _, ok := uuo.mutation.CityID(); uuo.mutation.CityCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "User.city"`)
+	if _, ok := uuo.mutation.RequiredCityID(); uuo.mutation.RequiredCityCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "User.required_city"`)
 	}
 	return nil
 }
@@ -658,12 +743,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Column: user.FieldOptionalNullableBool,
 		})
 	}
-	if uuo.mutation.CityCleared() {
+	if uuo.mutation.RequiredCityCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   user.CityTable,
-			Columns: []string{user.CityColumn},
+			Table:   user.RequiredCityTable,
+			Columns: []string{user.RequiredCityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -674,12 +759,47 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.CityIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.RequiredCityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   user.CityTable,
-			Columns: []string{user.CityColumn},
+			Table:   user.RequiredCityTable,
+			Columns: []string{user.RequiredCityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: city.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.OptionalCityCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.OptionalCityTable,
+			Columns: []string{user.OptionalCityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: city.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.OptionalCityIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.OptionalCityTable,
+			Columns: []string{user.OptionalCityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

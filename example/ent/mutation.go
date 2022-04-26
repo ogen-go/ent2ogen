@@ -598,8 +598,10 @@ type UserMutation struct {
 	user_name              *string
 	optional_nullable_bool *bool
 	clearedFields          map[string]struct{}
-	city                   *uuid.UUID
-	clearedcity            bool
+	required_city          *uuid.UUID
+	clearedrequired_city   bool
+	optional_city          *uuid.UUID
+	clearedoptional_city   bool
 	friend_list            map[uuid.UUID]struct{}
 	removedfriend_list     map[uuid.UUID]struct{}
 	clearedfriend_list     bool
@@ -941,43 +943,82 @@ func (m *UserMutation) ResetOptionalNullableBool() {
 	delete(m.clearedFields, user.FieldOptionalNullableBool)
 }
 
-// SetCityID sets the "city" edge to the City entity by id.
-func (m *UserMutation) SetCityID(id uuid.UUID) {
-	m.city = &id
+// SetRequiredCityID sets the "required_city" edge to the City entity by id.
+func (m *UserMutation) SetRequiredCityID(id uuid.UUID) {
+	m.required_city = &id
 }
 
-// ClearCity clears the "city" edge to the City entity.
-func (m *UserMutation) ClearCity() {
-	m.clearedcity = true
+// ClearRequiredCity clears the "required_city" edge to the City entity.
+func (m *UserMutation) ClearRequiredCity() {
+	m.clearedrequired_city = true
 }
 
-// CityCleared reports if the "city" edge to the City entity was cleared.
-func (m *UserMutation) CityCleared() bool {
-	return m.clearedcity
+// RequiredCityCleared reports if the "required_city" edge to the City entity was cleared.
+func (m *UserMutation) RequiredCityCleared() bool {
+	return m.clearedrequired_city
 }
 
-// CityID returns the "city" edge ID in the mutation.
-func (m *UserMutation) CityID() (id uuid.UUID, exists bool) {
-	if m.city != nil {
-		return *m.city, true
+// RequiredCityID returns the "required_city" edge ID in the mutation.
+func (m *UserMutation) RequiredCityID() (id uuid.UUID, exists bool) {
+	if m.required_city != nil {
+		return *m.required_city, true
 	}
 	return
 }
 
-// CityIDs returns the "city" edge IDs in the mutation.
+// RequiredCityIDs returns the "required_city" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CityID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) CityIDs() (ids []uuid.UUID) {
-	if id := m.city; id != nil {
+// RequiredCityID instead. It exists only for internal usage by the builders.
+func (m *UserMutation) RequiredCityIDs() (ids []uuid.UUID) {
+	if id := m.required_city; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetCity resets all changes to the "city" edge.
-func (m *UserMutation) ResetCity() {
-	m.city = nil
-	m.clearedcity = false
+// ResetRequiredCity resets all changes to the "required_city" edge.
+func (m *UserMutation) ResetRequiredCity() {
+	m.required_city = nil
+	m.clearedrequired_city = false
+}
+
+// SetOptionalCityID sets the "optional_city" edge to the City entity by id.
+func (m *UserMutation) SetOptionalCityID(id uuid.UUID) {
+	m.optional_city = &id
+}
+
+// ClearOptionalCity clears the "optional_city" edge to the City entity.
+func (m *UserMutation) ClearOptionalCity() {
+	m.clearedoptional_city = true
+}
+
+// OptionalCityCleared reports if the "optional_city" edge to the City entity was cleared.
+func (m *UserMutation) OptionalCityCleared() bool {
+	return m.clearedoptional_city
+}
+
+// OptionalCityID returns the "optional_city" edge ID in the mutation.
+func (m *UserMutation) OptionalCityID() (id uuid.UUID, exists bool) {
+	if m.optional_city != nil {
+		return *m.optional_city, true
+	}
+	return
+}
+
+// OptionalCityIDs returns the "optional_city" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// OptionalCityID instead. It exists only for internal usage by the builders.
+func (m *UserMutation) OptionalCityIDs() (ids []uuid.UUID) {
+	if id := m.optional_city; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetOptionalCity resets all changes to the "optional_city" edge.
+func (m *UserMutation) ResetOptionalCity() {
+	m.optional_city = nil
+	m.clearedoptional_city = false
 }
 
 // AddFriendListIDs adds the "friend_list" edge to the User entity by ids.
@@ -1246,9 +1287,12 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.city != nil {
-		edges = append(edges, user.EdgeCity)
+	edges := make([]string, 0, 3)
+	if m.required_city != nil {
+		edges = append(edges, user.EdgeRequiredCity)
+	}
+	if m.optional_city != nil {
+		edges = append(edges, user.EdgeOptionalCity)
 	}
 	if m.friend_list != nil {
 		edges = append(edges, user.EdgeFriendList)
@@ -1260,8 +1304,12 @@ func (m *UserMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeCity:
-		if id := m.city; id != nil {
+	case user.EdgeRequiredCity:
+		if id := m.required_city; id != nil {
+			return []ent.Value{*id}
+		}
+	case user.EdgeOptionalCity:
+		if id := m.optional_city; id != nil {
 			return []ent.Value{*id}
 		}
 	case user.EdgeFriendList:
@@ -1276,7 +1324,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedfriend_list != nil {
 		edges = append(edges, user.EdgeFriendList)
 	}
@@ -1299,9 +1347,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedcity {
-		edges = append(edges, user.EdgeCity)
+	edges := make([]string, 0, 3)
+	if m.clearedrequired_city {
+		edges = append(edges, user.EdgeRequiredCity)
+	}
+	if m.clearedoptional_city {
+		edges = append(edges, user.EdgeOptionalCity)
 	}
 	if m.clearedfriend_list {
 		edges = append(edges, user.EdgeFriendList)
@@ -1313,8 +1364,10 @@ func (m *UserMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
-	case user.EdgeCity:
-		return m.clearedcity
+	case user.EdgeRequiredCity:
+		return m.clearedrequired_city
+	case user.EdgeOptionalCity:
+		return m.clearedoptional_city
 	case user.EdgeFriendList:
 		return m.clearedfriend_list
 	}
@@ -1325,8 +1378,11 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
-	case user.EdgeCity:
-		m.ClearCity()
+	case user.EdgeRequiredCity:
+		m.ClearRequiredCity()
+		return nil
+	case user.EdgeOptionalCity:
+		m.ClearOptionalCity()
 		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
@@ -1336,8 +1392,11 @@ func (m *UserMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
-	case user.EdgeCity:
-		m.ResetCity()
+	case user.EdgeRequiredCity:
+		m.ResetRequiredCity()
+		return nil
+	case user.EdgeOptionalCity:
+		m.ResetOptionalCity()
 		return nil
 	case user.EdgeFriendList:
 		m.ResetFriendList()

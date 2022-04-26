@@ -81,6 +81,52 @@ func (o NilCityNullableEnum) Or(d CityNullableEnum) CityNullableEnum {
 	return d
 }
 
+// NewOptCity returns new OptCity with value set to v.
+func NewOptCity(v City) OptCity {
+	return OptCity{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptCity is optional City.
+type OptCity struct {
+	Value City
+	Set   bool
+}
+
+// IsSet returns true if OptCity was set.
+func (o OptCity) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptCity) Reset() {
+	var v City
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptCity) SetTo(v City) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptCity) Get() (v City, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptCity) Or(d City) City {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilBool returns new OptNilBool with value set to v.
 func NewOptNilBool(v bool) OptNilBool {
 	return OptNilBool{
@@ -143,6 +189,7 @@ type User struct {
 	LastName             string     "json:\"last_name\""
 	Username             string     "json:\"username\""
 	OptionalNullableBool OptNilBool "json:\"optional_nullable_bool\""
-	City                 City       "json:\"city\""
+	RequiredCity         City       "json:\"required_city\""
+	OptionalCity         OptCity    "json:\"optional_city\""
 	Friends              []User     "json:\"friends\""
 }

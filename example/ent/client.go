@@ -306,15 +306,31 @@ func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 	return obj
 }
 
-// QueryCity queries the city edge of a User.
-func (c *UserClient) QueryCity(u *User) *CityQuery {
+// QueryRequiredCity queries the required_city edge of a User.
+func (c *UserClient) QueryRequiredCity(u *User) *CityQuery {
 	query := &CityQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(city.Table, city.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, user.CityTable, user.CityColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, user.RequiredCityTable, user.RequiredCityColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryOptionalCity queries the optional_city edge of a User.
+func (c *UserClient) QueryOptionalCity(u *User) *CityQuery {
+	query := &CityQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(city.Table, city.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, user.OptionalCityTable, user.OptionalCityColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

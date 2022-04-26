@@ -649,25 +649,53 @@ func OptionalNullableBoolNotNil() predicate.User {
 	})
 }
 
-// HasCity applies the HasEdge predicate on the "city" edge.
-func HasCity() predicate.User {
+// HasRequiredCity applies the HasEdge predicate on the "required_city" edge.
+func HasRequiredCity() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CityTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, CityTable, CityColumn),
+			sqlgraph.To(RequiredCityTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, RequiredCityTable, RequiredCityColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasCityWith applies the HasEdge predicate on the "city" edge with a given conditions (other predicates).
-func HasCityWith(preds ...predicate.City) predicate.User {
+// HasRequiredCityWith applies the HasEdge predicate on the "required_city" edge with a given conditions (other predicates).
+func HasRequiredCityWith(preds ...predicate.City) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CityInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, CityTable, CityColumn),
+			sqlgraph.To(RequiredCityInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, RequiredCityTable, RequiredCityColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasOptionalCity applies the HasEdge predicate on the "optional_city" edge.
+func HasOptionalCity() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OptionalCityTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, OptionalCityTable, OptionalCityColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOptionalCityWith applies the HasEdge predicate on the "optional_city" edge with a given conditions (other predicates).
+func HasOptionalCityWith(preds ...predicate.City) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OptionalCityInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, OptionalCityTable, OptionalCityColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

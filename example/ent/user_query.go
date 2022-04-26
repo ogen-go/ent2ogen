@@ -28,9 +28,10 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withCity       *CityQuery
-	withFriendList *UserQuery
-	withFKs        bool
+	withRequiredCity *CityQuery
+	withOptionalCity *CityQuery
+	withFriendList   *UserQuery
+	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -67,8 +68,8 @@ func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	return uq
 }
 
-// QueryCity chains the current query on the "city" edge.
-func (uq *UserQuery) QueryCity() *CityQuery {
+// QueryRequiredCity chains the current query on the "required_city" edge.
+func (uq *UserQuery) QueryRequiredCity() *CityQuery {
 	query := &CityQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
@@ -81,7 +82,29 @@ func (uq *UserQuery) QueryCity() *CityQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(city.Table, city.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, user.CityTable, user.CityColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, user.RequiredCityTable, user.RequiredCityColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryOptionalCity chains the current query on the "optional_city" edge.
+func (uq *UserQuery) QueryOptionalCity() *CityQuery {
+	query := &CityQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(city.Table, city.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, user.OptionalCityTable, user.OptionalCityColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -287,13 +310,14 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:         uq.config,
-		limit:          uq.limit,
-		offset:         uq.offset,
-		order:          append([]OrderFunc{}, uq.order...),
-		predicates:     append([]predicate.User{}, uq.predicates...),
-		withCity:       uq.withCity.Clone(),
-		withFriendList: uq.withFriendList.Clone(),
+		config:           uq.config,
+		limit:            uq.limit,
+		offset:           uq.offset,
+		order:            append([]OrderFunc{}, uq.order...),
+		predicates:       append([]predicate.User{}, uq.predicates...),
+		withRequiredCity: uq.withRequiredCity.Clone(),
+		withOptionalCity: uq.withOptionalCity.Clone(),
+		withFriendList:   uq.withFriendList.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -301,14 +325,25 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
-// WithCity tells the query-builder to eager-load the nodes that are connected to
-// the "city" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithCity(opts ...func(*CityQuery)) *UserQuery {
+// WithRequiredCity tells the query-builder to eager-load the nodes that are connected to
+// the "required_city" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithRequiredCity(opts ...func(*CityQuery)) *UserQuery {
 	query := &CityQuery{config: uq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withCity = query
+	uq.withRequiredCity = query
+	return uq
+}
+
+// WithOptionalCity tells the query-builder to eager-load the nodes that are connected to
+// the "optional_city" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithOptionalCity(opts ...func(*CityQuery)) *UserQuery {
+	query := &CityQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withOptionalCity = query
 	return uq
 }
 
@@ -389,12 +424,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		nodes       = []*User{}
 		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [2]bool{
-			uq.withCity != nil,
+		loadedTypes = [3]bool{
+			uq.withRequiredCity != nil,
+			uq.withOptionalCity != nil,
 			uq.withFriendList != nil,
 		}
 	)
-	if uq.withCity != nil {
+	if uq.withRequiredCity != nil || uq.withOptionalCity != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -420,14 +456,14 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		return nodes, nil
 	}
 
-	if query := uq.withCity; query != nil {
+	if query := uq.withRequiredCity; query != nil {
 		ids := make([]uuid.UUID, 0, len(nodes))
 		nodeids := make(map[uuid.UUID][]*User)
 		for i := range nodes {
-			if nodes[i].user_city == nil {
+			if nodes[i].user_required_city == nil {
 				continue
 			}
-			fk := *nodes[i].user_city
+			fk := *nodes[i].user_required_city
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -441,10 +477,39 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_city" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_required_city" returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.City = n
+				nodes[i].Edges.RequiredCity = n
+			}
+		}
+	}
+
+	if query := uq.withOptionalCity; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*User)
+		for i := range nodes {
+			if nodes[i].user_optional_city == nil {
+				continue
+			}
+			fk := *nodes[i].user_optional_city
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(city.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_optional_city" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.OptionalCity = n
 			}
 		}
 	}

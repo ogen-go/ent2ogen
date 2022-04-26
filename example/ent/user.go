@@ -34,39 +34,56 @@ type User struct {
 	OptionalNullableBool *bool `json:"optional_nullable_bool,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges     UserEdges `json:"edges"`
-	user_city *uuid.UUID
+	Edges              UserEdges `json:"edges"`
+	user_required_city *uuid.UUID
+	user_optional_city *uuid.UUID
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// City holds the value of the city edge.
-	City *City `json:"city,omitempty"`
+	// RequiredCity holds the value of the required_city edge.
+	RequiredCity *City `json:"required_city,omitempty"`
+	// OptionalCity holds the value of the optional_city edge.
+	OptionalCity *City `json:"optional_city,omitempty"`
 	// FriendList holds the value of the friend_list edge.
 	FriendList []*User `json:"friend_list,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
-// CityOrErr returns the City value or an error if the edge
+// RequiredCityOrErr returns the RequiredCity value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) CityOrErr() (*City, error) {
+func (e UserEdges) RequiredCityOrErr() (*City, error) {
 	if e.loadedTypes[0] {
-		if e.City == nil {
-			// The edge city was loaded in eager-loading,
+		if e.RequiredCity == nil {
+			// The edge required_city was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: city.Label}
 		}
-		return e.City, nil
+		return e.RequiredCity, nil
 	}
-	return nil, &NotLoadedError{edge: "city"}
+	return nil, &NotLoadedError{edge: "required_city"}
+}
+
+// OptionalCityOrErr returns the OptionalCity value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) OptionalCityOrErr() (*City, error) {
+	if e.loadedTypes[1] {
+		if e.OptionalCity == nil {
+			// The edge optional_city was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: city.Label}
+		}
+		return e.OptionalCity, nil
+	}
+	return nil, &NotLoadedError{edge: "optional_city"}
 }
 
 // FriendListOrErr returns the FriendList value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) FriendListOrErr() ([]*User, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.FriendList, nil
 	}
 	return nil, &NotLoadedError{edge: "friend_list"}
@@ -85,7 +102,9 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullTime)
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
-		case user.ForeignKeys[0]: // user_city
+		case user.ForeignKeys[0]: // user_required_city
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case user.ForeignKeys[1]: // user_optional_city
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
@@ -147,19 +166,31 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			}
 		case user.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field user_city", values[i])
+				return fmt.Errorf("unexpected type %T for field user_required_city", values[i])
 			} else if value.Valid {
-				u.user_city = new(uuid.UUID)
-				*u.user_city = *value.S.(*uuid.UUID)
+				u.user_required_city = new(uuid.UUID)
+				*u.user_required_city = *value.S.(*uuid.UUID)
+			}
+		case user.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field user_optional_city", values[i])
+			} else if value.Valid {
+				u.user_optional_city = new(uuid.UUID)
+				*u.user_optional_city = *value.S.(*uuid.UUID)
 			}
 		}
 	}
 	return nil
 }
 
-// QueryCity queries the "city" edge of the User entity.
-func (u *User) QueryCity() *CityQuery {
-	return (&UserClient{config: u.config}).QueryCity(u)
+// QueryRequiredCity queries the "required_city" edge of the User entity.
+func (u *User) QueryRequiredCity() *CityQuery {
+	return (&UserClient{config: u.config}).QueryRequiredCity(u)
+}
+
+// QueryOptionalCity queries the "optional_city" edge of the User entity.
+func (u *User) QueryOptionalCity() *CityQuery {
+	return (&UserClient{config: u.config}).QueryOptionalCity(u)
 }
 
 // QueryFriendList queries the "friend_list" edge of the User entity.

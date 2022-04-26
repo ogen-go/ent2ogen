@@ -363,6 +363,39 @@ func (s *NilCityNullableEnum) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes City as json.
+func (o OptCity) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes City from json.
+func (o *OptCity) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptCity to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptCity) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptCity) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes bool as json.
 func (o OptNilBool) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -451,8 +484,14 @@ func (s User) encodeFields(e *jx.Encoder) {
 	}
 	{
 
-		e.FieldStart("city")
-		s.City.Encode(e)
+		e.FieldStart("required_city")
+		s.RequiredCity.Encode(e)
+	}
+	{
+		if s.OptionalCity.Set {
+			e.FieldStart("optional_city")
+			s.OptionalCity.Encode(e)
+		}
 	}
 	{
 		if s.Friends != nil {
@@ -466,14 +505,15 @@ func (s User) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfUser = [7]string{
+var jsonFieldsNameOfUser = [8]string{
 	0: "id",
 	1: "first_name",
 	2: "last_name",
 	3: "username",
 	4: "optional_nullable_bool",
-	5: "city",
-	6: "friends",
+	5: "required_city",
+	6: "optional_city",
+	7: "friends",
 }
 
 // Decode decodes User from json.
@@ -543,15 +583,25 @@ func (s *User) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"optional_nullable_bool\"")
 			}
-		case "city":
+		case "required_city":
 			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
-				if err := s.City.Decode(d); err != nil {
+				if err := s.RequiredCity.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"city\"")
+				return errors.Wrap(err, "decode field \"required_city\"")
+			}
+		case "optional_city":
+			if err := func() error {
+				s.OptionalCity.Reset()
+				if err := s.OptionalCity.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"optional_city\"")
 			}
 		case "friends":
 			if err := func() error {

@@ -32,7 +32,8 @@ var (
 		{Name: "last_name", Type: field.TypeString},
 		{Name: "user_name", Type: field.TypeString, Unique: true},
 		{Name: "optional_nullable_bool", Type: field.TypeBool, Nullable: true},
-		{Name: "user_city", Type: field.TypeUUID},
+		{Name: "user_required_city", Type: field.TypeUUID},
+		{Name: "user_optional_city", Type: field.TypeUUID, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -41,10 +42,16 @@ var (
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "users_cities_city",
+				Symbol:     "users_cities_required_city",
 				Columns:    []*schema.Column{UsersColumns[7]},
 				RefColumns: []*schema.Column{CitiesColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "users_cities_optional_city",
+				Columns:    []*schema.Column{UsersColumns[8]},
+				RefColumns: []*schema.Column{CitiesColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
@@ -83,6 +90,7 @@ var (
 
 func init() {
 	UsersTable.ForeignKeys[0].RefTable = CitiesTable
+	UsersTable.ForeignKeys[1].RefTable = CitiesTable
 	UserFriendListTable.ForeignKeys[0].RefTable = UsersTable
 	UserFriendListTable.ForeignKeys[1].RefTable = UsersTable
 }

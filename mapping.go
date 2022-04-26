@@ -253,17 +253,34 @@ func (m *Mapping) createEdgeMapping(edge *gen.Edge, field *ir.Field) error {
 		return fmt.Errorf("spec cannot be nil")
 	}
 
-	if edge.Optional && edge.Unique {
-		return fmt.Errorf("optional unique edges are not supported")
-	}
-
 	typ := field.Type
-	if !edge.Unique {
+	switch {
+	case edge.Optional && edge.Unique: // Single optional type.
+		if !typ.IsGeneric() {
+			return fmt.Errorf("edge is optional, generic type is expected, not %q", typ.Kind)
+		}
+
+		typ = typ.GenericOf
+
+	case edge.Optional && !edge.Unique: // Multiple optional types.
 		if !typ.IsArray() {
 			return fmt.Errorf("edge is not unique, schema must be an array, not %q", typ.Kind)
 		}
 
 		typ = typ.Item
+
+	case !edge.Optional && edge.Unique: // Required unique type.
+		// Use field type.
+
+	case !edge.Optional && !edge.Unique: // Required multiple types.
+		if !typ.IsArray() {
+			return fmt.Errorf("edge is not unique, schema must be an array, not %q", typ.Kind)
+		}
+
+		typ = typ.Item
+
+	default:
+		panic("unreachable")
 	}
 
 	if err := m.ext.createMapping(edge.Type, typ); err != nil {

@@ -2,6 +2,7 @@ package ent2ogen
 
 import (
 	"fmt"
+	"strings"
 
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/schema/field"
@@ -312,29 +313,51 @@ func (m *Mapping) EntFields() []*gen.Field {
 	return fields
 }
 
-func assign(dst *ir.Field, src *gen.Field) (string, error) {
-	var (
-		assignT = "t." + dst.Name
-		srcT    = "e." + src.StructField()
-	)
-
-	if src.Nillable {
-		srcT = "*" + srcT
+func (m *Mapping) Comment() string {
+	if len(m.requiredEdges()) == 0 {
+		return ""
 	}
 
-	if dst.Type.IsGeneric() {
-		if dst.Type.GenericOf.IsPrimitive() {
-			return assignT + ".SetTo(" + srcT + ")", nil
+	var b strings.Builder
+	b.WriteString("// Following edges must be loaded:\n")
+	m.comment(0, &b)
+	return strings.TrimSpace(b.String())
+}
+
+func (m *Mapping) comment(indent int, b *strings.Builder) {
+	wr := func(s string) {
+		space := strings.Repeat(" ", indent)
+		b.WriteString("// " + space + s + "\n")
+	}
+
+	for _, e := range m.EdgeMappings {
+		if e.From.Optional {
+			continue
 		}
 
-		gotyp := dst.Type.GenericOf.Go()
-		return fmt.Sprintf("%s.SetTo(openapi.%s(%s))", assignT, gotyp, srcT), nil
+		tm, ok := m.ext.cfg.Mappings[e.From.Type]
+		if !ok {
+			panic("unreachable")
+		}
+
+		if len(tm.requiredEdges()) == 0 {
+			wr("  " + e.From.Name)
+			continue
+		}
+
+		wr("  " + e.From.Name + ":")
+		tm.comment(indent+2, b)
+	}
+}
+
+func (m *Mapping) requiredEdges() (result []EdgeMapping) {
+	for _, e := range m.EdgeMappings {
+		if e.From.Optional {
+			continue
+		}
+
+		result = append(result, e)
 	}
 
-	if dst.Type.IsEnum() {
-		gotyp := dst.Type.Go()
-		return fmt.Sprintf("%s = openapi.%s(%s)", assignT, gotyp, srcT), nil
-	}
-
-	return fmt.Sprintf("%s = %s", assignT, srcT), nil
+	return result
 }

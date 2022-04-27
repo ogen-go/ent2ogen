@@ -9,6 +9,7 @@ import openapi "{{ $cfg.OgenPackage }}"
 
 type {{ $m.From.Name }}Slice []*{{ $m.From.Name }}
 
+{{ $m.Comment }}
 func (s {{ $m.From.Name }}Slice) ToOpenAPI() (_ []openapi.{{ $m.To.Name }}, err error) {
     result := make([]openapi.{{ $m.To.Name }}, len(s))
     for i, v := range s {
@@ -21,6 +22,7 @@ func (s {{ $m.From.Name }}Slice) ToOpenAPI() (_ []openapi.{{ $m.To.Name }}, err 
     return result, nil
 }
 
+{{ $m.Comment }}
 func (e *{{ $m.From.Name }}) ToOpenAPI() (t openapi.{{ $m.To.Name }}, err error) {
     {{- range $f := $m.FieldMappings }}
         {{- $entField  := $f.From }}

@@ -33,6 +33,8 @@ func (e *City) ToOpenAPI() (t openapi.City, err error) {
 
 type UserSlice []*User
 
+// Following edges must be loaded:
+//   required_city
 func (s UserSlice) ToOpenAPI() (_ []openapi.User, err error) {
 	result := make([]openapi.User, len(s))
 	for i, v := range s {
@@ -45,6 +47,8 @@ func (s UserSlice) ToOpenAPI() (_ []openapi.User, err error) {
 	return result, nil
 }
 
+// Following edges must be loaded:
+//   required_city
 func (e *User) ToOpenAPI() (t openapi.User, err error) {
 	t.ID = e.ID
 	t.FirstName = e.FirstName

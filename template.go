@@ -25,6 +25,33 @@ var (
 	templates = gen.MustParse(gen.NewTemplate("ent2ogen").Funcs(funcMap).ParseFS(templateDir, "_templates/*.tmpl"))
 )
 
+func assign(dst *ir.Field, src *gen.Field) (string, error) {
+	var (
+		assignT = "t." + dst.Name
+		srcT    = "e." + src.StructField()
+	)
+
+	if src.Nillable {
+		srcT = "*" + srcT
+	}
+
+	if dst.Type.IsGeneric() {
+		if dst.Type.GenericOf.IsPrimitive() {
+			return assignT + ".SetTo(" + srcT + ")", nil
+		}
+
+		gotyp := dst.Type.GenericOf.Go()
+		return fmt.Sprintf("%s.SetTo(openapi.%s(%s))", assignT, gotyp, srcT), nil
+	}
+
+	if dst.Type.IsEnum() {
+		gotyp := dst.Type.Go()
+		return fmt.Sprintf("%s = openapi.%s(%s)", assignT, gotyp, srcT), nil
+	}
+
+	return fmt.Sprintf("%s = %s", assignT, srcT), nil
+}
+
 func rendertype(t *ir.Type) string {
 	switch t.Kind {
 	case ir.KindPrimitive:

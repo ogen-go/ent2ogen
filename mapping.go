@@ -134,14 +134,22 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 		return nil
 	}
 
-	ogenSchema := ogenField.Spec.Schema
-
-	if entField.Optional && !entField.Nillable {
+	switch {
+	case entField.Optional && !entField.Nillable:
 		return fmt.Errorf("optional fields are not supported")
-	}
 
-	if entField.Nillable != ogenSchema.Nullable {
-		return fmt.Errorf("nullability mismatch")
+	case entField.Optional && entField.Nillable:
+		if !ogenField.Type.IsGeneric() {
+			return fmt.Errorf("field is optional, type must be generic, not %q", ogenField.Type.Kind)
+		}
+
+	case !entField.Optional:
+		if ogenField.Type.IsGeneric() {
+			return fmt.Errorf("field must be required")
+		}
+
+	default:
+		panic("unreachable")
 	}
 
 	type tf struct {
@@ -163,6 +171,7 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 		return fmt.Errorf("unsupported ent type: %s", entField.Type.ConstName())
 	}
 
+	ogenSchema := ogenField.Spec.Schema
 	if ogenSchema.Type != v.Type {
 		return fmt.Errorf("type mismatch: expected %q but have %q", v.Type, ogenSchema.Type)
 	}

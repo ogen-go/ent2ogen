@@ -314,50 +314,44 @@ func (m *Mapping) EntFields() []*gen.Field {
 }
 
 func (m *Mapping) Comment() string {
-	if len(m.requiredEdges()) == 0 {
+	if len(m.EdgeMappings) == 0 {
 		return ""
 	}
 
 	var b strings.Builder
 	b.WriteString("// Following edges must be loaded:\n")
-	m.comment(0, &b)
+	m.comment(0, map[*gen.Type]struct{}{}, &b)
 	return strings.TrimSpace(b.String())
 }
 
-func (m *Mapping) comment(indent int, b *strings.Builder) {
+func (m *Mapping) comment(indent int, walk map[*gen.Type]struct{}, b *strings.Builder) {
 	wr := func(s string) {
 		space := strings.Repeat(" ", indent)
 		b.WriteString("// " + space + s + "\n")
 	}
 
 	for _, e := range m.EdgeMappings {
-		if e.From.Optional {
-			continue
-		}
-
 		tm, ok := m.ext.cfg.Mappings[e.From.Type]
 		if !ok {
 			panic("unreachable")
 		}
 
-		if len(tm.requiredEdges()) == 0 {
+		if len(tm.EdgeMappings) == 0 {
 			wr("  " + e.From.Name)
 			continue
 		}
 
-		wr("  " + e.From.Name + ":")
-		tm.comment(indent+2, b)
-	}
-}
-
-func (m *Mapping) requiredEdges() (result []EdgeMapping) {
-	for _, e := range m.EdgeMappings {
-		if e.From.Optional {
+		if _, ok := walk[e.From.Type]; ok {
+			wr("  " + e.From.Name + "...")
 			continue
 		}
 
-		result = append(result, e)
-	}
+		func() {
+			walk[e.From.Type] = struct{}{}
+			defer func() { delete(walk, e.From.Type) }()
 
-	return result
+			wr("  " + e.From.Name + ":")
+			tm.comment(indent+2, walk, b)
+		}()
+	}
 }

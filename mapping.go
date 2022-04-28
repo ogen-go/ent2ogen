@@ -320,7 +320,7 @@ func (m *Mapping) Comment() string {
 
 	var b strings.Builder
 	b.WriteString("// Following edges must be loaded:\n")
-	m.comment(0, map[*gen.Type]struct{}{}, &b)
+	m.comment(2, map[*gen.Type]struct{}{}, &b)
 	return strings.TrimSpace(b.String())
 }
 
@@ -337,12 +337,12 @@ func (m *Mapping) comment(indent int, walk map[*gen.Type]struct{}, b *strings.Bu
 		}
 
 		if len(tm.EdgeMappings) == 0 {
-			wr("  " + e.From.Name)
+			wr(e.From.Name)
 			continue
 		}
 
 		if _, ok := walk[e.From.Type]; ok {
-			wr("  " + e.From.Name + "...")
+			wr(e.From.Name + "...")
 			continue
 		}
 
@@ -350,7 +350,7 @@ func (m *Mapping) comment(indent int, walk map[*gen.Type]struct{}, b *strings.Bu
 			walk[e.From.Type] = struct{}{}
 			defer func() { delete(walk, e.From.Type) }()
 
-			wr("  " + e.From.Name + ":")
+			wr(e.From.Name + ":")
 			tm.comment(indent+2, walk, b)
 		}()
 	}

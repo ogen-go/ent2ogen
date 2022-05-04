@@ -2,6 +2,7 @@ package ent2ogen
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"entgo.io/ent/entc/gen"
@@ -342,6 +343,10 @@ func (m *Mapping) comment(indent int, walk map[*gen.Type]struct{}, b *strings.Bu
 		}
 
 		if _, ok := walk[e.From.Type]; ok {
+			if !e.From.Optional {
+				log.Fatalf("type %q edge %q infinite recursion", m.From.Name, e.From.Name)
+			}
+
 			wr(e.From.Name + "...")
 			continue
 		}

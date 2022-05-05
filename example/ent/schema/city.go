@@ -12,6 +12,8 @@ type City struct {
 
 func (City) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int64("id"),
+
 		field.String("name").NotEmpty(),
 
 		field.Enum("required_enum").Values(
@@ -23,13 +25,6 @@ func (City) Fields() []ent.Field {
 			"c",
 			"d",
 		).Optional().Nillable(),
-	}
-}
-
-func (City) Mixin() []ent.Mixin {
-	return []ent.Mixin{
-		IDMixin{},
-		TimeMixin{},
 	}
 }
 

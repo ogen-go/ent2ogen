@@ -14,6 +14,7 @@ type User struct {
 
 func (User) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int64("id"),
 		field.String("first_name").NotEmpty(),
 		field.String("last_name").NotEmpty(),
 		field.String("user_name").Unique().
@@ -28,13 +29,6 @@ func (User) Edges() []ent.Edge {
 		edge.To("optional_city", City.Type).Unique(),
 		edge.To("friend_list", User.Type).
 			Annotations(ent2ogen.BindTo("friends")),
-	}
-}
-
-func (User) Mixin() []ent.Mixin {
-	return []ent.Mixin{
-		IDMixin{},
-		TimeMixin{},
 	}
 }
 

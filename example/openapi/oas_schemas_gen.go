@@ -4,8 +4,6 @@ package openapi
 
 import (
 	"fmt"
-
-	"github.com/google/uuid"
 )
 
 func (s *ErrorResponseStatusCode) Error() string {
@@ -184,7 +182,7 @@ func (o OptNilBool) Or(d bool) bool {
 
 // Ref: #/components/schemas/User
 type User struct {
-	ID                   uuid.UUID  "json:\"id\""
+	ID                   int64      "json:\"id\""
 	FirstName            string     "json:\"first_name\""
 	LastName             string     "json:\"last_name\""
 	Username             string     "json:\"username\""

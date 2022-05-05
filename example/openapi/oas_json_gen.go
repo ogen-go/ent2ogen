@@ -9,7 +9,6 @@ import (
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
 
-	"github.com/ogen-go/ogen/json"
 	"github.com/ogen-go/ogen/validate"
 )
 
@@ -459,7 +458,7 @@ func (s User) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("id")
-		json.EncodeUUID(e, s.ID)
+		e.Int64(s.ID)
 	}
 	{
 
@@ -528,8 +527,8 @@ func (s *User) Decode(d *jx.Decoder) error {
 		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ID = v
+				v, err := d.Int64()
+				s.ID = int64(v)
 				if err != nil {
 					return err
 				}

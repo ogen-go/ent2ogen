@@ -3,9 +3,6 @@
 package ent
 
 import (
-	"time"
-
-	"github.com/google/uuid"
 	"github.com/ogen-go/ent2ogen/example/ent/city"
 	"github.com/ogen-go/ent2ogen/example/ent/schema"
 	"github.com/ogen-go/ent2ogen/example/ent/user"
@@ -15,58 +12,20 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	cityMixin := schema.City{}.Mixin()
-	cityMixinFields0 := cityMixin[0].Fields()
-	_ = cityMixinFields0
-	cityMixinFields1 := cityMixin[1].Fields()
-	_ = cityMixinFields1
 	cityFields := schema.City{}.Fields()
 	_ = cityFields
-	// cityDescCreatedAt is the schema descriptor for created_at field.
-	cityDescCreatedAt := cityMixinFields1[0].Descriptor()
-	// city.DefaultCreatedAt holds the default value on creation for the created_at field.
-	city.DefaultCreatedAt = cityDescCreatedAt.Default.(func() time.Time)
-	// cityDescUpdatedAt is the schema descriptor for updated_at field.
-	cityDescUpdatedAt := cityMixinFields1[1].Descriptor()
-	// city.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	city.DefaultUpdatedAt = cityDescUpdatedAt.Default.(func() time.Time)
-	// city.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	city.UpdateDefaultUpdatedAt = cityDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// cityDescName is the schema descriptor for name field.
-	cityDescName := cityFields[0].Descriptor()
+	cityDescName := cityFields[1].Descriptor()
 	// city.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	city.NameValidator = cityDescName.Validators[0].(func(string) error)
-	// cityDescID is the schema descriptor for id field.
-	cityDescID := cityMixinFields0[0].Descriptor()
-	// city.DefaultID holds the default value on creation for the id field.
-	city.DefaultID = cityDescID.Default.(func() uuid.UUID)
-	userMixin := schema.User{}.Mixin()
-	userMixinFields0 := userMixin[0].Fields()
-	_ = userMixinFields0
-	userMixinFields1 := userMixin[1].Fields()
-	_ = userMixinFields1
 	userFields := schema.User{}.Fields()
 	_ = userFields
-	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userMixinFields1[0].Descriptor()
-	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
-	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
-	// userDescUpdatedAt is the schema descriptor for updated_at field.
-	userDescUpdatedAt := userMixinFields1[1].Descriptor()
-	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
-	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescFirstName is the schema descriptor for first_name field.
-	userDescFirstName := userFields[0].Descriptor()
+	userDescFirstName := userFields[1].Descriptor()
 	// user.FirstNameValidator is a validator for the "first_name" field. It is called by the builders before save.
 	user.FirstNameValidator = userDescFirstName.Validators[0].(func(string) error)
 	// userDescLastName is the schema descriptor for last_name field.
-	userDescLastName := userFields[1].Descriptor()
+	userDescLastName := userFields[2].Descriptor()
 	// user.LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	user.LastNameValidator = userDescLastName.Validators[0].(func(string) error)
-	// userDescID is the schema descriptor for id field.
-	userDescID := userMixinFields0[0].Descriptor()
-	// user.DefaultID holds the default value on creation for the id field.
-	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 }

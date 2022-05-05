@@ -3,7 +3,6 @@
 package ent
 
 import (
-	"github.com/google/uuid"
 	"github.com/ogen-go/ent2ogen/example/ent/city"
 	openapi "github.com/ogen-go/ent2ogen/example/openapi"
 )
@@ -34,7 +33,7 @@ func _() {
 
 func _() {
 	_ = struct {
-		ID                   uuid.UUID
+		ID                   int64
 		FirstName            string
 		LastName             string
 		Username             string

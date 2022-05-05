@@ -7,9 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/ogen-go/ent2ogen/example/ent/city"
 	"github.com/ogen-go/ent2ogen/example/ent/predicate"
 	"github.com/ogen-go/ent2ogen/example/ent/user"
@@ -35,9 +33,7 @@ type CityMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *uuid.UUID
-	created_at    *time.Time
-	updated_at    *time.Time
+	id            *int64
 	name          *string
 	required_enum *city.RequiredEnum
 	nullable_enum *city.NullableEnum
@@ -67,7 +63,7 @@ func newCityMutation(c config, op Op, opts ...cityOption) *CityMutation {
 }
 
 // withCityID sets the ID field of the mutation.
-func withCityID(id uuid.UUID) cityOption {
+func withCityID(id int64) cityOption {
 	return func(m *CityMutation) {
 		var (
 			err   error
@@ -119,13 +115,13 @@ func (m CityMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of City entities.
-func (m *CityMutation) SetID(id uuid.UUID) {
+func (m *CityMutation) SetID(id int64) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *CityMutation) ID() (id uuid.UUID, exists bool) {
+func (m *CityMutation) ID() (id int64, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -136,12 +132,12 @@ func (m *CityMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *CityMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *CityMutation) IDs(ctx context.Context) ([]int64, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []uuid.UUID{id}, nil
+			return []int64{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -149,78 +145,6 @@ func (m *CityMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *CityMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *CityMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the City entity.
-// If the City object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CityMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *CityMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *CityMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *CityMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the City entity.
-// If the City object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CityMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *CityMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetName sets the "name" field.
@@ -363,13 +287,7 @@ func (m *CityMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CityMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.created_at != nil {
-		fields = append(fields, city.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, city.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 3)
 	if m.name != nil {
 		fields = append(fields, city.FieldName)
 	}
@@ -387,10 +305,6 @@ func (m *CityMutation) Fields() []string {
 // schema.
 func (m *CityMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case city.FieldCreatedAt:
-		return m.CreatedAt()
-	case city.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case city.FieldName:
 		return m.Name()
 	case city.FieldRequiredEnum:
@@ -406,10 +320,6 @@ func (m *CityMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *CityMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case city.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case city.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case city.FieldName:
 		return m.OldName(ctx)
 	case city.FieldRequiredEnum:
@@ -425,20 +335,6 @@ func (m *CityMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *CityMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case city.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case city.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case city.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -518,12 +414,6 @@ func (m *CityMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *CityMutation) ResetField(name string) error {
 	switch name {
-	case city.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case city.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case city.FieldName:
 		m.ResetName()
 		return nil
@@ -590,20 +480,18 @@ type UserMutation struct {
 	config
 	op                     Op
 	typ                    string
-	id                     *uuid.UUID
-	created_at             *time.Time
-	updated_at             *time.Time
+	id                     *int64
 	first_name             *string
 	last_name              *string
 	user_name              *string
 	optional_nullable_bool *bool
 	clearedFields          map[string]struct{}
-	required_city          *uuid.UUID
+	required_city          *int64
 	clearedrequired_city   bool
-	optional_city          *uuid.UUID
+	optional_city          *int64
 	clearedoptional_city   bool
-	friend_list            map[uuid.UUID]struct{}
-	removedfriend_list     map[uuid.UUID]struct{}
+	friend_list            map[int64]struct{}
+	removedfriend_list     map[int64]struct{}
 	clearedfriend_list     bool
 	done                   bool
 	oldValue               func(context.Context) (*User, error)
@@ -630,7 +518,7 @@ func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 }
 
 // withUserID sets the ID field of the mutation.
-func withUserID(id uuid.UUID) userOption {
+func withUserID(id int64) userOption {
 	return func(m *UserMutation) {
 		var (
 			err   error
@@ -682,13 +570,13 @@ func (m UserMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of User entities.
-func (m *UserMutation) SetID(id uuid.UUID) {
+func (m *UserMutation) SetID(id int64) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
+func (m *UserMutation) ID() (id int64, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -699,12 +587,12 @@ func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *UserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *UserMutation) IDs(ctx context.Context) ([]int64, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []uuid.UUID{id}, nil
+			return []int64{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -712,78 +600,6 @@ func (m *UserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *UserMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *UserMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *UserMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *UserMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *UserMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetFirstName sets the "first_name" field.
@@ -944,7 +760,7 @@ func (m *UserMutation) ResetOptionalNullableBool() {
 }
 
 // SetRequiredCityID sets the "required_city" edge to the City entity by id.
-func (m *UserMutation) SetRequiredCityID(id uuid.UUID) {
+func (m *UserMutation) SetRequiredCityID(id int64) {
 	m.required_city = &id
 }
 
@@ -959,7 +775,7 @@ func (m *UserMutation) RequiredCityCleared() bool {
 }
 
 // RequiredCityID returns the "required_city" edge ID in the mutation.
-func (m *UserMutation) RequiredCityID() (id uuid.UUID, exists bool) {
+func (m *UserMutation) RequiredCityID() (id int64, exists bool) {
 	if m.required_city != nil {
 		return *m.required_city, true
 	}
@@ -969,7 +785,7 @@ func (m *UserMutation) RequiredCityID() (id uuid.UUID, exists bool) {
 // RequiredCityIDs returns the "required_city" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // RequiredCityID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) RequiredCityIDs() (ids []uuid.UUID) {
+func (m *UserMutation) RequiredCityIDs() (ids []int64) {
 	if id := m.required_city; id != nil {
 		ids = append(ids, *id)
 	}
@@ -983,7 +799,7 @@ func (m *UserMutation) ResetRequiredCity() {
 }
 
 // SetOptionalCityID sets the "optional_city" edge to the City entity by id.
-func (m *UserMutation) SetOptionalCityID(id uuid.UUID) {
+func (m *UserMutation) SetOptionalCityID(id int64) {
 	m.optional_city = &id
 }
 
@@ -998,7 +814,7 @@ func (m *UserMutation) OptionalCityCleared() bool {
 }
 
 // OptionalCityID returns the "optional_city" edge ID in the mutation.
-func (m *UserMutation) OptionalCityID() (id uuid.UUID, exists bool) {
+func (m *UserMutation) OptionalCityID() (id int64, exists bool) {
 	if m.optional_city != nil {
 		return *m.optional_city, true
 	}
@@ -1008,7 +824,7 @@ func (m *UserMutation) OptionalCityID() (id uuid.UUID, exists bool) {
 // OptionalCityIDs returns the "optional_city" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // OptionalCityID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) OptionalCityIDs() (ids []uuid.UUID) {
+func (m *UserMutation) OptionalCityIDs() (ids []int64) {
 	if id := m.optional_city; id != nil {
 		ids = append(ids, *id)
 	}
@@ -1022,9 +838,9 @@ func (m *UserMutation) ResetOptionalCity() {
 }
 
 // AddFriendListIDs adds the "friend_list" edge to the User entity by ids.
-func (m *UserMutation) AddFriendListIDs(ids ...uuid.UUID) {
+func (m *UserMutation) AddFriendListIDs(ids ...int64) {
 	if m.friend_list == nil {
-		m.friend_list = make(map[uuid.UUID]struct{})
+		m.friend_list = make(map[int64]struct{})
 	}
 	for i := range ids {
 		m.friend_list[ids[i]] = struct{}{}
@@ -1042,9 +858,9 @@ func (m *UserMutation) FriendListCleared() bool {
 }
 
 // RemoveFriendListIDs removes the "friend_list" edge to the User entity by IDs.
-func (m *UserMutation) RemoveFriendListIDs(ids ...uuid.UUID) {
+func (m *UserMutation) RemoveFriendListIDs(ids ...int64) {
 	if m.removedfriend_list == nil {
-		m.removedfriend_list = make(map[uuid.UUID]struct{})
+		m.removedfriend_list = make(map[int64]struct{})
 	}
 	for i := range ids {
 		delete(m.friend_list, ids[i])
@@ -1053,7 +869,7 @@ func (m *UserMutation) RemoveFriendListIDs(ids ...uuid.UUID) {
 }
 
 // RemovedFriendList returns the removed IDs of the "friend_list" edge to the User entity.
-func (m *UserMutation) RemovedFriendListIDs() (ids []uuid.UUID) {
+func (m *UserMutation) RemovedFriendListIDs() (ids []int64) {
 	for id := range m.removedfriend_list {
 		ids = append(ids, id)
 	}
@@ -1061,7 +877,7 @@ func (m *UserMutation) RemovedFriendListIDs() (ids []uuid.UUID) {
 }
 
 // FriendListIDs returns the "friend_list" edge IDs in the mutation.
-func (m *UserMutation) FriendListIDs() (ids []uuid.UUID) {
+func (m *UserMutation) FriendListIDs() (ids []int64) {
 	for id := range m.friend_list {
 		ids = append(ids, id)
 	}
@@ -1094,13 +910,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m.created_at != nil {
-		fields = append(fields, user.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, user.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 4)
 	if m.first_name != nil {
 		fields = append(fields, user.FieldFirstName)
 	}
@@ -1121,10 +931,6 @@ func (m *UserMutation) Fields() []string {
 // schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case user.FieldCreatedAt:
-		return m.CreatedAt()
-	case user.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case user.FieldFirstName:
 		return m.FirstName()
 	case user.FieldLastName:
@@ -1142,10 +948,6 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case user.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case user.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case user.FieldFirstName:
 		return m.OldFirstName(ctx)
 	case user.FieldLastName:
@@ -1163,20 +965,6 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case user.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case user.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case user.FieldFirstName:
 		v, ok := value.(string)
 		if !ok {
@@ -1263,12 +1051,6 @@ func (m *UserMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
-	case user.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case user.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case user.FieldFirstName:
 		m.ResetFirstName()
 		return nil

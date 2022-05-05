@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -25,12 +24,6 @@ type CityUpdate struct {
 // Where appends a list predicates to the CityUpdate builder.
 func (cu *CityUpdate) Where(ps ...predicate.City) *CityUpdate {
 	cu.mutation.Where(ps...)
-	return cu
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (cu *CityUpdate) SetUpdatedAt(t time.Time) *CityUpdate {
-	cu.mutation.SetUpdatedAt(t)
 	return cu
 }
 
@@ -77,7 +70,6 @@ func (cu *CityUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
-	cu.defaults()
 	if len(cu.hooks) == 0 {
 		if err = cu.check(); err != nil {
 			return 0, err
@@ -132,14 +124,6 @@ func (cu *CityUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (cu *CityUpdate) defaults() {
-	if _, ok := cu.mutation.UpdatedAt(); !ok {
-		v := city.UpdateDefaultUpdatedAt()
-		cu.mutation.SetUpdatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (cu *CityUpdate) check() error {
 	if v, ok := cu.mutation.Name(); ok {
@@ -166,7 +150,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   city.Table,
 			Columns: city.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt64,
 				Column: city.FieldID,
 			},
 		},
@@ -177,13 +161,6 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := cu.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: city.FieldUpdatedAt,
-		})
 	}
 	if value, ok := cu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -229,12 +206,6 @@ type CityUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *CityMutation
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (cuo *CityUpdateOne) SetUpdatedAt(t time.Time) *CityUpdateOne {
-	cuo.mutation.SetUpdatedAt(t)
-	return cuo
 }
 
 // SetName sets the "name" field.
@@ -287,7 +258,6 @@ func (cuo *CityUpdateOne) Save(ctx context.Context) (*City, error) {
 		err  error
 		node *City
 	)
-	cuo.defaults()
 	if len(cuo.hooks) == 0 {
 		if err = cuo.check(); err != nil {
 			return nil, err
@@ -342,14 +312,6 @@ func (cuo *CityUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (cuo *CityUpdateOne) defaults() {
-	if _, ok := cuo.mutation.UpdatedAt(); !ok {
-		v := city.UpdateDefaultUpdatedAt()
-		cuo.mutation.SetUpdatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (cuo *CityUpdateOne) check() error {
 	if v, ok := cuo.mutation.Name(); ok {
@@ -376,7 +338,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 			Table:   city.Table,
 			Columns: city.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt64,
 				Column: city.FieldID,
 			},
 		},
@@ -404,13 +366,6 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := cuo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: city.FieldUpdatedAt,
-		})
 	}
 	if value, ok := cuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

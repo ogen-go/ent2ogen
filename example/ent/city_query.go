@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ogen-go/ent2ogen/example/ent/city"
 	"github.com/ogen-go/ent2ogen/example/ent/predicate"
 )
@@ -85,8 +84,8 @@ func (cq *CityQuery) FirstX(ctx context.Context) *City {
 
 // FirstID returns the first City ID from the query.
 // Returns a *NotFoundError when no City ID was found.
-func (cq *CityQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (cq *CityQuery) FirstID(ctx context.Context) (id int64, err error) {
+	var ids []int64
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -98,7 +97,7 @@ func (cq *CityQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (cq *CityQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (cq *CityQuery) FirstIDX(ctx context.Context) int64 {
 	id, err := cq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -136,8 +135,8 @@ func (cq *CityQuery) OnlyX(ctx context.Context) *City {
 // OnlyID is like Only, but returns the only City ID in the query.
 // Returns a *NotSingularError when more than one City ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (cq *CityQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (cq *CityQuery) OnlyID(ctx context.Context) (id int64, err error) {
+	var ids []int64
 	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -153,7 +152,7 @@ func (cq *CityQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (cq *CityQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (cq *CityQuery) OnlyIDX(ctx context.Context) int64 {
 	id, err := cq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,8 +178,8 @@ func (cq *CityQuery) AllX(ctx context.Context) []*City {
 }
 
 // IDs executes the query and returns a list of City IDs.
-func (cq *CityQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (cq *CityQuery) IDs(ctx context.Context) ([]int64, error) {
+	var ids []int64
 	if err := cq.Select(city.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -188,7 +187,7 @@ func (cq *CityQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cq *CityQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (cq *CityQuery) IDsX(ctx context.Context) []int64 {
 	ids, err := cq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -255,12 +254,12 @@ func (cq *CityQuery) Clone() *CityQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Name string `json:"name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.City.Query().
-//		GroupBy(city.FieldCreatedAt).
+//		GroupBy(city.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -282,11 +281,11 @@ func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Name string `json:"name,omitempty"`
 //	}
 //
 //	client.City.Query().
-//		Select(city.FieldCreatedAt).
+//		Select(city.FieldName).
 //		Scan(ctx, &v)
 //
 func (cq *CityQuery) Select(fields ...string) *CitySelect {
@@ -359,7 +358,7 @@ func (cq *CityQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   city.Table,
 			Columns: city.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt64,
 				Column: city.FieldID,
 			},
 		},

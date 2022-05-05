@@ -6,13 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ogen-go/ent2ogen/example/ent/city"
 )
 
@@ -21,35 +17,6 @@ type CityCreate struct {
 	config
 	mutation *CityMutation
 	hooks    []Hook
-	conflict []sql.ConflictOption
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (cc *CityCreate) SetCreatedAt(t time.Time) *CityCreate {
-	cc.mutation.SetCreatedAt(t)
-	return cc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (cc *CityCreate) SetNillableCreatedAt(t *time.Time) *CityCreate {
-	if t != nil {
-		cc.SetCreatedAt(*t)
-	}
-	return cc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (cc *CityCreate) SetUpdatedAt(t time.Time) *CityCreate {
-	cc.mutation.SetUpdatedAt(t)
-	return cc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (cc *CityCreate) SetNillableUpdatedAt(t *time.Time) *CityCreate {
-	if t != nil {
-		cc.SetUpdatedAt(*t)
-	}
-	return cc
 }
 
 // SetName sets the "name" field.
@@ -79,16 +46,8 @@ func (cc *CityCreate) SetNillableNullableEnum(ce *city.NullableEnum) *CityCreate
 }
 
 // SetID sets the "id" field.
-func (cc *CityCreate) SetID(u uuid.UUID) *CityCreate {
-	cc.mutation.SetID(u)
-	return cc
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (cc *CityCreate) SetNillableID(u *uuid.UUID) *CityCreate {
-	if u != nil {
-		cc.SetID(*u)
-	}
+func (cc *CityCreate) SetID(i int64) *CityCreate {
+	cc.mutation.SetID(i)
 	return cc
 }
 
@@ -103,7 +62,6 @@ func (cc *CityCreate) Save(ctx context.Context) (*City, error) {
 		err  error
 		node *City
 	)
-	cc.defaults()
 	if len(cc.hooks) == 0 {
 		if err = cc.check(); err != nil {
 			return nil, err
@@ -161,30 +119,8 @@ func (cc *CityCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (cc *CityCreate) defaults() {
-	if _, ok := cc.mutation.CreatedAt(); !ok {
-		v := city.DefaultCreatedAt()
-		cc.mutation.SetCreatedAt(v)
-	}
-	if _, ok := cc.mutation.UpdatedAt(); !ok {
-		v := city.DefaultUpdatedAt()
-		cc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := cc.mutation.ID(); !ok {
-		v := city.DefaultID()
-		cc.mutation.SetID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (cc *CityCreate) check() error {
-	if _, ok := cc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "City.created_at"`)}
-	}
-	if _, ok := cc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "City.updated_at"`)}
-	}
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "City.name"`)}
 	}
@@ -217,12 +153,9 @@ func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = int64(id)
 	}
 	return _node, nil
 }
@@ -233,31 +166,14 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: city.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt64,
 				Column: city.FieldID,
 			},
 		}
 	)
-	_spec.OnConflict = cc.conflict
 	if id, ok := cc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if value, ok := cc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: city.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := cc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: city.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
+		_spec.ID.Value = id
 	}
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -286,296 +202,10 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.City.Create().
-//		SetCreatedAt(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.CityUpsert) {
-//			SetCreatedAt(v+v).
-//		}).
-//		Exec(ctx)
-//
-func (cc *CityCreate) OnConflict(opts ...sql.ConflictOption) *CityUpsertOne {
-	cc.conflict = opts
-	return &CityUpsertOne{
-		create: cc,
-	}
-}
-
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.City.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
-//
-func (cc *CityCreate) OnConflictColumns(columns ...string) *CityUpsertOne {
-	cc.conflict = append(cc.conflict, sql.ConflictColumns(columns...))
-	return &CityUpsertOne{
-		create: cc,
-	}
-}
-
-type (
-	// CityUpsertOne is the builder for "upsert"-ing
-	//  one City node.
-	CityUpsertOne struct {
-		create *CityCreate
-	}
-
-	// CityUpsert is the "OnConflict" setter.
-	CityUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetCreatedAt sets the "created_at" field.
-func (u *CityUpsert) SetCreatedAt(v time.Time) *CityUpsert {
-	u.Set(city.FieldCreatedAt, v)
-	return u
-}
-
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *CityUpsert) UpdateCreatedAt() *CityUpsert {
-	u.SetExcluded(city.FieldCreatedAt)
-	return u
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (u *CityUpsert) SetUpdatedAt(v time.Time) *CityUpsert {
-	u.Set(city.FieldUpdatedAt, v)
-	return u
-}
-
-// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
-func (u *CityUpsert) UpdateUpdatedAt() *CityUpsert {
-	u.SetExcluded(city.FieldUpdatedAt)
-	return u
-}
-
-// SetName sets the "name" field.
-func (u *CityUpsert) SetName(v string) *CityUpsert {
-	u.Set(city.FieldName, v)
-	return u
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *CityUpsert) UpdateName() *CityUpsert {
-	u.SetExcluded(city.FieldName)
-	return u
-}
-
-// SetRequiredEnum sets the "required_enum" field.
-func (u *CityUpsert) SetRequiredEnum(v city.RequiredEnum) *CityUpsert {
-	u.Set(city.FieldRequiredEnum, v)
-	return u
-}
-
-// UpdateRequiredEnum sets the "required_enum" field to the value that was provided on create.
-func (u *CityUpsert) UpdateRequiredEnum() *CityUpsert {
-	u.SetExcluded(city.FieldRequiredEnum)
-	return u
-}
-
-// SetNullableEnum sets the "nullable_enum" field.
-func (u *CityUpsert) SetNullableEnum(v city.NullableEnum) *CityUpsert {
-	u.Set(city.FieldNullableEnum, v)
-	return u
-}
-
-// UpdateNullableEnum sets the "nullable_enum" field to the value that was provided on create.
-func (u *CityUpsert) UpdateNullableEnum() *CityUpsert {
-	u.SetExcluded(city.FieldNullableEnum)
-	return u
-}
-
-// ClearNullableEnum clears the value of the "nullable_enum" field.
-func (u *CityUpsert) ClearNullableEnum() *CityUpsert {
-	u.SetNull(city.FieldNullableEnum)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
-// Using this option is equivalent to using:
-//
-//	client.City.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(city.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-//
-func (u *CityUpsertOne) UpdateNewValues() *CityUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		if _, exists := u.create.mutation.ID(); exists {
-			s.SetIgnore(city.FieldID)
-		}
-		if _, exists := u.create.mutation.CreatedAt(); exists {
-			s.SetIgnore(city.FieldCreatedAt)
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//  client.City.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
-func (u *CityUpsertOne) Ignore() *CityUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *CityUpsertOne) DoNothing() *CityUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the CityCreate.OnConflict
-// documentation for more info.
-func (u *CityUpsertOne) Update(set func(*CityUpsert)) *CityUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&CityUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (u *CityUpsertOne) SetCreatedAt(v time.Time) *CityUpsertOne {
-	return u.Update(func(s *CityUpsert) {
-		s.SetCreatedAt(v)
-	})
-}
-
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *CityUpsertOne) UpdateCreatedAt() *CityUpsertOne {
-	return u.Update(func(s *CityUpsert) {
-		s.UpdateCreatedAt()
-	})
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (u *CityUpsertOne) SetUpdatedAt(v time.Time) *CityUpsertOne {
-	return u.Update(func(s *CityUpsert) {
-		s.SetUpdatedAt(v)
-	})
-}
-
-// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
-func (u *CityUpsertOne) UpdateUpdatedAt() *CityUpsertOne {
-	return u.Update(func(s *CityUpsert) {
-		s.UpdateUpdatedAt()
-	})
-}
-
-// SetName sets the "name" field.
-func (u *CityUpsertOne) SetName(v string) *CityUpsertOne {
-	return u.Update(func(s *CityUpsert) {
-		s.SetName(v)
-	})
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *CityUpsertOne) UpdateName() *CityUpsertOne {
-	return u.Update(func(s *CityUpsert) {
-		s.UpdateName()
-	})
-}
-
-// SetRequiredEnum sets the "required_enum" field.
-func (u *CityUpsertOne) SetRequiredEnum(v city.RequiredEnum) *CityUpsertOne {
-	return u.Update(func(s *CityUpsert) {
-		s.SetRequiredEnum(v)
-	})
-}
-
-// UpdateRequiredEnum sets the "required_enum" field to the value that was provided on create.
-func (u *CityUpsertOne) UpdateRequiredEnum() *CityUpsertOne {
-	return u.Update(func(s *CityUpsert) {
-		s.UpdateRequiredEnum()
-	})
-}
-
-// SetNullableEnum sets the "nullable_enum" field.
-func (u *CityUpsertOne) SetNullableEnum(v city.NullableEnum) *CityUpsertOne {
-	return u.Update(func(s *CityUpsert) {
-		s.SetNullableEnum(v)
-	})
-}
-
-// UpdateNullableEnum sets the "nullable_enum" field to the value that was provided on create.
-func (u *CityUpsertOne) UpdateNullableEnum() *CityUpsertOne {
-	return u.Update(func(s *CityUpsert) {
-		s.UpdateNullableEnum()
-	})
-}
-
-// ClearNullableEnum clears the value of the "nullable_enum" field.
-func (u *CityUpsertOne) ClearNullableEnum() *CityUpsertOne {
-	return u.Update(func(s *CityUpsert) {
-		s.ClearNullableEnum()
-	})
-}
-
-// Exec executes the query.
-func (u *CityUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for CityCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *CityUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *CityUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
-	if u.create.driver.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: CityUpsertOne.ID is not supported by MySQL driver. Use CityUpsertOne.Exec instead")
-	}
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *CityUpsertOne) IDX(ctx context.Context) uuid.UUID {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
-
 // CityCreateBulk is the builder for creating many City entities in bulk.
 type CityCreateBulk struct {
 	config
 	builders []*CityCreate
-	conflict []sql.ConflictOption
 }
 
 // Save creates the City entities in the database.
@@ -586,7 +216,6 @@ func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
 	for i := range ccb.builders {
 		func(i int, root context.Context) {
 			builder := ccb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CityMutation)
 				if !ok {
@@ -602,7 +231,6 @@ func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
 					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = ccb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, ccb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -615,6 +243,10 @@ func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
 				}
 				mutation.id = &nodes[i].ID
 				mutation.done = true
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int64(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -649,202 +281,6 @@ func (ccb *CityCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (ccb *CityCreateBulk) ExecX(ctx context.Context) {
 	if err := ccb.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.City.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.CityUpsert) {
-//			SetCreatedAt(v+v).
-//		}).
-//		Exec(ctx)
-//
-func (ccb *CityCreateBulk) OnConflict(opts ...sql.ConflictOption) *CityUpsertBulk {
-	ccb.conflict = opts
-	return &CityUpsertBulk{
-		create: ccb,
-	}
-}
-
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.City.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
-//
-func (ccb *CityCreateBulk) OnConflictColumns(columns ...string) *CityUpsertBulk {
-	ccb.conflict = append(ccb.conflict, sql.ConflictColumns(columns...))
-	return &CityUpsertBulk{
-		create: ccb,
-	}
-}
-
-// CityUpsertBulk is the builder for "upsert"-ing
-// a bulk of City nodes.
-type CityUpsertBulk struct {
-	create *CityCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.City.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(city.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-//
-func (u *CityUpsertBulk) UpdateNewValues() *CityUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		for _, b := range u.create.builders {
-			if _, exists := b.mutation.ID(); exists {
-				s.SetIgnore(city.FieldID)
-				return
-			}
-			if _, exists := b.mutation.CreatedAt(); exists {
-				s.SetIgnore(city.FieldCreatedAt)
-			}
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.City.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-//
-func (u *CityUpsertBulk) Ignore() *CityUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *CityUpsertBulk) DoNothing() *CityUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the CityCreateBulk.OnConflict
-// documentation for more info.
-func (u *CityUpsertBulk) Update(set func(*CityUpsert)) *CityUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&CityUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (u *CityUpsertBulk) SetCreatedAt(v time.Time) *CityUpsertBulk {
-	return u.Update(func(s *CityUpsert) {
-		s.SetCreatedAt(v)
-	})
-}
-
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *CityUpsertBulk) UpdateCreatedAt() *CityUpsertBulk {
-	return u.Update(func(s *CityUpsert) {
-		s.UpdateCreatedAt()
-	})
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (u *CityUpsertBulk) SetUpdatedAt(v time.Time) *CityUpsertBulk {
-	return u.Update(func(s *CityUpsert) {
-		s.SetUpdatedAt(v)
-	})
-}
-
-// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
-func (u *CityUpsertBulk) UpdateUpdatedAt() *CityUpsertBulk {
-	return u.Update(func(s *CityUpsert) {
-		s.UpdateUpdatedAt()
-	})
-}
-
-// SetName sets the "name" field.
-func (u *CityUpsertBulk) SetName(v string) *CityUpsertBulk {
-	return u.Update(func(s *CityUpsert) {
-		s.SetName(v)
-	})
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *CityUpsertBulk) UpdateName() *CityUpsertBulk {
-	return u.Update(func(s *CityUpsert) {
-		s.UpdateName()
-	})
-}
-
-// SetRequiredEnum sets the "required_enum" field.
-func (u *CityUpsertBulk) SetRequiredEnum(v city.RequiredEnum) *CityUpsertBulk {
-	return u.Update(func(s *CityUpsert) {
-		s.SetRequiredEnum(v)
-	})
-}
-
-// UpdateRequiredEnum sets the "required_enum" field to the value that was provided on create.
-func (u *CityUpsertBulk) UpdateRequiredEnum() *CityUpsertBulk {
-	return u.Update(func(s *CityUpsert) {
-		s.UpdateRequiredEnum()
-	})
-}
-
-// SetNullableEnum sets the "nullable_enum" field.
-func (u *CityUpsertBulk) SetNullableEnum(v city.NullableEnum) *CityUpsertBulk {
-	return u.Update(func(s *CityUpsert) {
-		s.SetNullableEnum(v)
-	})
-}
-
-// UpdateNullableEnum sets the "nullable_enum" field to the value that was provided on create.
-func (u *CityUpsertBulk) UpdateNullableEnum() *CityUpsertBulk {
-	return u.Update(func(s *CityUpsert) {
-		s.UpdateNullableEnum()
-	})
-}
-
-// ClearNullableEnum clears the value of the "nullable_enum" field.
-func (u *CityUpsertBulk) ClearNullableEnum() *CityUpsertBulk {
-	return u.Update(func(s *CityUpsert) {
-		s.ClearNullableEnum()
-	})
-}
-
-// Exec executes the query.
-func (u *CityUpsertBulk) Exec(ctx context.Context) error {
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the CityCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for CityCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *CityUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

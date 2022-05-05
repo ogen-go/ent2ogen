@@ -6,12 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ogen-go/ent2ogen/example/ent/city"
 	"github.com/ogen-go/ent2ogen/example/ent/predicate"
 	"github.com/ogen-go/ent2ogen/example/ent/user"
@@ -27,12 +25,6 @@ type UserUpdate struct {
 // Where appends a list predicates to the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.Where(ps...)
-	return uu
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
-	uu.mutation.SetUpdatedAt(t)
 	return uu
 }
 
@@ -75,7 +67,7 @@ func (uu *UserUpdate) ClearOptionalNullableBool() *UserUpdate {
 }
 
 // SetRequiredCityID sets the "required_city" edge to the City entity by ID.
-func (uu *UserUpdate) SetRequiredCityID(id uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) SetRequiredCityID(id int64) *UserUpdate {
 	uu.mutation.SetRequiredCityID(id)
 	return uu
 }
@@ -86,13 +78,13 @@ func (uu *UserUpdate) SetRequiredCity(c *City) *UserUpdate {
 }
 
 // SetOptionalCityID sets the "optional_city" edge to the City entity by ID.
-func (uu *UserUpdate) SetOptionalCityID(id uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) SetOptionalCityID(id int64) *UserUpdate {
 	uu.mutation.SetOptionalCityID(id)
 	return uu
 }
 
 // SetNillableOptionalCityID sets the "optional_city" edge to the City entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableOptionalCityID(id *uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) SetNillableOptionalCityID(id *int64) *UserUpdate {
 	if id != nil {
 		uu = uu.SetOptionalCityID(*id)
 	}
@@ -105,14 +97,14 @@ func (uu *UserUpdate) SetOptionalCity(c *City) *UserUpdate {
 }
 
 // AddFriendListIDs adds the "friend_list" edge to the User entity by IDs.
-func (uu *UserUpdate) AddFriendListIDs(ids ...uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) AddFriendListIDs(ids ...int64) *UserUpdate {
 	uu.mutation.AddFriendListIDs(ids...)
 	return uu
 }
 
 // AddFriendList adds the "friend_list" edges to the User entity.
 func (uu *UserUpdate) AddFriendList(u ...*User) *UserUpdate {
-	ids := make([]uuid.UUID, len(u))
+	ids := make([]int64, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -143,14 +135,14 @@ func (uu *UserUpdate) ClearFriendList() *UserUpdate {
 }
 
 // RemoveFriendListIDs removes the "friend_list" edge to User entities by IDs.
-func (uu *UserUpdate) RemoveFriendListIDs(ids ...uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) RemoveFriendListIDs(ids ...int64) *UserUpdate {
 	uu.mutation.RemoveFriendListIDs(ids...)
 	return uu
 }
 
 // RemoveFriendList removes "friend_list" edges to User entities.
 func (uu *UserUpdate) RemoveFriendList(u ...*User) *UserUpdate {
-	ids := make([]uuid.UUID, len(u))
+	ids := make([]int64, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -163,7 +155,6 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
-	uu.defaults()
 	if len(uu.hooks) == 0 {
 		if err = uu.check(); err != nil {
 			return 0, err
@@ -218,14 +209,6 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (uu *UserUpdate) defaults() {
-	if _, ok := uu.mutation.UpdatedAt(); !ok {
-		v := user.UpdateDefaultUpdatedAt()
-		uu.mutation.SetUpdatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (uu *UserUpdate) check() error {
 	if v, ok := uu.mutation.FirstName(); ok {
@@ -250,7 +233,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt64,
 				Column: user.FieldID,
 			},
 		},
@@ -261,13 +244,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := uu.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldUpdatedAt,
-		})
 	}
 	if value, ok := uu.mutation.FirstName(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -312,7 +288,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: city.FieldID,
 				},
 			},
@@ -328,7 +304,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: city.FieldID,
 				},
 			},
@@ -347,7 +323,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: city.FieldID,
 				},
 			},
@@ -363,7 +339,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: city.FieldID,
 				},
 			},
@@ -382,7 +358,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},
@@ -398,7 +374,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},
@@ -417,7 +393,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},
@@ -444,12 +420,6 @@ type UserUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetUpdatedAt(t)
-	return uuo
 }
 
 // SetFirstName sets the "first_name" field.
@@ -491,7 +461,7 @@ func (uuo *UserUpdateOne) ClearOptionalNullableBool() *UserUpdateOne {
 }
 
 // SetRequiredCityID sets the "required_city" edge to the City entity by ID.
-func (uuo *UserUpdateOne) SetRequiredCityID(id uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetRequiredCityID(id int64) *UserUpdateOne {
 	uuo.mutation.SetRequiredCityID(id)
 	return uuo
 }
@@ -502,13 +472,13 @@ func (uuo *UserUpdateOne) SetRequiredCity(c *City) *UserUpdateOne {
 }
 
 // SetOptionalCityID sets the "optional_city" edge to the City entity by ID.
-func (uuo *UserUpdateOne) SetOptionalCityID(id uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetOptionalCityID(id int64) *UserUpdateOne {
 	uuo.mutation.SetOptionalCityID(id)
 	return uuo
 }
 
 // SetNillableOptionalCityID sets the "optional_city" edge to the City entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableOptionalCityID(id *uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetNillableOptionalCityID(id *int64) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetOptionalCityID(*id)
 	}
@@ -521,14 +491,14 @@ func (uuo *UserUpdateOne) SetOptionalCity(c *City) *UserUpdateOne {
 }
 
 // AddFriendListIDs adds the "friend_list" edge to the User entity by IDs.
-func (uuo *UserUpdateOne) AddFriendListIDs(ids ...uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddFriendListIDs(ids ...int64) *UserUpdateOne {
 	uuo.mutation.AddFriendListIDs(ids...)
 	return uuo
 }
 
 // AddFriendList adds the "friend_list" edges to the User entity.
 func (uuo *UserUpdateOne) AddFriendList(u ...*User) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(u))
+	ids := make([]int64, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -559,14 +529,14 @@ func (uuo *UserUpdateOne) ClearFriendList() *UserUpdateOne {
 }
 
 // RemoveFriendListIDs removes the "friend_list" edge to User entities by IDs.
-func (uuo *UserUpdateOne) RemoveFriendListIDs(ids ...uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveFriendListIDs(ids ...int64) *UserUpdateOne {
 	uuo.mutation.RemoveFriendListIDs(ids...)
 	return uuo
 }
 
 // RemoveFriendList removes "friend_list" edges to User entities.
 func (uuo *UserUpdateOne) RemoveFriendList(u ...*User) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(u))
+	ids := make([]int64, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -586,7 +556,6 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
-	uuo.defaults()
 	if len(uuo.hooks) == 0 {
 		if err = uuo.check(); err != nil {
 			return nil, err
@@ -641,14 +610,6 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (uuo *UserUpdateOne) defaults() {
-	if _, ok := uuo.mutation.UpdatedAt(); !ok {
-		v := user.UpdateDefaultUpdatedAt()
-		uuo.mutation.SetUpdatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (uuo *UserUpdateOne) check() error {
 	if v, ok := uuo.mutation.FirstName(); ok {
@@ -673,7 +634,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt64,
 				Column: user.FieldID,
 			},
 		},
@@ -701,13 +662,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := uuo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldUpdatedAt,
-		})
 	}
 	if value, ok := uuo.mutation.FirstName(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -752,7 +706,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: city.FieldID,
 				},
 			},
@@ -768,7 +722,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: city.FieldID,
 				},
 			},
@@ -787,7 +741,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: city.FieldID,
 				},
 			},
@@ -803,7 +757,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: city.FieldID,
 				},
 			},
@@ -822,7 +776,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},
@@ -838,7 +792,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},
@@ -857,7 +811,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt64,
 					Column: user.FieldID,
 				},
 			},

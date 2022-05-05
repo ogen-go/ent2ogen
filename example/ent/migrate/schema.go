@@ -10,9 +10,7 @@ import (
 var (
 	// CitiesColumns holds the columns for the "cities" table.
 	CitiesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "required_enum", Type: field.TypeEnum, Enums: []string{"a", "b"}},
 		{Name: "nullable_enum", Type: field.TypeEnum, Nullable: true, Enums: []string{"c", "d"}},
@@ -25,15 +23,13 @@ var (
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
 		{Name: "user_name", Type: field.TypeString, Unique: true},
 		{Name: "optional_nullable_bool", Type: field.TypeBool, Nullable: true},
-		{Name: "user_required_city", Type: field.TypeUUID},
-		{Name: "user_optional_city", Type: field.TypeUUID, Nullable: true},
+		{Name: "user_required_city", Type: field.TypeInt64},
+		{Name: "user_optional_city", Type: field.TypeInt64, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -43,13 +39,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_cities_required_city",
-				Columns:    []*schema.Column{UsersColumns[7]},
+				Columns:    []*schema.Column{UsersColumns[5]},
 				RefColumns: []*schema.Column{CitiesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "users_cities_optional_city",
-				Columns:    []*schema.Column{UsersColumns[8]},
+				Columns:    []*schema.Column{UsersColumns[6]},
 				RefColumns: []*schema.Column{CitiesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -57,8 +53,8 @@ var (
 	}
 	// UserFriendListColumns holds the columns for the "user_friend_list" table.
 	UserFriendListColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeUUID},
-		{Name: "friend_list_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeInt64},
+		{Name: "friend_list_id", Type: field.TypeInt64},
 	}
 	// UserFriendListTable holds the schema information for the "user_friend_list" table.
 	UserFriendListTable = &schema.Table{

@@ -7,11 +7,11 @@ import openapi "{{ $cfg.OgenPackage }}"
 
 {{- range $_, $m := $cfg.Mappings }}
 
-type {{ $m.From.Name }}Slice []*{{ $m.From.Name }}
+type {{ $m.DBType.Name }}Slice []*{{ $m.DBType.Name }}
 
 {{ $m.Comment }}
-func (s {{ $m.From.Name }}Slice) ToOpenAPI() (_ []openapi.{{ $m.To.Name }}, err error) {
-    result := make([]openapi.{{ $m.To.Name }}, len(s))
+func (s {{ $m.DBType.Name }}Slice) ToOpenAPI() (_ []openapi.{{ $m.APIType.Name }}, err error) {
+    result := make([]openapi.{{ $m.APIType.Name }}, len(s))
     for i, v := range s {
         result[i], err = v.ToOpenAPI()
         if err != nil {
@@ -23,47 +23,42 @@ func (s {{ $m.From.Name }}Slice) ToOpenAPI() (_ []openapi.{{ $m.To.Name }}, err 
 }
 
 {{ $m.Comment }}
-func (e *{{ $m.From.Name }}) ToOpenAPI() (t openapi.{{ $m.To.Name }}, err error) {
-    {{- range $f := $m.FieldMappings }}
-        {{- $entField  := $f.From }}
-        {{- $ogenField := $f.To }}
-
-        {{- if $entField.Nillable }}
-        if e.{{ $entField.StructField }} != nil {
-            {{ assign $ogenField $entField }}
+func (e *{{ $m.DBType.Name }}) ToOpenAPI() (t openapi.{{ $m.APIType.Name }}, err error) {
+    {{- range $fm := $m.FieldMappings }}
+        {{- if $fm.DBField.Nillable }}
+        if e.{{ $fm.DBField.StructField }} != nil {
+            {{ assign $fm.APIField $fm.DBField }}
         }
         {{- else }}
-        {{ assign $ogenField $entField }}
+        {{ assign $fm.APIField $fm.DBField }}
         {{- end }}
     {{- end }}
 
-    {{- range $e := $m.EdgeMappings }}
-    // Edge '{{ $e.From.Name }}'.
+    {{- range $em := $m.EdgeMappings }}
+    // Edge '{{ $em.DBEdge.Name }}'.
     {
-        {{- $edge  := $e.From }}
-        {{- $field := $e.To }}
-        v, err := e.Edges.{{ $edge.StructField }}OrErr()
+        v, err := e.Edges.{{ $em.DBEdge.StructField }}OrErr()
         if err == nil {
-            {{- if $edge.Unique }}
+            {{- if $em.DBEdge.Unique }}
                 converted, err := v.ToOpenAPI()
             {{- else }}
-                converted, err := {{ $edge.Type.Name }}Slice(v).ToOpenAPI()
+                converted, err := {{ $em.DBEdge.Type.Name }}Slice(v).ToOpenAPI()
             {{- end }}
             if err != nil {
-                return t, fmt.Errorf("convert '{{ $edge.Name }}' edge: %w", err)
+                return t, fmt.Errorf("convert '{{ $em.DBEdge.Name }}' edge: %w", err)
             }
 
-            {{- if $edge.Optional }}
-                {{- if $edge.Unique }}
-                t.{{ $field.Name }}.SetTo(converted)
+            {{- if $em.DBEdge.Optional }}
+                {{- if $em.DBEdge.Unique }}
+                t.{{ $em.APIField.Name }}.SetTo(converted)
                 {{- else }}
-                t.{{ $field.Name }} = converted
+                t.{{ $em.APIField.Name }} = converted
                 {{- end }}
             {{- else }}
-                t.{{ $field.Name }} = converted
+                t.{{ $em.APIField.Name }} = converted
             {{- end }}
-        } else {{ if $edge.Optional }}if !IsNotFound(err){{ end }} {
-            return t, fmt.Errorf("load '{{ $edge.Name }}' edge: %w", err)
+        } else {{ if $em.DBEdge.Optional }}if !IsNotFound(err){{ end }} {
+            return t, fmt.Errorf("load '{{ $em.DBEdge.Name }}' edge: %w", err)
         }
     }
     {{- end }}

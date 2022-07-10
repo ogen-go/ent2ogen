@@ -123,7 +123,7 @@ func (m *Mapping) lookupField(name string) (*gen.Field, bool, error) {
 		return matches[0], true, nil
 
 	default:
-		var names []string
+		names := make([]string, 0, len(matches))
 		for _, m := range matches {
 			names = append(names, m.Name)
 		}
@@ -188,7 +188,7 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 			return fmt.Errorf("enum mismatch")
 		}
 
-		dbEnums := map[string]gen.Enum{}
+		dbEnums := make(map[string]gen.Enum, len(entField.Enums))
 		for _, enum := range entField.Enums {
 			dbEnums[enum.Value] = enum
 		}
@@ -251,7 +251,7 @@ func (m *Mapping) lookupEdge(name string) (*gen.Edge, bool, error) {
 		return matches[0], true, nil
 
 	default:
-		var names []string
+		names := make([]string, 0, len(matches))
 		for _, m := range matches {
 			names = append(names, m.Name)
 		}

@@ -13,8 +13,8 @@ import (
 
 // Mapping is used to render templates.
 type Mapping struct {
-	DBType        *gen.Type
-	APIType       *ir.Type
+	From          *gen.Type
+	To            *ir.Type
 	FieldMappings []FieldMapping
 	EdgeMappings  []EdgeMapping
 
@@ -22,19 +22,19 @@ type Mapping struct {
 }
 
 type FieldMapping struct {
-	DBField  *gen.Field
-	APIField *ir.Field
-	Enums    []EnumMapping // only for enum fields
+	From  *gen.Field
+	To    *ir.Field
+	Enums []EnumMapping // only for enum fields
 }
 
 type EnumMapping struct {
-	DBEnum  gen.Enum
-	APIEnum *ir.EnumVariant
+	From gen.Enum
+	To   *ir.EnumVariant
 }
 
 type EdgeMapping struct {
-	DBEdge   *gen.Edge
-	APIField *ir.Field
+	From *gen.Edge
+	To   *ir.Field
 }
 
 func (e *Extension) createMapping(from *gen.Type, to *ir.Type) error {
@@ -44,9 +44,9 @@ func (e *Extension) createMapping(from *gen.Type, to *ir.Type) error {
 
 	e.recur[from] = struct{}{}
 	m := &Mapping{
-		DBType:  from,
-		APIType: to,
-		ext:     e,
+		From: from,
+		To:   to,
+		ext:  e,
 	}
 
 	if err := m.checkCompatibility(); err != nil {
@@ -58,11 +58,11 @@ func (e *Extension) createMapping(from *gen.Type, to *ir.Type) error {
 }
 
 func (m *Mapping) checkCompatibility() error {
-	if m.APIType.Kind != ir.KindStruct {
+	if m.To.Kind != ir.KindStruct {
 		return fmt.Errorf("schema must be an object")
 	}
 
-	for _, field := range m.APIType.Fields {
+	for _, field := range m.To.Fields {
 		if field.Spec == nil {
 			return fmt.Errorf("field %q has no spec", field.Name)
 		}
@@ -210,16 +210,16 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 			}
 
 			enumMappings = append(enumMappings, EnumMapping{
-				DBEnum:  dbEnum,
-				APIEnum: ogenEnum,
+				From: dbEnum,
+				To:   ogenEnum,
 			})
 		}
 	}
 
 	m.FieldMappings = append(m.FieldMappings, FieldMapping{
-		DBField:  entField,
-		APIField: ogenField,
-		Enums:    enumMappings,
+		From:  entField,
+		To:    ogenField,
+		Enums: enumMappings,
 	})
 
 	return nil
@@ -227,7 +227,7 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 
 func (m *Mapping) lookupEdge(name string) (*gen.Edge, bool, error) {
 	var matches []*gen.Edge
-	for _, e := range m.DBType.Edges {
+	for _, e := range m.From.Edges {
 		ant, err := annotation(e.Annotations)
 		if err != nil {
 			return nil, false, fmt.Errorf("read edge %q annotation: %w", e.Name, err)
@@ -299,8 +299,8 @@ func (m *Mapping) createEdgeMapping(edge *gen.Edge, field *ir.Field) error {
 	}
 
 	m.EdgeMappings = append(m.EdgeMappings, EdgeMapping{
-		DBEdge:   edge,
-		APIField: field,
+		From: edge,
+		To:   field,
 	})
 
 	return nil
@@ -308,9 +308,9 @@ func (m *Mapping) createEdgeMapping(edge *gen.Edge, field *ir.Field) error {
 
 // EntFields returns ent schema fields.
 func (m *Mapping) EntFields() []*gen.Field {
-	fields := make([]*gen.Field, 0, len(m.DBType.Fields)+1)
-	fields = append(fields, m.DBType.ID)
-	fields = append(fields, m.DBType.Fields...)
+	fields := make([]*gen.Field, 0, len(m.From.Fields)+1)
+	fields = append(fields, m.From.ID)
+	fields = append(fields, m.From.Fields...)
 	return fields
 }
 
@@ -321,37 +321,42 @@ func (m *Mapping) Comment() string {
 
 	var b strings.Builder
 	b.WriteString("// Following edges must be loaded:\n")
-	m.comment(2, &walkpath{}, &b)
+	m.comment(2, map[*gen.Type]struct{}{}, &b)
 	return strings.TrimSpace(b.String())
 }
 
-func (m *Mapping) comment(indent int, path *walkpath, b *strings.Builder) {
+func (m *Mapping) comment(indent int, walk map[*gen.Type]struct{}, b *strings.Builder) {
 	wr := func(s string) {
 		space := strings.Repeat(" ", indent)
 		b.WriteString("// " + space + s + "\n")
 	}
 
 	for _, e := range m.EdgeMappings {
-		tm, ok := m.ext.cfg.Mappings[e.DBEdge.Type]
+		tm, ok := m.ext.cfg.Mappings[e.From.Type]
 		if !ok {
 			panic("unreachable")
 		}
 
 		if len(tm.EdgeMappings) == 0 {
-			wr(e.DBEdge.Name)
+			wr(e.From.Name)
 			continue
 		}
 
-		if path.has(e.DBEdge.Type) {
-			if !e.DBEdge.Optional {
-				log.Fatalf("type %q edge %q infinite recursion", m.DBType.Name, e.DBEdge.Name)
+		if _, ok := walk[e.From.Type]; ok {
+			if !e.From.Optional {
+				log.Fatalf("type %q edge %q infinite recursion", m.From.Name, e.From.Name)
 			}
 
-			wr(e.DBEdge.Name + "...")
+			wr(e.From.Name + "...")
 			continue
 		}
 
-		wr(e.DBEdge.Name + ":")
-		tm.comment(indent+2, path.append(tm.DBType), b)
+		func() {
+			walk[e.From.Type] = struct{}{}
+			defer func() { delete(walk, e.From.Type) }()
+
+			wr(e.From.Name + ":")
+			tm.comment(indent+2, walk, b)
+		}()
 	}
 }

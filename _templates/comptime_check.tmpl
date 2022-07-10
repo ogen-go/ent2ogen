@@ -8,23 +8,23 @@ import openapi "{{ $cfg.OgenPackage }}"
 {{- range $_, $m := $cfg.Mappings }}
 func _() {
     _ = struct{
-        {{- range $f := $m.APIType.Fields }}
+        {{- range $f := $m.To.Fields }}
         {{ $f.Name }} {{ rendertype $f.Type }}
         {{- end }}
-    }(openapi.{{ $m.APIType.Name }}{})
+    }(openapi.{{ $m.To.Name }}{})
 
-    {{- range $f := $m.FieldMappings }}{{ if eq $f.DBField.Type.Type.ConstName "TypeEnum" }}
-    {{- $dst := $f.APIField.Type }}
-    {{- if $dst.IsGeneric }}{{ $dst = $dst.GenericOf }}{{ end }}
-    {{- if eq $dst.Primitive.String "string" }}
+    {{- range $f := $m.FieldMappings }}{{ if eq $f.From.Type.Type.ConstName "TypeEnum" }}
+    {{- $srcT := $f.To.Type }}
+    {{- if $srcT.IsGeneric }}{{ $srcT = $srcT.GenericOf }}{{ end }}
+    {{- if eq $srcT.Primitive.String "string" }}
         {{- range $e := $f.Enums }}
         _ = map[bool]struct{}{
-            string(openapi.{{ $e.APIEnum.Name }}) == string({{ $m.DBType.Package }}.{{ $e.DBEnum.Name }}): {},
+            string(openapi.{{ $e.To.Name }}) == string({{ $m.From.Package }}.{{ $e.From.Name }}): {},
             false: {},
         }
         {{- end }}
     {{- else }}
-        {{- errorf "unsupported enum primitive type: %s" $dst.Primitive }}
+        {{- errorf "unsupported enum primitive type: %s" $srcT.Primitive }}
     {{- end }}
     {{- end }}{{ end }}
 }

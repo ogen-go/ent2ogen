@@ -28,7 +28,6 @@ func (s City) Validate() error {
 			return err
 		}
 		return nil
-		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "nullable_enum",
@@ -85,7 +84,6 @@ func (s User) Validate() error {
 				return err
 			}
 		}
-		return nil
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{

@@ -4,6 +4,7 @@ package openapi
 
 import (
 	"io"
+	"mime"
 	"net/http"
 
 	"github.com/go-faster/errors"
@@ -16,18 +17,18 @@ import (
 func decodeWhoamiResponse(resp *http.Response, span trace.Span) (res User, err error) {
 	switch resp.StatusCode {
 	case 200:
-		switch ct := resp.Header.Get("Content-Type"); ct {
-		case "application/json":
-			buf := getBuf()
-			defer putBuf(buf)
-			if _, err := io.Copy(buf, resp.Body); err != nil {
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
 				return res, err
 			}
 
-			d := jx.GetDecoder()
-			defer jx.PutDecoder(d)
-			d.ResetBytes(buf.Bytes())
-
+			d := jx.DecodeBytes(b)
 			var response User
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
@@ -37,25 +38,24 @@ func decodeWhoamiResponse(resp *http.Response, span trace.Span) (res User, err e
 			}(); err != nil {
 				return res, err
 			}
-
 			return response, nil
 		default:
 			return res, validate.InvalidContentType(ct)
 		}
 	default:
 		defRes, err := func() (res ErrorResponseStatusCode, err error) {
-			switch ct := resp.Header.Get("Content-Type"); ct {
-			case "application/json":
-				buf := getBuf()
-				defer putBuf(buf)
-				if _, err := io.Copy(buf, resp.Body); err != nil {
+			ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+			if err != nil {
+				return res, errors.Wrap(err, "parse media type")
+			}
+			switch {
+			case ct == "application/json":
+				b, err := io.ReadAll(resp.Body)
+				if err != nil {
 					return res, err
 				}
 
-				d := jx.GetDecoder()
-				defer jx.PutDecoder(d)
-				d.ResetBytes(buf.Bytes())
-
+				d := jx.DecodeBytes(b)
 				var response ErrorResponse
 				if err := func() error {
 					if err := response.Decode(d); err != nil {
@@ -65,7 +65,6 @@ func decodeWhoamiResponse(resp *http.Response, span trace.Span) (res User, err e
 				}(); err != nil {
 					return res, err
 				}
-
 				return ErrorResponseStatusCode{
 					StatusCode: resp.StatusCode,
 					Response:   response,

@@ -16,14 +16,13 @@ func encodeWhoamiResponse(response User, w http.ResponseWriter, span trace.Span)
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 	e := jx.GetEncoder()
-	defer jx.PutEncoder(e)
 
 	response.Encode(e)
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
-
 	return nil
+
 }
 func encodeErrorResponse(response ErrorResponseStatusCode, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -35,12 +34,11 @@ func encodeErrorResponse(response ErrorResponseStatusCode, w http.ResponseWriter
 		span.SetStatus(codes.Ok, st)
 	}
 	e := jx.GetEncoder()
-	defer jx.PutEncoder(e)
 
 	response.Response.Encode(e)
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
-
 	return nil
+
 }

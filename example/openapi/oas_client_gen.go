@@ -75,7 +75,6 @@ func (c *Client) Whoami(ctx context.Context) (res User, err error) {
 	u.Path += "/whoami"
 
 	r := ht.NewRequest(ctx, "GET", u, nil)
-	defer ht.PutRequest(r)
 
 	resp, err := c.cfg.Client.Do(r)
 	if err != nil {

@@ -3,7 +3,7 @@ module github.com/ogen-go/ent2ogen
 go 1.18
 
 require (
-	entgo.io/ent v0.10.1
+	entgo.io/ent v0.11.0
 	github.com/go-faster/errors v0.6.1
 	github.com/go-faster/jx v0.38.0
 	github.com/ogen-go/ogen v0.43.1

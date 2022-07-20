@@ -3,7 +3,7 @@ module github.com/ogen-go/ent2ogen
 go 1.18
 
 require (
-	entgo.io/ent v0.11.0
+	entgo.io/ent v0.11.1
 	github.com/go-faster/errors v0.6.1
 	github.com/go-faster/jx v0.38.1
 	github.com/ogen-go/ogen v0.43.2
@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.4.3 // indirect
+	ariga.io/atlas v0.5.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/go-json-experiment/json v0.0.0-20220620174529-794765d0bd38 // indirect

@@ -1,7 +1,7 @@
-ariga.io/atlas v0.4.3 h1:X1XC6P5myi7BxWKkmhJf4LsIcmXhkGoymI+GOELb/3s=
-ariga.io/atlas v0.4.3/go.mod h1:ofVetkJqlaWle3mvYmaS2uyFGFcc7dSq436tmxa/Mzk=
-entgo.io/ent v0.11.0 h1:4G5GKmXOpHnIbWIkY2nZvNmuXmHpKWC4SYV1bqfoyZY=
-entgo.io/ent v0.11.0/go.mod h1:Q8cDTupeHjWoIo0K8NyTyV0B9FVrFNSM9AnwnLt22KQ=
+ariga.io/atlas v0.5.0 h1:9HZclkGI/xsW7IqKZLIMfnUJ0Nkgm1X1nysq4SMkKsg=
+ariga.io/atlas v0.5.0/go.mod h1:ofVetkJqlaWle3mvYmaS2uyFGFcc7dSq436tmxa/Mzk=
+entgo.io/ent v0.11.1 h1:im67R+2W3Nee2bNS2YnoYz8oAF0Qz4AOlIvKRIAEISY=
+entgo.io/ent v0.11.1/go.mod h1:X5b1YfMayrRTgKGO//8IqpL7XJx0uqdeReEkxNpXROA=
 github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20OEh60=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=

@@ -6,7 +6,7 @@ require (
 	entgo.io/ent v0.11.1
 	github.com/go-faster/errors v0.6.1
 	github.com/go-faster/jx v0.38.1
-	github.com/ogen-go/ogen v0.44.0
+	github.com/ogen-go/ogen v0.45.0
 	go.opentelemetry.io/otel v1.8.0
 	go.opentelemetry.io/otel/metric v0.31.0
 	go.opentelemetry.io/otel/trace v1.8.0
@@ -17,7 +17,7 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/go-faster/yamlx v0.2.0 // indirect
+	github.com/go-faster/yamlx v0.2.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect

@@ -49,8 +49,7 @@ type UserEdges struct {
 func (e UserEdges) RequiredCityOrErr() (*City, error) {
 	if e.loadedTypes[0] {
 		if e.RequiredCity == nil {
-			// The edge required_city was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: city.Label}
 		}
 		return e.RequiredCity, nil
@@ -63,8 +62,7 @@ func (e UserEdges) RequiredCityOrErr() (*City, error) {
 func (e UserEdges) OptionalCityOrErr() (*City, error) {
 	if e.loadedTypes[1] {
 		if e.OptionalCity == nil {
-			// The edge optional_city was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: city.Label}
 		}
 		return e.OptionalCity, nil

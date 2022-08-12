@@ -39,8 +39,8 @@ func main() {
 	}
 
 	ex, err := ent2ogen.NewExtension(ent2ogen.ExtensionConfig{
-		API:          g.API(),
-		Types:        g.Types(),
+		API:         g.API(),
+		Types:       g.Types(),
 		OgenPackage: "github.com/ogen-go/ent2ogen/example/openapi",
 	})
 	if err != nil {

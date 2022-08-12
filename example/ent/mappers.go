@@ -34,12 +34,13 @@ func (e *City) ToOpenAPI() (t openapi.City, err error) {
 type UserSlice []*User
 
 // Following edges must be loaded:
-//   required_city
-//   optional_city
-//   friend_list:
-//     required_city
-//     optional_city
-//     friend_list...
+//
+//	required_city
+//	optional_city
+//	friend_list:
+//	  required_city
+//	  optional_city
+//	  friend_list...
 func (s UserSlice) ToOpenAPI() (_ []openapi.User, err error) {
 	result := make([]openapi.User, len(s))
 	for i, v := range s {
@@ -53,12 +54,13 @@ func (s UserSlice) ToOpenAPI() (_ []openapi.User, err error) {
 }
 
 // Following edges must be loaded:
-//   required_city
-//   optional_city
-//   friend_list:
-//     required_city
-//     optional_city
-//     friend_list...
+//
+//	required_city
+//	optional_city
+//	friend_list:
+//	  required_city
+//	  optional_city
+//	  friend_list...
 func (e *User) ToOpenAPI() (t openapi.User, err error) {
 	t.ID = e.ID
 	t.FirstName = e.FirstName

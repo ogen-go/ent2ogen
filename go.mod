@@ -5,7 +5,7 @@ go 1.18
 require (
 	entgo.io/ent v0.11.2
 	github.com/go-faster/errors v0.6.1
-	github.com/go-faster/jx v0.39.0
+	github.com/go-faster/jx v0.40.0
 	github.com/ogen-go/ogen v0.46.2
 	go.opentelemetry.io/otel v1.10.0
 	go.opentelemetry.io/otel/metric v0.31.0

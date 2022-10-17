@@ -3,6 +3,7 @@
 package openapi
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -12,10 +13,14 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	ht "github.com/ogen-go/ogen/http"
+	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/otelogen"
 )
 
-// HandleWhoamiRequest handles whoami operation.
+// Allocate option closure once.
+var serverSpanKind = trace.WithSpanKind(trace.SpanKindServer)
+
+// handleWhoamiRequest handles whoami operation.
 //
 // GET /whoami
 func (s *Server) handleWhoamiRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
@@ -26,7 +31,7 @@ func (s *Server) handleWhoamiRequest(args [0]string, w http.ResponseWriter, r *h
 	// Start a span for this request.
 	ctx, span := s.cfg.Tracer.Start(r.Context(), "Whoami",
 		trace.WithAttributes(otelAttrs...),
-		trace.WithSpanKind(trace.SpanKindServer),
+		serverSpanKind,
 	)
 	defer span.End()
 
@@ -49,11 +54,40 @@ func (s *Server) handleWhoamiRequest(args [0]string, w http.ResponseWriter, r *h
 		err error
 	)
 
-	response, err := s.h.Whoami(ctx)
+	var response User
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "Whoami",
+			OperationID:   "whoami",
+			Body:          nil,
+			Params:        map[string]any{},
+			Raw:           r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = struct{}
+			Response = User
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (Response, error) {
+				return s.h.Whoami(ctx)
+			},
+		)
+	} else {
+		response, err = s.h.Whoami(ctx)
+	}
 	if err != nil {
 		recordError("Internal", err)
-		var errRes *ErrorResponseStatusCode
-		if errors.As(err, &errRes) {
+		if errRes, ok := errors.Into[*ErrorResponseStatusCode](err); ok {
 			encodeErrorResponse(*errRes, w, span)
 			return
 		}

@@ -9,12 +9,11 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
-	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ogen-go/ogen/validate"
 )
 
-func decodeWhoamiResponse(resp *http.Response, span trace.Span) (res User, err error) {
+func decodeWhoamiResponse(resp *http.Response) (res User, err error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -37,7 +36,10 @@ func decodeWhoamiResponse(resp *http.Response, span trace.Span) (res User, err e
 				}
 				return nil
 			}(); err != nil {
-				return res, err
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
 			}
 			return response, nil
 		default:
@@ -65,7 +67,10 @@ func decodeWhoamiResponse(resp *http.Response, span trace.Span) (res User, err e
 				}
 				return nil
 			}(); err != nil {
-				return res, err
+				return res, errors.Wrap(err, "decode \"application/json\"")
+			}
+			if err := d.Skip(); err != io.EOF {
+				return res, errors.New("unexpected trailing data")
 			}
 			return ErrorResponseStatusCode{
 				StatusCode: resp.StatusCode,

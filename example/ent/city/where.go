@@ -31,7 +31,7 @@ func IDNEQ(id int64) predicate.City {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int64) predicate.City {
 	return predicate.City(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -42,7 +42,7 @@ func IDIn(ids ...int64) predicate.City {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int64) predicate.City {
 	return predicate.City(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -101,7 +101,7 @@ func NameNEQ(v string) predicate.City {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.City {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -112,7 +112,7 @@ func NameIn(vs ...string) predicate.City {
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.City {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -200,7 +200,7 @@ func RequiredEnumNEQ(v RequiredEnum) predicate.City {
 
 // RequiredEnumIn applies the In predicate on the "required_enum" field.
 func RequiredEnumIn(vs ...RequiredEnum) predicate.City {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -211,7 +211,7 @@ func RequiredEnumIn(vs ...RequiredEnum) predicate.City {
 
 // RequiredEnumNotIn applies the NotIn predicate on the "required_enum" field.
 func RequiredEnumNotIn(vs ...RequiredEnum) predicate.City {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -236,7 +236,7 @@ func NullableEnumNEQ(v NullableEnum) predicate.City {
 
 // NullableEnumIn applies the In predicate on the "nullable_enum" field.
 func NullableEnumIn(vs ...NullableEnum) predicate.City {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -247,7 +247,7 @@ func NullableEnumIn(vs ...NullableEnum) predicate.City {
 
 // NullableEnumNotIn applies the NotIn predicate on the "nullable_enum" field.
 func NullableEnumNotIn(vs ...NullableEnum) predicate.City {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

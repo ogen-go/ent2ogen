@@ -12,9 +12,39 @@ func (s *ErrorResponseStatusCode) Error() string {
 
 // Ref: #/components/schemas/City
 type City struct {
-	Name         string              "json:\"name\""
-	RequiredEnum CityRequiredEnum    "json:\"required_enum\""
-	NullableEnum NilCityNullableEnum "json:\"nullable_enum\""
+	Name         string              `json:"name"`
+	RequiredEnum CityRequiredEnum    `json:"required_enum"`
+	NullableEnum NilCityNullableEnum `json:"nullable_enum"`
+}
+
+// GetName returns the value of Name.
+func (s City) GetName() string {
+	return s.Name
+}
+
+// GetRequiredEnum returns the value of RequiredEnum.
+func (s City) GetRequiredEnum() CityRequiredEnum {
+	return s.RequiredEnum
+}
+
+// GetNullableEnum returns the value of NullableEnum.
+func (s City) GetNullableEnum() NilCityNullableEnum {
+	return s.NullableEnum
+}
+
+// SetName sets the value of Name.
+func (s *City) SetName(val string) {
+	s.Name = val
+}
+
+// SetRequiredEnum sets the value of RequiredEnum.
+func (s *City) SetRequiredEnum(val CityRequiredEnum) {
+	s.RequiredEnum = val
+}
+
+// SetNullableEnum sets the value of NullableEnum.
+func (s *City) SetNullableEnum(val NilCityNullableEnum) {
+	s.NullableEnum = val
 }
 
 type CityNullableEnum string
@@ -32,13 +62,43 @@ const (
 )
 
 type ErrorResponse struct {
-	ErrorMessage string "json:\"error_message\""
+	ErrorMessage string `json:"error_message"`
+}
+
+// GetErrorMessage returns the value of ErrorMessage.
+func (s ErrorResponse) GetErrorMessage() string {
+	return s.ErrorMessage
+}
+
+// SetErrorMessage sets the value of ErrorMessage.
+func (s *ErrorResponse) SetErrorMessage(val string) {
+	s.ErrorMessage = val
 }
 
 // ErrorResponseStatusCode wraps ErrorResponse with StatusCode.
 type ErrorResponseStatusCode struct {
 	StatusCode int
 	Response   ErrorResponse
+}
+
+// GetStatusCode returns the value of StatusCode.
+func (s ErrorResponseStatusCode) GetStatusCode() int {
+	return s.StatusCode
+}
+
+// GetResponse returns the value of Response.
+func (s ErrorResponseStatusCode) GetResponse() ErrorResponse {
+	return s.Response
+}
+
+// SetStatusCode sets the value of StatusCode.
+func (s *ErrorResponseStatusCode) SetStatusCode(val int) {
+	s.StatusCode = val
+}
+
+// SetResponse sets the value of Response.
+func (s *ErrorResponseStatusCode) SetResponse(val ErrorResponse) {
+	s.Response = val
 }
 
 // NewNilCityNullableEnum returns new NilCityNullableEnum with value set to v.
@@ -182,12 +242,92 @@ func (o OptNilBool) Or(d bool) bool {
 
 // Ref: #/components/schemas/User
 type User struct {
-	ID                   int64      "json:\"id\""
-	FirstName            string     "json:\"first_name\""
-	LastName             string     "json:\"last_name\""
-	Username             string     "json:\"username\""
-	OptionalNullableBool OptNilBool "json:\"optional_nullable_bool\""
-	RequiredCity         City       "json:\"required_city\""
-	OptionalCity         OptCity    "json:\"optional_city\""
-	Friends              []User     "json:\"friends\""
+	ID                   int64      `json:"id"`
+	FirstName            string     `json:"first_name"`
+	LastName             string     `json:"last_name"`
+	Username             string     `json:"username"`
+	OptionalNullableBool OptNilBool `json:"optional_nullable_bool"`
+	RequiredCity         City       `json:"required_city"`
+	OptionalCity         OptCity    `json:"optional_city"`
+	Friends              []User     `json:"friends"`
+}
+
+// GetID returns the value of ID.
+func (s User) GetID() int64 {
+	return s.ID
+}
+
+// GetFirstName returns the value of FirstName.
+func (s User) GetFirstName() string {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s User) GetLastName() string {
+	return s.LastName
+}
+
+// GetUsername returns the value of Username.
+func (s User) GetUsername() string {
+	return s.Username
+}
+
+// GetOptionalNullableBool returns the value of OptionalNullableBool.
+func (s User) GetOptionalNullableBool() OptNilBool {
+	return s.OptionalNullableBool
+}
+
+// GetRequiredCity returns the value of RequiredCity.
+func (s User) GetRequiredCity() City {
+	return s.RequiredCity
+}
+
+// GetOptionalCity returns the value of OptionalCity.
+func (s User) GetOptionalCity() OptCity {
+	return s.OptionalCity
+}
+
+// GetFriends returns the value of Friends.
+func (s User) GetFriends() []User {
+	return s.Friends
+}
+
+// SetID sets the value of ID.
+func (s *User) SetID(val int64) {
+	s.ID = val
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *User) SetFirstName(val string) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *User) SetLastName(val string) {
+	s.LastName = val
+}
+
+// SetUsername sets the value of Username.
+func (s *User) SetUsername(val string) {
+	s.Username = val
+}
+
+// SetOptionalNullableBool sets the value of OptionalNullableBool.
+func (s *User) SetOptionalNullableBool(val OptNilBool) {
+	s.OptionalNullableBool = val
+}
+
+// SetRequiredCity sets the value of RequiredCity.
+func (s *User) SetRequiredCity(val City) {
+	s.RequiredCity = val
+}
+
+// SetOptionalCity sets the value of OptionalCity.
+func (s *User) SetOptionalCity(val OptCity) {
+	s.OptionalCity = val
+}
+
+// SetFriends sets the value of Friends.
+func (s *User) SetFriends(val []User) {
+	s.Friends = val
 }

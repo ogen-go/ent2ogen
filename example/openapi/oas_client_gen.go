@@ -18,6 +18,18 @@ import (
 	"github.com/ogen-go/ogen/uri"
 )
 
+type errorHandler interface {
+	NewError(ctx context.Context, err error) ErrorResponseStatusCode
+}
+
+var _ Handler = struct {
+	errorHandler
+	*Client
+}{}
+
+// Allocate option closure once.
+var clientSpanKind = trace.WithSpanKind(trace.SpanKindClient)
+
 // Client implements OAS client.
 type Client struct {
 	serverURL *url.URL
@@ -49,6 +61,21 @@ func NewClient(serverURL string, opts ...Option) (*Client, error) {
 	return c, nil
 }
 
+type serverURLKey struct{}
+
+// WithServerURL sets context key to override server URL.
+func WithServerURL(ctx context.Context, u *url.URL) context.Context {
+	return context.WithValue(ctx, serverURLKey{}, u)
+}
+
+func (c *Client) requestURL(ctx context.Context) *url.URL {
+	u, ok := ctx.Value(serverURLKey{}).(*url.URL)
+	if !ok {
+		return c.serverURL
+	}
+	return u
+}
+
 // Whoami invokes whoami operation.
 //
 // GET /whoami
@@ -70,7 +97,7 @@ func (c *Client) Whoami(ctx context.Context) (res User, err error) {
 	// Start a span for this request.
 	ctx, span := c.cfg.Tracer.Start(ctx, "Whoami",
 		trace.WithAttributes(otelAttrs...),
-		trace.WithSpanKind(trace.SpanKindClient),
+		clientSpanKind,
 	)
 	// Track stage for error reporting.
 	var stage string
@@ -84,11 +111,14 @@ func (c *Client) Whoami(ctx context.Context) (res User, err error) {
 	}()
 
 	stage = "BuildURL"
-	u := uri.Clone(c.serverURL)
+	u := uri.Clone(c.requestURL(ctx))
 	u.Path += "/whoami"
 
 	stage = "EncodeRequest"
-	r := ht.NewRequest(ctx, "GET", u, nil)
+	r, err := ht.NewRequest(ctx, "GET", u, nil)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
 
 	stage = "SendRequest"
 	resp, err := c.cfg.Client.Do(r)
@@ -98,7 +128,7 @@ func (c *Client) Whoami(ctx context.Context) (res User, err error) {
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeWhoamiResponse(resp, span)
+	result, err := decodeWhoamiResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

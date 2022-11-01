@@ -161,7 +161,8 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 	mapping := map[field.Type]tf{
 		field.TypeBool:   {jsonschema.Boolean, ""},
 		field.TypeString: {jsonschema.String, ""},
-		field.TypeInt:    {jsonschema.Integer, "int32"},
+		field.TypeInt:    {jsonschema.Integer, ""},
+		field.TypeInt32:  {jsonschema.Integer, "int32"},
 		field.TypeInt64:  {jsonschema.Integer, "int64"},
 		field.TypeTime:   {jsonschema.String, "date-time"},
 		field.TypeUUID:   {jsonschema.String, "uuid"},

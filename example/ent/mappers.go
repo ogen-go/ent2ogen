@@ -70,43 +70,55 @@ func (e *User) ToOpenAPI() (t openapi.User, err error) {
 		t.OptionalNullableBool.SetTo(*e.OptionalNullableBool)
 	}
 	// Edge 'required_city'.
-	{
+	if err := func() error {
 		v, err := e.Edges.RequiredCityOrErr()
-		if err == nil {
-			converted, err := v.ToOpenAPI()
-			if err != nil {
-				return t, fmt.Errorf("convert 'required_city' edge: %w", err)
-			}
-			t.RequiredCity = converted
-		} else {
-			return t, fmt.Errorf("load 'required_city' edge: %w", err)
+		if err != nil {
+			return fmt.Errorf("load: %w", err)
 		}
+		openapiType, err := v.ToOpenAPI()
+		if err != nil {
+			return fmt.Errorf("convert to openapi: %w", err)
+		}
+		t.RequiredCity = openapiType
+		return nil
+	}(); err != nil {
+		return t, fmt.Errorf("edge 'required_city': %w", err)
 	}
 	// Edge 'optional_city'.
-	{
+	if err := func() error {
 		v, err := e.Edges.OptionalCityOrErr()
-		if err == nil {
-			converted, err := v.ToOpenAPI()
-			if err != nil {
-				return t, fmt.Errorf("convert 'optional_city' edge: %w", err)
+		if err != nil {
+			if IsNotFound(err) {
+				return nil
 			}
-			t.OptionalCity.SetTo(converted)
-		} else if !IsNotFound(err) {
-			return t, fmt.Errorf("load 'optional_city' edge: %w", err)
+			return fmt.Errorf("load: %w", err)
 		}
+		openapiType, err := v.ToOpenAPI()
+		if err != nil {
+			return fmt.Errorf("convert to openapi: %w", err)
+		}
+		t.OptionalCity.SetTo(openapiType)
+		return nil
+	}(); err != nil {
+		return t, fmt.Errorf("edge 'optional_city': %w", err)
 	}
 	// Edge 'friend_list'.
-	{
+	if err := func() error {
 		v, err := e.Edges.FriendListOrErr()
-		if err == nil {
-			converted, err := UserSlice(v).ToOpenAPI()
-			if err != nil {
-				return t, fmt.Errorf("convert 'friend_list' edge: %w", err)
+		if err != nil {
+			if IsNotFound(err) {
+				return nil
 			}
-			t.Friends = converted
-		} else if !IsNotFound(err) {
-			return t, fmt.Errorf("load 'friend_list' edge: %w", err)
+			return fmt.Errorf("load: %w", err)
 		}
+		openapiType, err := UserSlice(v).ToOpenAPI()
+		if err != nil {
+			return fmt.Errorf("convert to openapi: %w", err)
+		}
+		t.Friends = openapiType
+		return nil
+	}(); err != nil {
+		return t, fmt.Errorf("edge 'friend_list': %w", err)
 	}
 	return t, nil
 }

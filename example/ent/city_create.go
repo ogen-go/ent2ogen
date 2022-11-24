@@ -182,27 +182,15 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := cc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: city.FieldName,
-		})
+		_spec.SetField(city.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := cc.mutation.RequiredEnum(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: city.FieldRequiredEnum,
-		})
+		_spec.SetField(city.FieldRequiredEnum, field.TypeEnum, value)
 		_node.RequiredEnum = value
 	}
 	if value, ok := cc.mutation.NullableEnum(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: city.FieldNullableEnum,
-		})
+		_spec.SetField(city.FieldNullableEnum, field.TypeEnum, value)
 		_node.NullableEnum = &value
 	}
 	return _node, _spec

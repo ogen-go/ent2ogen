@@ -235,35 +235,19 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := uc.mutation.FirstName(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldFirstName,
-		})
+		_spec.SetField(user.FieldFirstName, field.TypeString, value)
 		_node.FirstName = value
 	}
 	if value, ok := uc.mutation.LastName(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldLastName,
-		})
+		_spec.SetField(user.FieldLastName, field.TypeString, value)
 		_node.LastName = value
 	}
 	if value, ok := uc.mutation.UserName(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldUserName,
-		})
+		_spec.SetField(user.FieldUserName, field.TypeString, value)
 		_node.UserName = value
 	}
 	if value, ok := uc.mutation.OptionalNullableBool(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldOptionalNullableBool,
-		})
+		_spec.SetField(user.FieldOptionalNullableBool, field.TypeBool, value)
 		_node.OptionalNullableBool = &value
 	}
 	if nodes := uc.mutation.RequiredCityIDs(); len(nodes) > 0 {

@@ -17,9 +17,6 @@ import (
 	"github.com/ogen-go/ogen/otelogen"
 )
 
-// Allocate option closure once.
-var serverSpanKind = trace.WithSpanKind(trace.SpanKindServer)
-
 // handleWhoamiRequest handles whoami operation.
 //
 // GET /whoami
@@ -61,7 +58,7 @@ func (s *Server) handleWhoamiRequest(args [0]string, w http.ResponseWriter, r *h
 			OperationName: "Whoami",
 			OperationID:   "whoami",
 			Body:          nil,
-			Params:        map[string]any{},
+			Params:        middleware.Parameters{},
 			Raw:           r,
 		}
 

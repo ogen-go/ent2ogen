@@ -186,7 +186,7 @@ func (c *CityClient) DeleteOne(ci *City) *CityDeleteOne {
 	return c.DeleteOneID(ci.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CityClient) DeleteOneID(id int64) *CityDeleteOne {
 	builder := c.Delete().Where(city.ID(id))
 	builder.mutation.id = &id
@@ -276,7 +276,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int64) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
@@ -308,7 +308,7 @@ func (c *UserClient) GetX(ctx context.Context, id int64) *User {
 // QueryRequiredCity queries the required_city edge of a User.
 func (c *UserClient) QueryRequiredCity(u *User) *CityQuery {
 	query := &CityQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -324,7 +324,7 @@ func (c *UserClient) QueryRequiredCity(u *User) *CityQuery {
 // QueryOptionalCity queries the optional_city edge of a User.
 func (c *UserClient) QueryOptionalCity(u *User) *CityQuery {
 	query := &CityQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -340,7 +340,7 @@ func (c *UserClient) QueryOptionalCity(u *User) *CityQuery {
 // QueryFriendList queries the friend_list edge of a User.
 func (c *UserClient) QueryFriendList(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),

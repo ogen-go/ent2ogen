@@ -163,31 +163,16 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: city.FieldName,
-		})
+		_spec.SetField(city.FieldName, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.RequiredEnum(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: city.FieldRequiredEnum,
-		})
+		_spec.SetField(city.FieldRequiredEnum, field.TypeEnum, value)
 	}
 	if value, ok := cu.mutation.NullableEnum(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: city.FieldNullableEnum,
-		})
+		_spec.SetField(city.FieldNullableEnum, field.TypeEnum, value)
 	}
 	if cu.mutation.NullableEnumCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: city.FieldNullableEnum,
-		})
+		_spec.ClearField(city.FieldNullableEnum, field.TypeEnum)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -374,31 +359,16 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 		}
 	}
 	if value, ok := cuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: city.FieldName,
-		})
+		_spec.SetField(city.FieldName, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.RequiredEnum(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: city.FieldRequiredEnum,
-		})
+		_spec.SetField(city.FieldRequiredEnum, field.TypeEnum, value)
 	}
 	if value, ok := cuo.mutation.NullableEnum(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: city.FieldNullableEnum,
-		})
+		_spec.SetField(city.FieldNullableEnum, field.TypeEnum, value)
 	}
 	if cuo.mutation.NullableEnumCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: city.FieldNullableEnum,
-		})
+		_spec.ClearField(city.FieldNullableEnum, field.TypeEnum)
 	}
 	_node = &City{config: cuo.config}
 	_spec.Assign = _node.assignValues

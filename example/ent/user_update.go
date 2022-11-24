@@ -246,38 +246,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := uu.mutation.FirstName(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldFirstName,
-		})
+		_spec.SetField(user.FieldFirstName, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.LastName(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldLastName,
-		})
+		_spec.SetField(user.FieldLastName, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.UserName(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldUserName,
-		})
+		_spec.SetField(user.FieldUserName, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.OptionalNullableBool(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldOptionalNullableBool,
-		})
+		_spec.SetField(user.FieldOptionalNullableBool, field.TypeBool, value)
 	}
 	if uu.mutation.OptionalNullableBoolCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldOptionalNullableBool,
-		})
+		_spec.ClearField(user.FieldOptionalNullableBool, field.TypeBool)
 	}
 	if uu.mutation.RequiredCityCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -670,38 +651,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 	}
 	if value, ok := uuo.mutation.FirstName(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldFirstName,
-		})
+		_spec.SetField(user.FieldFirstName, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.LastName(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldLastName,
-		})
+		_spec.SetField(user.FieldLastName, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.UserName(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldUserName,
-		})
+		_spec.SetField(user.FieldUserName, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.OptionalNullableBool(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldOptionalNullableBool,
-		})
+		_spec.SetField(user.FieldOptionalNullableBool, field.TypeBool, value)
 	}
 	if uuo.mutation.OptionalNullableBoolCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldOptionalNullableBool,
-		})
+		_spec.ClearField(user.FieldOptionalNullableBool, field.TypeBool)
 	}
 	if uuo.mutation.RequiredCityCleared() {
 		edge := &sqlgraph.EdgeSpec{

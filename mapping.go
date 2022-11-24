@@ -138,16 +138,16 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 
 	switch {
 	case entField.Optional && !entField.Nillable:
-		return fmt.Errorf("optional fields are not supported")
+		return fmt.Errorf("optional ent fields are not supported - you need to make the field either optional and nullable or required")
 
 	case entField.Optional && entField.Nillable:
 		if !ogenField.Type.IsGeneric() {
-			return fmt.Errorf("field is optional, type must be generic, not %q", ogenField.Type.Kind)
+			return fmt.Errorf("ent field is optional, ogen type must be generic, not %q", ogenField.Type.Kind)
 		}
 
 	case !entField.Optional:
 		if ogenField.Type.IsGeneric() {
-			return fmt.Errorf("field must be required")
+			return fmt.Errorf("openapi field must be required")
 		}
 
 	default:

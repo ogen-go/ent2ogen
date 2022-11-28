@@ -27,6 +27,8 @@ func (e *City) ToOpenAPI() (t openapi.City, err error) {
 	t.RequiredEnum = openapi.CityRequiredEnum(e.RequiredEnum)
 	if e.NullableEnum != nil {
 		t.NullableEnum.SetTo(openapi.CityNullableEnum(*e.NullableEnum))
+	} else {
+		t.NullableEnum.Null = true
 	}
 	return t, nil
 }
@@ -68,6 +70,8 @@ func (e *User) ToOpenAPI() (t openapi.User, err error) {
 	t.Username = e.UserName
 	if e.OptionalNullableBool != nil {
 		t.OptionalNullableBool.SetTo(*e.OptionalNullableBool)
+	} else {
+		t.OptionalNullableBool.Set, t.OptionalNullableBool.Null = false, true
 	}
 	// Edge 'required_city'.
 	if err := func() error {

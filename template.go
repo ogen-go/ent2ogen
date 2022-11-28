@@ -19,6 +19,7 @@ var (
 			return nil, fmt.Errorf(format, args...)
 		},
 		"assign":     assign,
+		"unassign":   unassign,
 		"rendertype": rendertype,
 	}
 	// templates holds all templates used by ent2ogen.
@@ -50,6 +51,70 @@ func assign(dst *ir.Field, src *gen.Field) (string, error) {
 	}
 
 	return fmt.Sprintf("%s = %s", assignT, srcT), nil
+}
+
+func unassign(dst *ir.Field) (string, error) {
+	assignT := "t." + dst.Name
+
+	type assignStmt struct {
+		variable string
+		value    string
+	}
+
+	var stmts []assignStmt
+	if dst.Type.IsGeneric() {
+		if dst.Type.GenericVariant.Optional {
+			// Reset ogen's generic 'Set' field.
+			//
+			// t.Foo.Set = false
+			stmts = append(stmts, assignStmt{
+				variable: fmt.Sprintf("%s.Set", assignT),
+				value:    "false",
+			})
+		}
+		if dst.Type.GenericVariant.Nullable {
+			// Reset ogen's generic 'Null' field.
+			//
+			// t.Foo.Null = true
+			stmts = append(stmts, assignStmt{
+				variable: fmt.Sprintf("%s.Null", assignT),
+				value:    "true",
+			})
+		}
+	}
+
+	// From github.com/ogen-go/ogen/gen/generics.go:boxType
+	if dst.Type.GenericOf.Kind == ir.KindArray || dst.Type.GenericOf.Primitive == ir.ByteSlice {
+		if dst.Type.GenericVariant.NullableOptional() {
+			return "", fmt.Errorf("unexpected nullable & optional ogen array type")
+		}
+
+		// t.Foo = nil
+		stmts = append(stmts, assignStmt{
+			variable: assignT,
+			value:    "nil",
+		})
+	}
+
+	// Represent assignments in a shorter form:
+	// foo, bar = true, false
+	oneliner := ""
+	for i, stmt := range stmts {
+		oneliner += stmt.variable
+		if i+1 != len(stmts) {
+			oneliner += ", "
+		}
+	}
+
+	oneliner += " = "
+	for i, stmt := range stmts {
+		oneliner += stmt.value
+		if i+1 != len(stmts) {
+			oneliner += ", "
+		}
+	}
+
+	return oneliner, nil
 }
 
 func rendertype(t *ir.Type) string {

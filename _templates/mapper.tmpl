@@ -31,6 +31,8 @@ func (e *{{ $m.From.Name }}) ToOpenAPI() (t openapi.{{ $m.To.Name }}, err error)
         {{- if $entField.Nillable }}
         if e.{{ $entField.StructField }} != nil {
             {{ assign $ogenField $entField }}
+        } else {
+            {{ unassign $ogenField }}
         }
         {{- else }}
             {{ assign $ogenField $entField }}

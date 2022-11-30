@@ -10,10 +10,14 @@ import openapi "{{ $cfg.OgenPackage }}"
 type {{ $m.From.Name }}Slice []*{{ $m.From.Name }}
 
 {{ $m.Comment }}
-func (s {{ $m.From.Name }}Slice) ToOpenAPI() (_ []openapi.{{ $m.To.Name }}, err error) {
+func (s {{ $m.From.Name }}Slice) ToOpenAPI() ([]openapi.{{ $m.To.Name }}, error) {
+    return s.toOpenAPI()
+}
+
+func (s {{ $m.From.Name }}Slice) toOpenAPI() (_ []openapi.{{ $m.To.Name }}, err error) {
     result := make([]openapi.{{ $m.To.Name }}, len(s))
     for i, v := range s {
-        result[i], err = v.ToOpenAPI()
+        result[i], err = v.toOpenAPI()
         if err != nil {
             return nil, err
         }
@@ -23,7 +27,16 @@ func (s {{ $m.From.Name }}Slice) ToOpenAPI() (_ []openapi.{{ $m.To.Name }}, err 
 }
 
 {{ $m.Comment }}
-func (e *{{ $m.From.Name }}) ToOpenAPI() (t openapi.{{ $m.To.Name }}, err error) {
+func (e *{{ $m.From.Name }}) ToOpenAPI() (*openapi.{{ $m.To.Name }}, error) {
+    t, err := e.toOpenAPI()
+    if err != nil {
+        return nil, err
+    }
+
+    return &t, nil
+}
+
+func (e *{{ $m.From.Name }}) toOpenAPI() (t openapi.{{ $m.To.Name }}, err error) {
     {{- range $f := $m.FieldMappings }}
         {{- $entField  := $f.From }}
         {{- $ogenField := $f.To }}
@@ -55,9 +68,9 @@ func (e *{{ $m.From.Name }}) ToOpenAPI() (t openapi.{{ $m.To.Name }}, err error)
         }
 
         {{- if $edge.Unique }}
-        openapiType, err := v.ToOpenAPI()
+        openapiType, err := v.toOpenAPI()
         {{- else }}
-        openapiType, err := {{ $edge.Type.Name }}Slice(v).ToOpenAPI()
+        openapiType, err := {{ $edge.Type.Name }}Slice(v).toOpenAPI()
         {{- end }}
         if err != nil {
             return fmt.Errorf("convert to openapi: %w", err)

@@ -10,10 +10,14 @@ import (
 
 type CitySlice []*City
 
-func (s CitySlice) ToOpenAPI() (_ []openapi.City, err error) {
+func (s CitySlice) ToOpenAPI() ([]openapi.City, error) {
+	return s.toOpenAPI()
+}
+
+func (s CitySlice) toOpenAPI() (_ []openapi.City, err error) {
 	result := make([]openapi.City, len(s))
 	for i, v := range s {
-		result[i], err = v.ToOpenAPI()
+		result[i], err = v.toOpenAPI()
 		if err != nil {
 			return nil, err
 		}
@@ -22,7 +26,16 @@ func (s CitySlice) ToOpenAPI() (_ []openapi.City, err error) {
 	return result, nil
 }
 
-func (e *City) ToOpenAPI() (t openapi.City, err error) {
+func (e *City) ToOpenAPI() (*openapi.City, error) {
+	t, err := e.toOpenAPI()
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
+}
+
+func (e *City) toOpenAPI() (t openapi.City, err error) {
 	t.Name = e.Name
 	t.RequiredEnum = openapi.CityRequiredEnum(e.RequiredEnum)
 	if e.NullableEnum != nil {
@@ -43,10 +56,14 @@ type UserSlice []*User
 //	  required_city
 //	  optional_city
 //	  friend_list...
-func (s UserSlice) ToOpenAPI() (_ []openapi.User, err error) {
+func (s UserSlice) ToOpenAPI() ([]openapi.User, error) {
+	return s.toOpenAPI()
+}
+
+func (s UserSlice) toOpenAPI() (_ []openapi.User, err error) {
 	result := make([]openapi.User, len(s))
 	for i, v := range s {
-		result[i], err = v.ToOpenAPI()
+		result[i], err = v.toOpenAPI()
 		if err != nil {
 			return nil, err
 		}
@@ -63,7 +80,16 @@ func (s UserSlice) ToOpenAPI() (_ []openapi.User, err error) {
 //	  required_city
 //	  optional_city
 //	  friend_list...
-func (e *User) ToOpenAPI() (t openapi.User, err error) {
+func (e *User) ToOpenAPI() (*openapi.User, error) {
+	t, err := e.toOpenAPI()
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
+}
+
+func (e *User) toOpenAPI() (t openapi.User, err error) {
 	t.ID = e.ID
 	t.FirstName = e.FirstName
 	t.LastName = e.LastName
@@ -79,7 +105,7 @@ func (e *User) ToOpenAPI() (t openapi.User, err error) {
 		if err != nil {
 			return fmt.Errorf("load: %w", err)
 		}
-		openapiType, err := v.ToOpenAPI()
+		openapiType, err := v.toOpenAPI()
 		if err != nil {
 			return fmt.Errorf("convert to openapi: %w", err)
 		}
@@ -97,7 +123,7 @@ func (e *User) ToOpenAPI() (t openapi.User, err error) {
 			}
 			return fmt.Errorf("load: %w", err)
 		}
-		openapiType, err := v.ToOpenAPI()
+		openapiType, err := v.toOpenAPI()
 		if err != nil {
 			return fmt.Errorf("convert to openapi: %w", err)
 		}
@@ -115,7 +141,7 @@ func (e *User) ToOpenAPI() (t openapi.User, err error) {
 			}
 			return fmt.Errorf("load: %w", err)
 		}
-		openapiType, err := UserSlice(v).ToOpenAPI()
+		openapiType, err := UserSlice(v).toOpenAPI()
 		if err != nil {
 			return fmt.Errorf("convert to openapi: %w", err)
 		}

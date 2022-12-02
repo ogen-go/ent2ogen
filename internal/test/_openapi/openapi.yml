@@ -66,6 +66,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SchemaB'
+        edge_schemaa_recursive:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemaA'
     SchemaB:
       type: object
       required:

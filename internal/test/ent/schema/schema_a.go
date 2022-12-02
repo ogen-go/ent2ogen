@@ -35,6 +35,8 @@ func (SchemaA) Edges() []ent.Edge {
 
 		edge.To("edge_schemab_unique_optional", SchemaB.Type).Unique(),
 		edge.To("edge_schemab", SchemaB.Type),
+
+		edge.To("edge_schemaa_recursive", SchemaA.Type),
 	}
 }
 

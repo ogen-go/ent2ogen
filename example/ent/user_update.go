@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/ogen-go/ent2ogen/example/ent/city"
 	"github.com/ogen-go/ent2ogen/example/ent/predicate"
@@ -63,6 +64,18 @@ func (uu *UserUpdate) SetNillableOptionalNullableBool(b *bool) *UserUpdate {
 // ClearOptionalNullableBool clears the value of the "optional_nullable_bool" field.
 func (uu *UserUpdate) ClearOptionalNullableBool() *UserUpdate {
 	uu.mutation.ClearOptionalNullableBool()
+	return uu
+}
+
+// SetHobbies sets the "hobbies" field.
+func (uu *UserUpdate) SetHobbies(s []string) *UserUpdate {
+	uu.mutation.SetHobbies(s)
+	return uu
+}
+
+// AppendHobbies appends s to the "hobbies" field.
+func (uu *UserUpdate) AppendHobbies(s []string) *UserUpdate {
+	uu.mutation.AppendHobbies(s)
 	return uu
 }
 
@@ -260,6 +273,14 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if uu.mutation.OptionalNullableBoolCleared() {
 		_spec.ClearField(user.FieldOptionalNullableBool, field.TypeBool)
 	}
+	if value, ok := uu.mutation.Hobbies(); ok {
+		_spec.SetField(user.FieldHobbies, field.TypeJSON, value)
+	}
+	if value, ok := uu.mutation.AppendedHobbies(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldHobbies, value)
+		})
+	}
 	if uu.mutation.RequiredCityCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -438,6 +459,18 @@ func (uuo *UserUpdateOne) SetNillableOptionalNullableBool(b *bool) *UserUpdateOn
 // ClearOptionalNullableBool clears the value of the "optional_nullable_bool" field.
 func (uuo *UserUpdateOne) ClearOptionalNullableBool() *UserUpdateOne {
 	uuo.mutation.ClearOptionalNullableBool()
+	return uuo
+}
+
+// SetHobbies sets the "hobbies" field.
+func (uuo *UserUpdateOne) SetHobbies(s []string) *UserUpdateOne {
+	uuo.mutation.SetHobbies(s)
+	return uuo
+}
+
+// AppendHobbies appends s to the "hobbies" field.
+func (uuo *UserUpdateOne) AppendHobbies(s []string) *UserUpdateOne {
+	uuo.mutation.AppendHobbies(s)
 	return uuo
 }
 
@@ -664,6 +697,14 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.OptionalNullableBoolCleared() {
 		_spec.ClearField(user.FieldOptionalNullableBool, field.TypeBool)
+	}
+	if value, ok := uuo.mutation.Hobbies(); ok {
+		_spec.SetField(user.FieldHobbies, field.TypeJSON, value)
+	}
+	if value, ok := uuo.mutation.AppendedHobbies(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldHobbies, value)
+		})
 	}
 	if uuo.mutation.RequiredCityCleared() {
 		edge := &sqlgraph.EdgeSpec{

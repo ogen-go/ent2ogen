@@ -41,5 +41,6 @@ func _() {
 		RequiredCity         openapi.City
 		OptionalCity         openapi.OptCity
 		Friends              []openapi.User
+		Hobbies              []string
 	}(openapi.User{})
 }

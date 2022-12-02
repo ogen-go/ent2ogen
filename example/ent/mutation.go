@@ -485,6 +485,8 @@ type UserMutation struct {
 	last_name              *string
 	user_name              *string
 	optional_nullable_bool *bool
+	hobbies                *[]string
+	appendhobbies          []string
 	clearedFields          map[string]struct{}
 	required_city          *int64
 	clearedrequired_city   bool
@@ -759,6 +761,57 @@ func (m *UserMutation) ResetOptionalNullableBool() {
 	delete(m.clearedFields, user.FieldOptionalNullableBool)
 }
 
+// SetHobbies sets the "hobbies" field.
+func (m *UserMutation) SetHobbies(s []string) {
+	m.hobbies = &s
+	m.appendhobbies = nil
+}
+
+// Hobbies returns the value of the "hobbies" field in the mutation.
+func (m *UserMutation) Hobbies() (r []string, exists bool) {
+	v := m.hobbies
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHobbies returns the old "hobbies" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldHobbies(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHobbies is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHobbies requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHobbies: %w", err)
+	}
+	return oldValue.Hobbies, nil
+}
+
+// AppendHobbies adds s to the "hobbies" field.
+func (m *UserMutation) AppendHobbies(s []string) {
+	m.appendhobbies = append(m.appendhobbies, s...)
+}
+
+// AppendedHobbies returns the list of values that were appended to the "hobbies" field in this mutation.
+func (m *UserMutation) AppendedHobbies() ([]string, bool) {
+	if len(m.appendhobbies) == 0 {
+		return nil, false
+	}
+	return m.appendhobbies, true
+}
+
+// ResetHobbies resets all changes to the "hobbies" field.
+func (m *UserMutation) ResetHobbies() {
+	m.hobbies = nil
+	m.appendhobbies = nil
+}
+
 // SetRequiredCityID sets the "required_city" edge to the City entity by id.
 func (m *UserMutation) SetRequiredCityID(id int64) {
 	m.required_city = &id
@@ -910,7 +963,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.first_name != nil {
 		fields = append(fields, user.FieldFirstName)
 	}
@@ -922,6 +975,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.optional_nullable_bool != nil {
 		fields = append(fields, user.FieldOptionalNullableBool)
+	}
+	if m.hobbies != nil {
+		fields = append(fields, user.FieldHobbies)
 	}
 	return fields
 }
@@ -939,6 +995,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.UserName()
 	case user.FieldOptionalNullableBool:
 		return m.OptionalNullableBool()
+	case user.FieldHobbies:
+		return m.Hobbies()
 	}
 	return nil, false
 }
@@ -956,6 +1014,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUserName(ctx)
 	case user.FieldOptionalNullableBool:
 		return m.OldOptionalNullableBool(ctx)
+	case user.FieldHobbies:
+		return m.OldHobbies(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -992,6 +1052,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOptionalNullableBool(v)
+		return nil
+	case user.FieldHobbies:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHobbies(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -1062,6 +1129,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldOptionalNullableBool:
 		m.ResetOptionalNullableBool()
+		return nil
+	case user.FieldHobbies:
+		m.ResetHobbies()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

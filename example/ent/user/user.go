@@ -15,6 +15,8 @@ const (
 	FieldUserName = "user_name"
 	// FieldOptionalNullableBool holds the string denoting the optional_nullable_bool field in the database.
 	FieldOptionalNullableBool = "optional_nullable_bool"
+	// FieldHobbies holds the string denoting the hobbies field in the database.
+	FieldHobbies = "hobbies"
 	// EdgeRequiredCity holds the string denoting the required_city edge name in mutations.
 	EdgeRequiredCity = "required_city"
 	// EdgeOptionalCity holds the string denoting the optional_city edge name in mutations.
@@ -48,6 +50,7 @@ var Columns = []string{
 	FieldLastName,
 	FieldUserName,
 	FieldOptionalNullableBool,
+	FieldHobbies,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "users"

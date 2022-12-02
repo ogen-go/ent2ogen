@@ -250,6 +250,7 @@ type User struct {
 	RequiredCity         City       `json:"required_city"`
 	OptionalCity         OptCity    `json:"optional_city"`
 	Friends              []User     `json:"friends"`
+	Hobbies              []string   `json:"hobbies"`
 }
 
 // GetID returns the value of ID.
@@ -292,6 +293,11 @@ func (s User) GetFriends() []User {
 	return s.Friends
 }
 
+// GetHobbies returns the value of Hobbies.
+func (s User) GetHobbies() []string {
+	return s.Hobbies
+}
+
 // SetID sets the value of ID.
 func (s *User) SetID(val int64) {
 	s.ID = val
@@ -330,4 +336,9 @@ func (s *User) SetOptionalCity(val OptCity) {
 // SetFriends sets the value of Friends.
 func (s *User) SetFriends(val []User) {
 	s.Friends = val
+}
+
+// SetHobbies sets the value of Hobbies.
+func (s *User) SetHobbies(val []string) {
+	s.Hobbies = val
 }

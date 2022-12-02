@@ -52,6 +52,12 @@ func (uc *UserCreate) SetNillableOptionalNullableBool(b *bool) *UserCreate {
 	return uc
 }
 
+// SetHobbies sets the "hobbies" field.
+func (uc *UserCreate) SetHobbies(s []string) *UserCreate {
+	uc.mutation.SetHobbies(s)
+	return uc
+}
+
 // SetID sets the "id" field.
 func (uc *UserCreate) SetID(i int64) *UserCreate {
 	uc.mutation.SetID(i)
@@ -198,6 +204,9 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.UserName(); !ok {
 		return &ValidationError{Name: "user_name", err: errors.New(`ent: missing required field "User.user_name"`)}
 	}
+	if _, ok := uc.mutation.Hobbies(); !ok {
+		return &ValidationError{Name: "hobbies", err: errors.New(`ent: missing required field "User.hobbies"`)}
+	}
 	if _, ok := uc.mutation.RequiredCityID(); !ok {
 		return &ValidationError{Name: "required_city", err: errors.New(`ent: missing required edge "User.required_city"`)}
 	}
@@ -249,6 +258,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.OptionalNullableBool(); ok {
 		_spec.SetField(user.FieldOptionalNullableBool, field.TypeBool, value)
 		_node.OptionalNullableBool = &value
+	}
+	if value, ok := uc.mutation.Hobbies(); ok {
+		_spec.SetField(user.FieldHobbies, field.TypeJSON, value)
+		_node.Hobbies = value
 	}
 	if nodes := uc.mutation.RequiredCityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

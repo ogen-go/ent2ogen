@@ -28,6 +28,7 @@ var (
 		{Name: "last_name", Type: field.TypeString},
 		{Name: "user_name", Type: field.TypeString, Unique: true},
 		{Name: "optional_nullable_bool", Type: field.TypeBool, Nullable: true},
+		{Name: "hobbies", Type: field.TypeJSON},
 		{Name: "user_required_city", Type: field.TypeInt64},
 		{Name: "user_optional_city", Type: field.TypeInt64, Nullable: true},
 	}
@@ -39,13 +40,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_cities_required_city",
-				Columns:    []*schema.Column{UsersColumns[5]},
+				Columns:    []*schema.Column{UsersColumns[6]},
 				RefColumns: []*schema.Column{CitiesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "users_cities_optional_city",
-				Columns:    []*schema.Column{UsersColumns[6]},
+				Columns:    []*schema.Column{UsersColumns[7]},
 				RefColumns: []*schema.Column{CitiesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

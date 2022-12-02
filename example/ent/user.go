@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -24,6 +25,8 @@ type User struct {
 	UserName string `json:"user_name,omitempty"`
 	// OptionalNullableBool holds the value of the "optional_nullable_bool" field.
 	OptionalNullableBool *bool `json:"optional_nullable_bool,omitempty"`
+	// Hobbies holds the value of the "hobbies" field.
+	Hobbies []string `json:"hobbies,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges              UserEdges `json:"edges"`
@@ -84,6 +87,8 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case user.FieldHobbies:
+			values[i] = new([]byte)
 		case user.FieldOptionalNullableBool:
 			values[i] = new(sql.NullBool)
 		case user.FieldID:
@@ -139,6 +144,14 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.OptionalNullableBool = new(bool)
 				*u.OptionalNullableBool = value.Bool
+			}
+		case user.FieldHobbies:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field hobbies", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Hobbies); err != nil {
+					return fmt.Errorf("unmarshal field hobbies: %w", err)
+				}
 			}
 		case user.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -210,6 +223,9 @@ func (u *User) String() string {
 		builder.WriteString("optional_nullable_bool=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("hobbies=")
+	builder.WriteString(fmt.Sprintf("%v", u.Hobbies))
 	builder.WriteByte(')')
 	return builder.String()
 }

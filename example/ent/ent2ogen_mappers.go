@@ -99,6 +99,7 @@ func (e *User) toOpenAPI() (t openapi.User, err error) {
 	} else {
 		t.OptionalNullableBool.Set, t.OptionalNullableBool.Null = false, true
 	}
+	t.Hobbies = e.Hobbies
 	// Edge 'required_city'.
 	if err := func() error {
 		v, err := e.Edges.RequiredCityOrErr()

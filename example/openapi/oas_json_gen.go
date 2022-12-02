@@ -502,9 +502,18 @@ func (s User) encodeFields(e *jx.Encoder) {
 			e.ArrEnd()
 		}
 	}
+	{
+
+		e.FieldStart("hobbies")
+		e.ArrStart()
+		for _, elem := range s.Hobbies {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
 }
 
-var jsonFieldsNameOfUser = [8]string{
+var jsonFieldsNameOfUser = [9]string{
 	0: "id",
 	1: "first_name",
 	2: "last_name",
@@ -513,6 +522,7 @@ var jsonFieldsNameOfUser = [8]string{
 	5: "required_city",
 	6: "optional_city",
 	7: "friends",
+	8: "hobbies",
 }
 
 // Decode decodes User from json.
@@ -520,7 +530,7 @@ func (s *User) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode User to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -619,6 +629,26 @@ func (s *User) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"friends\"")
 			}
+		case "hobbies":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				s.Hobbies = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Hobbies = append(s.Hobbies, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"hobbies\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -628,8 +658,9 @@ func (s *User) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b00101111,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

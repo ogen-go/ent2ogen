@@ -1,0 +1,76 @@
+openapi: 3.0.3
+info:
+  title: test
+  version: 0.0.1
+paths:
+  /test:
+    get:
+      operationId: test
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaA'
+components:
+  schemas:
+    SchemaA:
+      type: object
+      required:
+        - int64
+        - string_foobar_bind
+        - string_optional_nullable
+        - jsontype_strings
+        - required_enum
+        - edge_schemab_unique_required
+        - edge_schemab_unique_required_bs_bind
+      properties:
+        int64:
+          type: integer
+          format: int64
+        string_foobar_bind:
+          type: string
+        string_optional_nullable:
+          type: string
+          nullable: true
+        optional_nullable_bool:
+          type: boolean
+          nullable: true
+        jsontype_strings:
+          type: array
+          items:
+            type: string
+        jsontype_strings_optional:
+          type: array
+          items:
+            type: string
+        required_enum:
+          type: string
+          enum:
+            - a
+            - b
+        optional_nullable_enum:
+          type: string
+          nullable: true
+          enum:
+            - c
+            - d
+        edge_schemab_unique_required:
+          $ref: '#/components/schemas/SchemaB'
+        edge_schemab_unique_required_bs_bind:
+          $ref: '#/components/schemas/SchemaB'
+        edge_schemab_unique_optional:
+          $ref: '#/components/schemas/SchemaB'
+        edge_schemab:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemaB'
+    SchemaB:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int64

@@ -1,0 +1,88 @@
+openapi: 3.0.3
+info:
+  title: example
+  version: 0.0.1
+paths:
+  /keyboard/{id}:
+    get:
+      operationId: getKeyboard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Keyboard'
+components:
+  schemas:
+    Keyboard:
+      type: object
+      required:
+        - id
+        - name
+        - switches
+        - keycaps
+        - price
+        - discount
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        switches:
+          $ref: '#/components/schemas/Switches'
+        keycaps:
+          $ref: '#/components/schemas/Keycaps'
+        price:
+          type: integer
+          format: int64
+        discount:
+          type: integer
+          format: int64
+          nullable: true
+    Switches:
+      type: object
+      required:
+        - id
+        - name
+        - switch_type
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        switch_type:
+          type: string
+          enum:
+            - mechanical
+            - optical
+            - electrocapacitive
+    Keycaps:
+      type: object
+      required:
+        - id
+        - name
+        - profile
+        - material
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        profile:
+          type: string
+        material:
+          type: string
+          enum:
+            - ABS
+            - PBT

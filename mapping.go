@@ -136,9 +136,19 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 		return nil
 	}
 
+	var (
+		et = entField.Type
+		js = ogenField.Spec.Schema
+	)
+
 	switch {
 	case entField.Optional && !entField.Nillable:
-		return fmt.Errorf("optional ent fields are not supported - you need to make the field either optional and nullable or required")
+		switch {
+		case et.Type == field.TypeJSON && et.Ident == "[]string":
+
+		default:
+			return fmt.Errorf("optional ent fields are not supported - you need to make the field either optional and nullable or required")
+		}
 
 	case entField.Optional && entField.Nillable:
 		if !ogenField.Type.IsGeneric() {
@@ -154,25 +164,29 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 		panic("unreachable")
 	}
 
-	var (
-		et = entField.Type
-		js = ogenField.Spec.Schema
-	)
-
 	switch entField.Type.Type {
 	case field.TypeBool:
 		if js.Type != jsonschema.Boolean {
 			return fmt.Errorf("type mismatch: expected boolean but have %q", js.Type)
+		}
+		if js.Format != "" {
+			return fmt.Errorf("unexpected format %q", js.Format)
 		}
 
 	case field.TypeString:
 		if js.Type != jsonschema.String {
 			return fmt.Errorf("type mismatch: expected string but have %q", js.Type)
 		}
+		if js.Format != "" {
+			return fmt.Errorf("unexpected format %q", js.Format)
+		}
 
 	case field.TypeInt:
 		if js.Type != jsonschema.Integer {
 			return fmt.Errorf("type mismatch: expected integer but have %q", js.Type)
+		}
+		if js.Format != "" {
+			return fmt.Errorf("unexpected format %q", js.Format)
 		}
 
 	case field.TypeInt32:

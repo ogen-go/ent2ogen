@@ -20,6 +20,8 @@ func (SchemaA) Fields() []ent.Field {
 		field.Bool("optional_nullable_bool").Optional().Nillable(),
 		field.Strings("jsontype_strings"),
 		field.Strings("jsontype_strings_optional").Optional(),
+		field.Ints("jsontype_ints"),
+		field.Ints("jsontype_ints_optional").Optional(),
 		field.Enum("required_enum").Values("a", "b"),
 		field.Enum("optional_nullable_enum").Values("c", "d").Optional().Nillable(),
 	}

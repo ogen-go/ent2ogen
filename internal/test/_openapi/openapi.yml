@@ -22,6 +22,7 @@ components:
         - string_foobar_bind
         - string_optional_nullable
         - jsontype_strings
+        - jsontype_ints
         - required_enum
         - edge_schemab_unique_required
         - edge_schemab_unique_required_bs_bind
@@ -45,6 +46,14 @@ components:
           type: array
           items:
             type: string
+        jsontype_ints:
+          type: array
+          items:
+            type: integer
+        jsontype_ints_optional:
+          type: array
+          items:
+            type: integer
         required_enum:
           type: string
           enum:

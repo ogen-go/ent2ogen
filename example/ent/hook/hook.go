@@ -9,28 +9,41 @@ import (
 	"github.com/ogen-go/ent2ogen/example/ent"
 )
 
-// The CityFunc type is an adapter to allow the use of ordinary
-// function as City mutator.
-type CityFunc func(context.Context, *ent.CityMutation) (ent.Value, error)
+// The KeyboardFunc type is an adapter to allow the use of ordinary
+// function as Keyboard mutator.
+type KeyboardFunc func(context.Context, *ent.KeyboardMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f CityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.CityMutation)
+func (f KeyboardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.KeyboardMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CityMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.KeyboardMutation", m)
 	}
 	return f(ctx, mv)
 }
 
-// The UserFunc type is an adapter to allow the use of ordinary
-// function as User mutator.
-type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
+// The KeycapModelFunc type is an adapter to allow the use of ordinary
+// function as KeycapModel mutator.
+type KeycapModelFunc func(context.Context, *ent.KeycapModelMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.UserMutation)
+func (f KeycapModelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.KeycapModelMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.KeycapModelMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The SwitchModelFunc type is an adapter to allow the use of ordinary
+// function as SwitchModel mutator.
+type SwitchModelFunc func(context.Context, *ent.SwitchModelMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SwitchModelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.SwitchModelMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SwitchModelMutation", m)
 	}
 	return f(ctx, mv)
 }

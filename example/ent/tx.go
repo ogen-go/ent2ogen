@@ -12,10 +12,12 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// City is the client for interacting with the City builders.
-	City *CityClient
-	// User is the client for interacting with the User builders.
-	User *UserClient
+	// Keyboard is the client for interacting with the Keyboard builders.
+	Keyboard *KeyboardClient
+	// KeycapModel is the client for interacting with the KeycapModel builders.
+	KeycapModel *KeycapModelClient
+	// SwitchModel is the client for interacting with the SwitchModel builders.
+	SwitchModel *SwitchModelClient
 
 	// lazily loaded.
 	client     *Client
@@ -147,8 +149,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.City = NewCityClient(tx.config)
-	tx.User = NewUserClient(tx.config)
+	tx.Keyboard = NewKeyboardClient(tx.config)
+	tx.KeycapModel = NewKeycapModelClient(tx.config)
+	tx.SwitchModel = NewSwitchModelClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -158,7 +161,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: City.QueryXXX(), the query will be executed
+// applies a query, for example: Keyboard.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

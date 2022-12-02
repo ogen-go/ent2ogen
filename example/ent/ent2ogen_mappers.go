@@ -5,17 +5,21 @@ package ent
 import (
 	"fmt"
 
-	openapi "github.com/ogen-go/ent2ogen/example/openapi"
+	openapi "github.com/ogen-go/ent2ogen/example/api"
 )
 
-type CitySlice []*City
+type KeyboardSlice []*Keyboard
 
-func (s CitySlice) ToOpenAPI() ([]openapi.City, error) {
+// Following edges must be loaded:
+//
+//	switches
+//	keycaps
+func (s KeyboardSlice) ToOpenAPI() ([]openapi.Keyboard, error) {
 	return s.toOpenAPI()
 }
 
-func (s CitySlice) toOpenAPI() (_ []openapi.City, err error) {
-	result := make([]openapi.City, len(s))
+func (s KeyboardSlice) toOpenAPI() (_ []openapi.Keyboard, err error) {
+	result := make([]openapi.Keyboard, len(s))
 	for i, v := range s {
 		result[i], err = v.toOpenAPI()
 		if err != nil {
@@ -26,7 +30,11 @@ func (s CitySlice) toOpenAPI() (_ []openapi.City, err error) {
 	return result, nil
 }
 
-func (e *City) ToOpenAPI() (*openapi.City, error) {
+// Following edges must be loaded:
+//
+//	switches
+//	keycaps
+func (e *Keyboard) ToOpenAPI() (*openapi.Keyboard, error) {
 	t, err := e.toOpenAPI()
 	if err != nil {
 		return nil, err
@@ -35,33 +43,56 @@ func (e *City) ToOpenAPI() (*openapi.City, error) {
 	return &t, nil
 }
 
-func (e *City) toOpenAPI() (t openapi.City, err error) {
+func (e *Keyboard) toOpenAPI() (t openapi.Keyboard, err error) {
+	t.ID = e.ID
 	t.Name = e.Name
-	t.RequiredEnum = openapi.CityRequiredEnum(e.RequiredEnum)
-	if e.NullableEnum != nil {
-		t.NullableEnum.SetTo(openapi.CityNullableEnum(*e.NullableEnum))
+	t.Price = e.Price
+	if e.Discount != nil {
+		t.Discount.SetTo(*e.Discount)
 	} else {
-		t.NullableEnum.Null = true
+		t.Discount.Null = true
+	}
+	// Edge 'switches'.
+	if err := func() error {
+		v, err := e.Edges.SwitchesOrErr()
+		if err != nil {
+			return fmt.Errorf("load: %w", err)
+		}
+		openapiType, err := v.toOpenAPI()
+		if err != nil {
+			return fmt.Errorf("convert to openapi: %w", err)
+		}
+		t.Switches = openapiType
+		return nil
+	}(); err != nil {
+		return t, fmt.Errorf("edge 'switches': %w", err)
+	}
+	// Edge 'keycaps'.
+	if err := func() error {
+		v, err := e.Edges.KeycapsOrErr()
+		if err != nil {
+			return fmt.Errorf("load: %w", err)
+		}
+		openapiType, err := v.toOpenAPI()
+		if err != nil {
+			return fmt.Errorf("convert to openapi: %w", err)
+		}
+		t.Keycaps = openapiType
+		return nil
+	}(); err != nil {
+		return t, fmt.Errorf("edge 'keycaps': %w", err)
 	}
 	return t, nil
 }
 
-type UserSlice []*User
+type KeycapModelSlice []*KeycapModel
 
-// Following edges must be loaded:
-//
-//	required_city
-//	optional_city
-//	friend_list:
-//	  required_city
-//	  optional_city
-//	  friend_list...
-func (s UserSlice) ToOpenAPI() ([]openapi.User, error) {
+func (s KeycapModelSlice) ToOpenAPI() ([]openapi.Keycaps, error) {
 	return s.toOpenAPI()
 }
 
-func (s UserSlice) toOpenAPI() (_ []openapi.User, err error) {
-	result := make([]openapi.User, len(s))
+func (s KeycapModelSlice) toOpenAPI() (_ []openapi.Keycaps, err error) {
+	result := make([]openapi.Keycaps, len(s))
 	for i, v := range s {
 		result[i], err = v.toOpenAPI()
 		if err != nil {
@@ -72,15 +103,7 @@ func (s UserSlice) toOpenAPI() (_ []openapi.User, err error) {
 	return result, nil
 }
 
-// Following edges must be loaded:
-//
-//	required_city
-//	optional_city
-//	friend_list:
-//	  required_city
-//	  optional_city
-//	  friend_list...
-func (e *User) ToOpenAPI() (*openapi.User, error) {
+func (e *KeycapModel) ToOpenAPI() (*openapi.Keycaps, error) {
 	t, err := e.toOpenAPI()
 	if err != nil {
 		return nil, err
@@ -89,67 +112,44 @@ func (e *User) ToOpenAPI() (*openapi.User, error) {
 	return &t, nil
 }
 
-func (e *User) toOpenAPI() (t openapi.User, err error) {
+func (e *KeycapModel) toOpenAPI() (t openapi.Keycaps, err error) {
 	t.ID = e.ID
-	t.FirstName = e.FirstName
-	t.LastName = e.LastName
-	t.Username = e.UserName
-	if e.OptionalNullableBool != nil {
-		t.OptionalNullableBool.SetTo(*e.OptionalNullableBool)
-	} else {
-		t.OptionalNullableBool.Set, t.OptionalNullableBool.Null = false, true
+	t.Name = e.Name
+	t.Profile = e.Profile
+	t.Material = openapi.KeycapsMaterial(e.Material)
+	return t, nil
+}
+
+type SwitchModelSlice []*SwitchModel
+
+func (s SwitchModelSlice) ToOpenAPI() ([]openapi.Switches, error) {
+	return s.toOpenAPI()
+}
+
+func (s SwitchModelSlice) toOpenAPI() (_ []openapi.Switches, err error) {
+	result := make([]openapi.Switches, len(s))
+	for i, v := range s {
+		result[i], err = v.toOpenAPI()
+		if err != nil {
+			return nil, err
+		}
 	}
-	t.Hobbies = e.Hobbies
-	// Edge 'required_city'.
-	if err := func() error {
-		v, err := e.Edges.RequiredCityOrErr()
-		if err != nil {
-			return fmt.Errorf("load: %w", err)
-		}
-		openapiType, err := v.toOpenAPI()
-		if err != nil {
-			return fmt.Errorf("convert to openapi: %w", err)
-		}
-		t.RequiredCity = openapiType
-		return nil
-	}(); err != nil {
-		return t, fmt.Errorf("edge 'required_city': %w", err)
+
+	return result, nil
+}
+
+func (e *SwitchModel) ToOpenAPI() (*openapi.Switches, error) {
+	t, err := e.toOpenAPI()
+	if err != nil {
+		return nil, err
 	}
-	// Edge 'optional_city'.
-	if err := func() error {
-		v, err := e.Edges.OptionalCityOrErr()
-		if err != nil {
-			if IsNotFound(err) {
-				return nil
-			}
-			return fmt.Errorf("load: %w", err)
-		}
-		openapiType, err := v.toOpenAPI()
-		if err != nil {
-			return fmt.Errorf("convert to openapi: %w", err)
-		}
-		t.OptionalCity.SetTo(openapiType)
-		return nil
-	}(); err != nil {
-		return t, fmt.Errorf("edge 'optional_city': %w", err)
-	}
-	// Edge 'friend_list'.
-	if err := func() error {
-		v, err := e.Edges.FriendListOrErr()
-		if err != nil {
-			if IsNotFound(err) {
-				return nil
-			}
-			return fmt.Errorf("load: %w", err)
-		}
-		openapiType, err := UserSlice(v).toOpenAPI()
-		if err != nil {
-			return fmt.Errorf("convert to openapi: %w", err)
-		}
-		t.Friends = openapiType
-		return nil
-	}(); err != nil {
-		return t, fmt.Errorf("edge 'friend_list': %w", err)
-	}
+
+	return &t, nil
+}
+
+func (e *SwitchModel) toOpenAPI() (t openapi.Switches, err error) {
+	t.ID = e.ID
+	t.Name = e.Name
+	t.SwitchType = openapi.SwitchesSwitchType(e.SwitchType)
 	return t, nil
 }

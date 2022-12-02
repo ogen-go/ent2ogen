@@ -8,86 +8,69 @@ import (
 )
 
 var (
-	// CitiesColumns holds the columns for the "cities" table.
-	CitiesColumns = []*schema.Column{
+	// KeyboardsColumns holds the columns for the "keyboards" table.
+	KeyboardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "required_enum", Type: field.TypeEnum, Enums: []string{"a", "b"}},
-		{Name: "nullable_enum", Type: field.TypeEnum, Nullable: true, Enums: []string{"c", "d"}},
+		{Name: "price", Type: field.TypeInt64},
+		{Name: "discount", Type: field.TypeInt64, Nullable: true},
+		{Name: "keyboard_switches", Type: field.TypeInt64},
+		{Name: "keyboard_keycaps", Type: field.TypeInt64},
 	}
-	// CitiesTable holds the schema information for the "cities" table.
-	CitiesTable = &schema.Table{
-		Name:       "cities",
-		Columns:    CitiesColumns,
-		PrimaryKey: []*schema.Column{CitiesColumns[0]},
-	}
-	// UsersColumns holds the columns for the "users" table.
-	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt64, Increment: true},
-		{Name: "first_name", Type: field.TypeString},
-		{Name: "last_name", Type: field.TypeString},
-		{Name: "user_name", Type: field.TypeString, Unique: true},
-		{Name: "optional_nullable_bool", Type: field.TypeBool, Nullable: true},
-		{Name: "hobbies", Type: field.TypeJSON},
-		{Name: "user_required_city", Type: field.TypeInt64},
-		{Name: "user_optional_city", Type: field.TypeInt64, Nullable: true},
-	}
-	// UsersTable holds the schema information for the "users" table.
-	UsersTable = &schema.Table{
-		Name:       "users",
-		Columns:    UsersColumns,
-		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	// KeyboardsTable holds the schema information for the "keyboards" table.
+	KeyboardsTable = &schema.Table{
+		Name:       "keyboards",
+		Columns:    KeyboardsColumns,
+		PrimaryKey: []*schema.Column{KeyboardsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "users_cities_required_city",
-				Columns:    []*schema.Column{UsersColumns[6]},
-				RefColumns: []*schema.Column{CitiesColumns[0]},
+				Symbol:     "keyboards_switch_models_switches",
+				Columns:    []*schema.Column{KeyboardsColumns[4]},
+				RefColumns: []*schema.Column{SwitchModelsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "users_cities_optional_city",
-				Columns:    []*schema.Column{UsersColumns[7]},
-				RefColumns: []*schema.Column{CitiesColumns[0]},
-				OnDelete:   schema.SetNull,
+				Symbol:     "keyboards_keycap_models_keycaps",
+				Columns:    []*schema.Column{KeyboardsColumns[5]},
+				RefColumns: []*schema.Column{KeycapModelsColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
-	// UserFriendListColumns holds the columns for the "user_friend_list" table.
-	UserFriendListColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeInt64},
-		{Name: "friend_list_id", Type: field.TypeInt64},
+	// KeycapModelsColumns holds the columns for the "keycap_models" table.
+	KeycapModelsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "profile", Type: field.TypeString},
+		{Name: "material", Type: field.TypeEnum, Enums: []string{"ABS", "PBT"}},
 	}
-	// UserFriendListTable holds the schema information for the "user_friend_list" table.
-	UserFriendListTable = &schema.Table{
-		Name:       "user_friend_list",
-		Columns:    UserFriendListColumns,
-		PrimaryKey: []*schema.Column{UserFriendListColumns[0], UserFriendListColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "user_friend_list_user_id",
-				Columns:    []*schema.Column{UserFriendListColumns[0]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "user_friend_list_friend_list_id",
-				Columns:    []*schema.Column{UserFriendListColumns[1]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
+	// KeycapModelsTable holds the schema information for the "keycap_models" table.
+	KeycapModelsTable = &schema.Table{
+		Name:       "keycap_models",
+		Columns:    KeycapModelsColumns,
+		PrimaryKey: []*schema.Column{KeycapModelsColumns[0]},
+	}
+	// SwitchModelsColumns holds the columns for the "switch_models" table.
+	SwitchModelsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "switch_type", Type: field.TypeEnum, Enums: []string{"mechanical", "optical", "electrocapacitive"}},
+	}
+	// SwitchModelsTable holds the schema information for the "switch_models" table.
+	SwitchModelsTable = &schema.Table{
+		Name:       "switch_models",
+		Columns:    SwitchModelsColumns,
+		PrimaryKey: []*schema.Column{SwitchModelsColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		CitiesTable,
-		UsersTable,
-		UserFriendListTable,
+		KeyboardsTable,
+		KeycapModelsTable,
+		SwitchModelsTable,
 	}
 )
 
 func init() {
-	UsersTable.ForeignKeys[0].RefTable = CitiesTable
-	UsersTable.ForeignKeys[1].RefTable = CitiesTable
-	UserFriendListTable.ForeignKeys[0].RefTable = UsersTable
-	UserFriendListTable.ForeignKeys[1].RefTable = UsersTable
+	KeyboardsTable.ForeignKeys[0].RefTable = SwitchModelsTable
+	KeyboardsTable.ForeignKeys[1].RefTable = KeycapModelsTable
 }

@@ -8,9 +8,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ogen-go/ent2ogen/example/ent/city"
+	"github.com/ogen-go/ent2ogen/example/ent/keyboard"
+	"github.com/ogen-go/ent2ogen/example/ent/keycapmodel"
 	"github.com/ogen-go/ent2ogen/example/ent/predicate"
-	"github.com/ogen-go/ent2ogen/example/ent/user"
+	"github.com/ogen-go/ent2ogen/example/ent/switchmodel"
 
 	"entgo.io/ent"
 )
@@ -24,36 +25,43 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeCity = "City"
-	TypeUser = "User"
+	TypeKeyboard    = "Keyboard"
+	TypeKeycapModel = "KeycapModel"
+	TypeSwitchModel = "SwitchModel"
 )
 
-// CityMutation represents an operation that mutates the City nodes in the graph.
-type CityMutation struct {
+// KeyboardMutation represents an operation that mutates the Keyboard nodes in the graph.
+type KeyboardMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int64
-	name          *string
-	required_enum *city.RequiredEnum
-	nullable_enum *city.NullableEnum
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*City, error)
-	predicates    []predicate.City
+	op              Op
+	typ             string
+	id              *int64
+	name            *string
+	price           *int64
+	addprice        *int64
+	discount        *int64
+	adddiscount     *int64
+	clearedFields   map[string]struct{}
+	switches        *int64
+	clearedswitches bool
+	keycaps         *int64
+	clearedkeycaps  bool
+	done            bool
+	oldValue        func(context.Context) (*Keyboard, error)
+	predicates      []predicate.Keyboard
 }
 
-var _ ent.Mutation = (*CityMutation)(nil)
+var _ ent.Mutation = (*KeyboardMutation)(nil)
 
-// cityOption allows management of the mutation configuration using functional options.
-type cityOption func(*CityMutation)
+// keyboardOption allows management of the mutation configuration using functional options.
+type keyboardOption func(*KeyboardMutation)
 
-// newCityMutation creates new mutation for the City entity.
-func newCityMutation(c config, op Op, opts ...cityOption) *CityMutation {
-	m := &CityMutation{
+// newKeyboardMutation creates new mutation for the Keyboard entity.
+func newKeyboardMutation(c config, op Op, opts ...keyboardOption) *KeyboardMutation {
+	m := &KeyboardMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeCity,
+		typ:           TypeKeyboard,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -62,20 +70,20 @@ func newCityMutation(c config, op Op, opts ...cityOption) *CityMutation {
 	return m
 }
 
-// withCityID sets the ID field of the mutation.
-func withCityID(id int64) cityOption {
-	return func(m *CityMutation) {
+// withKeyboardID sets the ID field of the mutation.
+func withKeyboardID(id int64) keyboardOption {
+	return func(m *KeyboardMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *City
+			value *Keyboard
 		)
-		m.oldValue = func(ctx context.Context) (*City, error) {
+		m.oldValue = func(ctx context.Context) (*Keyboard, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().City.Get(ctx, id)
+					value, err = m.Client().Keyboard.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -84,10 +92,10 @@ func withCityID(id int64) cityOption {
 	}
 }
 
-// withCity sets the old City of the mutation.
-func withCity(node *City) cityOption {
-	return func(m *CityMutation) {
-		m.oldValue = func(context.Context) (*City, error) {
+// withKeyboard sets the old Keyboard of the mutation.
+func withKeyboard(node *Keyboard) keyboardOption {
+	return func(m *KeyboardMutation) {
+		m.oldValue = func(context.Context) (*Keyboard, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -96,7 +104,7 @@ func withCity(node *City) cityOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m CityMutation) Client() *Client {
+func (m KeyboardMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -104,7 +112,7 @@ func (m CityMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m CityMutation) Tx() (*Tx, error) {
+func (m KeyboardMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -114,14 +122,14 @@ func (m CityMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of City entities.
-func (m *CityMutation) SetID(id int64) {
+// operation is only accepted on creation of Keyboard entities.
+func (m *KeyboardMutation) SetID(id int64) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *CityMutation) ID() (id int64, exists bool) {
+func (m *KeyboardMutation) ID() (id int64, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -132,7 +140,7 @@ func (m *CityMutation) ID() (id int64, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *CityMutation) IDs(ctx context.Context) ([]int64, error) {
+func (m *KeyboardMutation) IDs(ctx context.Context) ([]int64, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -141,19 +149,19 @@ func (m *CityMutation) IDs(ctx context.Context) ([]int64, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().City.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().Keyboard.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetName sets the "name" field.
-func (m *CityMutation) SetName(s string) {
+func (m *KeyboardMutation) SetName(s string) {
 	m.name = &s
 }
 
 // Name returns the value of the "name" field in the mutation.
-func (m *CityMutation) Name() (r string, exists bool) {
+func (m *KeyboardMutation) Name() (r string, exists bool) {
 	v := m.name
 	if v == nil {
 		return
@@ -161,10 +169,10 @@ func (m *CityMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the City entity.
-// If the City object wasn't provided to the builder, the object is fetched from the database.
+// OldName returns the old "name" field's value of the Keyboard entity.
+// If the Keyboard object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CityMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *KeyboardMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldName is only allowed on UpdateOne operations")
 	}
@@ -179,123 +187,242 @@ func (m *CityMutation) OldName(ctx context.Context) (v string, err error) {
 }
 
 // ResetName resets all changes to the "name" field.
-func (m *CityMutation) ResetName() {
+func (m *KeyboardMutation) ResetName() {
 	m.name = nil
 }
 
-// SetRequiredEnum sets the "required_enum" field.
-func (m *CityMutation) SetRequiredEnum(ce city.RequiredEnum) {
-	m.required_enum = &ce
+// SetPrice sets the "price" field.
+func (m *KeyboardMutation) SetPrice(i int64) {
+	m.price = &i
+	m.addprice = nil
 }
 
-// RequiredEnum returns the value of the "required_enum" field in the mutation.
-func (m *CityMutation) RequiredEnum() (r city.RequiredEnum, exists bool) {
-	v := m.required_enum
+// Price returns the value of the "price" field in the mutation.
+func (m *KeyboardMutation) Price() (r int64, exists bool) {
+	v := m.price
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRequiredEnum returns the old "required_enum" field's value of the City entity.
-// If the City object wasn't provided to the builder, the object is fetched from the database.
+// OldPrice returns the old "price" field's value of the Keyboard entity.
+// If the Keyboard object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CityMutation) OldRequiredEnum(ctx context.Context) (v city.RequiredEnum, err error) {
+func (m *KeyboardMutation) OldPrice(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRequiredEnum is only allowed on UpdateOne operations")
+		return v, errors.New("OldPrice is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRequiredEnum requires an ID field in the mutation")
+		return v, errors.New("OldPrice requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRequiredEnum: %w", err)
+		return v, fmt.Errorf("querying old value for OldPrice: %w", err)
 	}
-	return oldValue.RequiredEnum, nil
+	return oldValue.Price, nil
 }
 
-// ResetRequiredEnum resets all changes to the "required_enum" field.
-func (m *CityMutation) ResetRequiredEnum() {
-	m.required_enum = nil
+// AddPrice adds i to the "price" field.
+func (m *KeyboardMutation) AddPrice(i int64) {
+	if m.addprice != nil {
+		*m.addprice += i
+	} else {
+		m.addprice = &i
+	}
 }
 
-// SetNullableEnum sets the "nullable_enum" field.
-func (m *CityMutation) SetNullableEnum(ce city.NullableEnum) {
-	m.nullable_enum = &ce
-}
-
-// NullableEnum returns the value of the "nullable_enum" field in the mutation.
-func (m *CityMutation) NullableEnum() (r city.NullableEnum, exists bool) {
-	v := m.nullable_enum
+// AddedPrice returns the value that was added to the "price" field in this mutation.
+func (m *KeyboardMutation) AddedPrice() (r int64, exists bool) {
+	v := m.addprice
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldNullableEnum returns the old "nullable_enum" field's value of the City entity.
-// If the City object wasn't provided to the builder, the object is fetched from the database.
+// ResetPrice resets all changes to the "price" field.
+func (m *KeyboardMutation) ResetPrice() {
+	m.price = nil
+	m.addprice = nil
+}
+
+// SetDiscount sets the "discount" field.
+func (m *KeyboardMutation) SetDiscount(i int64) {
+	m.discount = &i
+	m.adddiscount = nil
+}
+
+// Discount returns the value of the "discount" field in the mutation.
+func (m *KeyboardMutation) Discount() (r int64, exists bool) {
+	v := m.discount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscount returns the old "discount" field's value of the Keyboard entity.
+// If the Keyboard object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CityMutation) OldNullableEnum(ctx context.Context) (v *city.NullableEnum, err error) {
+func (m *KeyboardMutation) OldDiscount(ctx context.Context) (v *int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldNullableEnum is only allowed on UpdateOne operations")
+		return v, errors.New("OldDiscount is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldNullableEnum requires an ID field in the mutation")
+		return v, errors.New("OldDiscount requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNullableEnum: %w", err)
+		return v, fmt.Errorf("querying old value for OldDiscount: %w", err)
 	}
-	return oldValue.NullableEnum, nil
+	return oldValue.Discount, nil
 }
 
-// ClearNullableEnum clears the value of the "nullable_enum" field.
-func (m *CityMutation) ClearNullableEnum() {
-	m.nullable_enum = nil
-	m.clearedFields[city.FieldNullableEnum] = struct{}{}
+// AddDiscount adds i to the "discount" field.
+func (m *KeyboardMutation) AddDiscount(i int64) {
+	if m.adddiscount != nil {
+		*m.adddiscount += i
+	} else {
+		m.adddiscount = &i
+	}
 }
 
-// NullableEnumCleared returns if the "nullable_enum" field was cleared in this mutation.
-func (m *CityMutation) NullableEnumCleared() bool {
-	_, ok := m.clearedFields[city.FieldNullableEnum]
+// AddedDiscount returns the value that was added to the "discount" field in this mutation.
+func (m *KeyboardMutation) AddedDiscount() (r int64, exists bool) {
+	v := m.adddiscount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDiscount clears the value of the "discount" field.
+func (m *KeyboardMutation) ClearDiscount() {
+	m.discount = nil
+	m.adddiscount = nil
+	m.clearedFields[keyboard.FieldDiscount] = struct{}{}
+}
+
+// DiscountCleared returns if the "discount" field was cleared in this mutation.
+func (m *KeyboardMutation) DiscountCleared() bool {
+	_, ok := m.clearedFields[keyboard.FieldDiscount]
 	return ok
 }
 
-// ResetNullableEnum resets all changes to the "nullable_enum" field.
-func (m *CityMutation) ResetNullableEnum() {
-	m.nullable_enum = nil
-	delete(m.clearedFields, city.FieldNullableEnum)
+// ResetDiscount resets all changes to the "discount" field.
+func (m *KeyboardMutation) ResetDiscount() {
+	m.discount = nil
+	m.adddiscount = nil
+	delete(m.clearedFields, keyboard.FieldDiscount)
 }
 
-// Where appends a list predicates to the CityMutation builder.
-func (m *CityMutation) Where(ps ...predicate.City) {
+// SetSwitchesID sets the "switches" edge to the SwitchModel entity by id.
+func (m *KeyboardMutation) SetSwitchesID(id int64) {
+	m.switches = &id
+}
+
+// ClearSwitches clears the "switches" edge to the SwitchModel entity.
+func (m *KeyboardMutation) ClearSwitches() {
+	m.clearedswitches = true
+}
+
+// SwitchesCleared reports if the "switches" edge to the SwitchModel entity was cleared.
+func (m *KeyboardMutation) SwitchesCleared() bool {
+	return m.clearedswitches
+}
+
+// SwitchesID returns the "switches" edge ID in the mutation.
+func (m *KeyboardMutation) SwitchesID() (id int64, exists bool) {
+	if m.switches != nil {
+		return *m.switches, true
+	}
+	return
+}
+
+// SwitchesIDs returns the "switches" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SwitchesID instead. It exists only for internal usage by the builders.
+func (m *KeyboardMutation) SwitchesIDs() (ids []int64) {
+	if id := m.switches; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSwitches resets all changes to the "switches" edge.
+func (m *KeyboardMutation) ResetSwitches() {
+	m.switches = nil
+	m.clearedswitches = false
+}
+
+// SetKeycapsID sets the "keycaps" edge to the KeycapModel entity by id.
+func (m *KeyboardMutation) SetKeycapsID(id int64) {
+	m.keycaps = &id
+}
+
+// ClearKeycaps clears the "keycaps" edge to the KeycapModel entity.
+func (m *KeyboardMutation) ClearKeycaps() {
+	m.clearedkeycaps = true
+}
+
+// KeycapsCleared reports if the "keycaps" edge to the KeycapModel entity was cleared.
+func (m *KeyboardMutation) KeycapsCleared() bool {
+	return m.clearedkeycaps
+}
+
+// KeycapsID returns the "keycaps" edge ID in the mutation.
+func (m *KeyboardMutation) KeycapsID() (id int64, exists bool) {
+	if m.keycaps != nil {
+		return *m.keycaps, true
+	}
+	return
+}
+
+// KeycapsIDs returns the "keycaps" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// KeycapsID instead. It exists only for internal usage by the builders.
+func (m *KeyboardMutation) KeycapsIDs() (ids []int64) {
+	if id := m.keycaps; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetKeycaps resets all changes to the "keycaps" edge.
+func (m *KeyboardMutation) ResetKeycaps() {
+	m.keycaps = nil
+	m.clearedkeycaps = false
+}
+
+// Where appends a list predicates to the KeyboardMutation builder.
+func (m *KeyboardMutation) Where(ps ...predicate.Keyboard) {
 	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
-func (m *CityMutation) Op() Op {
+func (m *KeyboardMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (City).
-func (m *CityMutation) Type() string {
+// Type returns the node type of this mutation (Keyboard).
+func (m *KeyboardMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *CityMutation) Fields() []string {
+func (m *KeyboardMutation) Fields() []string {
 	fields := make([]string, 0, 3)
 	if m.name != nil {
-		fields = append(fields, city.FieldName)
+		fields = append(fields, keyboard.FieldName)
 	}
-	if m.required_enum != nil {
-		fields = append(fields, city.FieldRequiredEnum)
+	if m.price != nil {
+		fields = append(fields, keyboard.FieldPrice)
 	}
-	if m.nullable_enum != nil {
-		fields = append(fields, city.FieldNullableEnum)
+	if m.discount != nil {
+		fields = append(fields, keyboard.FieldDiscount)
 	}
 	return fields
 }
@@ -303,14 +430,14 @@ func (m *CityMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *CityMutation) Field(name string) (ent.Value, bool) {
+func (m *KeyboardMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case city.FieldName:
+	case keyboard.FieldName:
 		return m.Name()
-	case city.FieldRequiredEnum:
-		return m.RequiredEnum()
-	case city.FieldNullableEnum:
-		return m.NullableEnum()
+	case keyboard.FieldPrice:
+		return m.Price()
+	case keyboard.FieldDiscount:
+		return m.Discount()
 	}
 	return nil, false
 }
@@ -318,199 +445,260 @@ func (m *CityMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *CityMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *KeyboardMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case city.FieldName:
+	case keyboard.FieldName:
 		return m.OldName(ctx)
-	case city.FieldRequiredEnum:
-		return m.OldRequiredEnum(ctx)
-	case city.FieldNullableEnum:
-		return m.OldNullableEnum(ctx)
+	case keyboard.FieldPrice:
+		return m.OldPrice(ctx)
+	case keyboard.FieldDiscount:
+		return m.OldDiscount(ctx)
 	}
-	return nil, fmt.Errorf("unknown City field %s", name)
+	return nil, fmt.Errorf("unknown Keyboard field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *CityMutation) SetField(name string, value ent.Value) error {
+func (m *KeyboardMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case city.FieldName:
+	case keyboard.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
 		return nil
-	case city.FieldRequiredEnum:
-		v, ok := value.(city.RequiredEnum)
+	case keyboard.FieldPrice:
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRequiredEnum(v)
+		m.SetPrice(v)
 		return nil
-	case city.FieldNullableEnum:
-		v, ok := value.(city.NullableEnum)
+	case keyboard.FieldDiscount:
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetNullableEnum(v)
+		m.SetDiscount(v)
 		return nil
 	}
-	return fmt.Errorf("unknown City field %s", name)
+	return fmt.Errorf("unknown Keyboard field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *CityMutation) AddedFields() []string {
-	return nil
+func (m *KeyboardMutation) AddedFields() []string {
+	var fields []string
+	if m.addprice != nil {
+		fields = append(fields, keyboard.FieldPrice)
+	}
+	if m.adddiscount != nil {
+		fields = append(fields, keyboard.FieldDiscount)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *CityMutation) AddedField(name string) (ent.Value, bool) {
+func (m *KeyboardMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case keyboard.FieldPrice:
+		return m.AddedPrice()
+	case keyboard.FieldDiscount:
+		return m.AddedDiscount()
+	}
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *CityMutation) AddField(name string, value ent.Value) error {
+func (m *KeyboardMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case keyboard.FieldPrice:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPrice(v)
+		return nil
+	case keyboard.FieldDiscount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDiscount(v)
+		return nil
 	}
-	return fmt.Errorf("unknown City numeric field %s", name)
+	return fmt.Errorf("unknown Keyboard numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *CityMutation) ClearedFields() []string {
+func (m *KeyboardMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(city.FieldNullableEnum) {
-		fields = append(fields, city.FieldNullableEnum)
+	if m.FieldCleared(keyboard.FieldDiscount) {
+		fields = append(fields, keyboard.FieldDiscount)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *CityMutation) FieldCleared(name string) bool {
+func (m *KeyboardMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *CityMutation) ClearField(name string) error {
+func (m *KeyboardMutation) ClearField(name string) error {
 	switch name {
-	case city.FieldNullableEnum:
-		m.ClearNullableEnum()
+	case keyboard.FieldDiscount:
+		m.ClearDiscount()
 		return nil
 	}
-	return fmt.Errorf("unknown City nullable field %s", name)
+	return fmt.Errorf("unknown Keyboard nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *CityMutation) ResetField(name string) error {
+func (m *KeyboardMutation) ResetField(name string) error {
 	switch name {
-	case city.FieldName:
+	case keyboard.FieldName:
 		m.ResetName()
 		return nil
-	case city.FieldRequiredEnum:
-		m.ResetRequiredEnum()
+	case keyboard.FieldPrice:
+		m.ResetPrice()
 		return nil
-	case city.FieldNullableEnum:
-		m.ResetNullableEnum()
+	case keyboard.FieldDiscount:
+		m.ResetDiscount()
 		return nil
 	}
-	return fmt.Errorf("unknown City field %s", name)
+	return fmt.Errorf("unknown Keyboard field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *CityMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+func (m *KeyboardMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.switches != nil {
+		edges = append(edges, keyboard.EdgeSwitches)
+	}
+	if m.keycaps != nil {
+		edges = append(edges, keyboard.EdgeKeycaps)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *CityMutation) AddedIDs(name string) []ent.Value {
+func (m *KeyboardMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case keyboard.EdgeSwitches:
+		if id := m.switches; id != nil {
+			return []ent.Value{*id}
+		}
+	case keyboard.EdgeKeycaps:
+		if id := m.keycaps; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *CityMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+func (m *KeyboardMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *CityMutation) RemovedIDs(name string) []ent.Value {
+func (m *KeyboardMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *CityMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+func (m *KeyboardMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedswitches {
+		edges = append(edges, keyboard.EdgeSwitches)
+	}
+	if m.clearedkeycaps {
+		edges = append(edges, keyboard.EdgeKeycaps)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *CityMutation) EdgeCleared(name string) bool {
+func (m *KeyboardMutation) EdgeCleared(name string) bool {
+	switch name {
+	case keyboard.EdgeSwitches:
+		return m.clearedswitches
+	case keyboard.EdgeKeycaps:
+		return m.clearedkeycaps
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *CityMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown City unique edge %s", name)
+func (m *KeyboardMutation) ClearEdge(name string) error {
+	switch name {
+	case keyboard.EdgeSwitches:
+		m.ClearSwitches()
+		return nil
+	case keyboard.EdgeKeycaps:
+		m.ClearKeycaps()
+		return nil
+	}
+	return fmt.Errorf("unknown Keyboard unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *CityMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown City edge %s", name)
+func (m *KeyboardMutation) ResetEdge(name string) error {
+	switch name {
+	case keyboard.EdgeSwitches:
+		m.ResetSwitches()
+		return nil
+	case keyboard.EdgeKeycaps:
+		m.ResetKeycaps()
+		return nil
+	}
+	return fmt.Errorf("unknown Keyboard edge %s", name)
 }
 
-// UserMutation represents an operation that mutates the User nodes in the graph.
-type UserMutation struct {
+// KeycapModelMutation represents an operation that mutates the KeycapModel nodes in the graph.
+type KeycapModelMutation struct {
 	config
-	op                     Op
-	typ                    string
-	id                     *int64
-	first_name             *string
-	last_name              *string
-	user_name              *string
-	optional_nullable_bool *bool
-	hobbies                *[]string
-	appendhobbies          []string
-	clearedFields          map[string]struct{}
-	required_city          *int64
-	clearedrequired_city   bool
-	optional_city          *int64
-	clearedoptional_city   bool
-	friend_list            map[int64]struct{}
-	removedfriend_list     map[int64]struct{}
-	clearedfriend_list     bool
-	done                   bool
-	oldValue               func(context.Context) (*User, error)
-	predicates             []predicate.User
+	op            Op
+	typ           string
+	id            *int64
+	name          *string
+	profile       *string
+	material      *keycapmodel.Material
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*KeycapModel, error)
+	predicates    []predicate.KeycapModel
 }
 
-var _ ent.Mutation = (*UserMutation)(nil)
+var _ ent.Mutation = (*KeycapModelMutation)(nil)
 
-// userOption allows management of the mutation configuration using functional options.
-type userOption func(*UserMutation)
+// keycapmodelOption allows management of the mutation configuration using functional options.
+type keycapmodelOption func(*KeycapModelMutation)
 
-// newUserMutation creates new mutation for the User entity.
-func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
-	m := &UserMutation{
+// newKeycapModelMutation creates new mutation for the KeycapModel entity.
+func newKeycapModelMutation(c config, op Op, opts ...keycapmodelOption) *KeycapModelMutation {
+	m := &KeycapModelMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeUser,
+		typ:           TypeKeycapModel,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -519,20 +707,20 @@ func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	return m
 }
 
-// withUserID sets the ID field of the mutation.
-func withUserID(id int64) userOption {
-	return func(m *UserMutation) {
+// withKeycapModelID sets the ID field of the mutation.
+func withKeycapModelID(id int64) keycapmodelOption {
+	return func(m *KeycapModelMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *User
+			value *KeycapModel
 		)
-		m.oldValue = func(ctx context.Context) (*User, error) {
+		m.oldValue = func(ctx context.Context) (*KeycapModel, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().User.Get(ctx, id)
+					value, err = m.Client().KeycapModel.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -541,10 +729,10 @@ func withUserID(id int64) userOption {
 	}
 }
 
-// withUser sets the old User of the mutation.
-func withUser(node *User) userOption {
-	return func(m *UserMutation) {
-		m.oldValue = func(context.Context) (*User, error) {
+// withKeycapModel sets the old KeycapModel of the mutation.
+func withKeycapModel(node *KeycapModel) keycapmodelOption {
+	return func(m *KeycapModelMutation) {
+		m.oldValue = func(context.Context) (*KeycapModel, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -553,7 +741,7 @@ func withUser(node *User) userOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m UserMutation) Client() *Client {
+func (m KeycapModelMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -561,7 +749,7 @@ func (m UserMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m UserMutation) Tx() (*Tx, error) {
+func (m KeycapModelMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -571,14 +759,14 @@ func (m UserMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of User entities.
-func (m *UserMutation) SetID(id int64) {
+// operation is only accepted on creation of KeycapModel entities.
+func (m *KeycapModelMutation) SetID(id int64) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *UserMutation) ID() (id int64, exists bool) {
+func (m *KeycapModelMutation) ID() (id int64, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -589,7 +777,7 @@ func (m *UserMutation) ID() (id int64, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *UserMutation) IDs(ctx context.Context) ([]int64, error) {
+func (m *KeycapModelMutation) IDs(ctx context.Context) ([]int64, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -598,386 +786,148 @@ func (m *UserMutation) IDs(ctx context.Context) ([]int64, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().User.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().KeycapModel.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
-// SetFirstName sets the "first_name" field.
-func (m *UserMutation) SetFirstName(s string) {
-	m.first_name = &s
+// SetName sets the "name" field.
+func (m *KeycapModelMutation) SetName(s string) {
+	m.name = &s
 }
 
-// FirstName returns the value of the "first_name" field in the mutation.
-func (m *UserMutation) FirstName() (r string, exists bool) {
-	v := m.first_name
+// Name returns the value of the "name" field in the mutation.
+func (m *KeycapModelMutation) Name() (r string, exists bool) {
+	v := m.name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldFirstName returns the old "first_name" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
+// OldName returns the old "name" field's value of the KeycapModel entity.
+// If the KeycapModel object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldFirstName(ctx context.Context) (v string, err error) {
+func (m *KeycapModelMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFirstName is only allowed on UpdateOne operations")
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFirstName requires an ID field in the mutation")
+		return v, errors.New("OldName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFirstName: %w", err)
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
 	}
-	return oldValue.FirstName, nil
+	return oldValue.Name, nil
 }
 
-// ResetFirstName resets all changes to the "first_name" field.
-func (m *UserMutation) ResetFirstName() {
-	m.first_name = nil
+// ResetName resets all changes to the "name" field.
+func (m *KeycapModelMutation) ResetName() {
+	m.name = nil
 }
 
-// SetLastName sets the "last_name" field.
-func (m *UserMutation) SetLastName(s string) {
-	m.last_name = &s
+// SetProfile sets the "profile" field.
+func (m *KeycapModelMutation) SetProfile(s string) {
+	m.profile = &s
 }
 
-// LastName returns the value of the "last_name" field in the mutation.
-func (m *UserMutation) LastName() (r string, exists bool) {
-	v := m.last_name
+// Profile returns the value of the "profile" field in the mutation.
+func (m *KeycapModelMutation) Profile() (r string, exists bool) {
+	v := m.profile
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLastName returns the old "last_name" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
+// OldProfile returns the old "profile" field's value of the KeycapModel entity.
+// If the KeycapModel object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldLastName(ctx context.Context) (v string, err error) {
+func (m *KeycapModelMutation) OldProfile(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLastName is only allowed on UpdateOne operations")
+		return v, errors.New("OldProfile is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLastName requires an ID field in the mutation")
+		return v, errors.New("OldProfile requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLastName: %w", err)
+		return v, fmt.Errorf("querying old value for OldProfile: %w", err)
 	}
-	return oldValue.LastName, nil
+	return oldValue.Profile, nil
 }
 
-// ResetLastName resets all changes to the "last_name" field.
-func (m *UserMutation) ResetLastName() {
-	m.last_name = nil
+// ResetProfile resets all changes to the "profile" field.
+func (m *KeycapModelMutation) ResetProfile() {
+	m.profile = nil
 }
 
-// SetUserName sets the "user_name" field.
-func (m *UserMutation) SetUserName(s string) {
-	m.user_name = &s
+// SetMaterial sets the "material" field.
+func (m *KeycapModelMutation) SetMaterial(k keycapmodel.Material) {
+	m.material = &k
 }
 
-// UserName returns the value of the "user_name" field in the mutation.
-func (m *UserMutation) UserName() (r string, exists bool) {
-	v := m.user_name
+// Material returns the value of the "material" field in the mutation.
+func (m *KeycapModelMutation) Material() (r keycapmodel.Material, exists bool) {
+	v := m.material
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldUserName returns the old "user_name" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
+// OldMaterial returns the old "material" field's value of the KeycapModel entity.
+// If the KeycapModel object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldUserName(ctx context.Context) (v string, err error) {
+func (m *KeycapModelMutation) OldMaterial(ctx context.Context) (v keycapmodel.Material, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserName is only allowed on UpdateOne operations")
+		return v, errors.New("OldMaterial is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserName requires an ID field in the mutation")
+		return v, errors.New("OldMaterial requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserName: %w", err)
+		return v, fmt.Errorf("querying old value for OldMaterial: %w", err)
 	}
-	return oldValue.UserName, nil
+	return oldValue.Material, nil
 }
 
-// ResetUserName resets all changes to the "user_name" field.
-func (m *UserMutation) ResetUserName() {
-	m.user_name = nil
+// ResetMaterial resets all changes to the "material" field.
+func (m *KeycapModelMutation) ResetMaterial() {
+	m.material = nil
 }
 
-// SetOptionalNullableBool sets the "optional_nullable_bool" field.
-func (m *UserMutation) SetOptionalNullableBool(b bool) {
-	m.optional_nullable_bool = &b
-}
-
-// OptionalNullableBool returns the value of the "optional_nullable_bool" field in the mutation.
-func (m *UserMutation) OptionalNullableBool() (r bool, exists bool) {
-	v := m.optional_nullable_bool
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldOptionalNullableBool returns the old "optional_nullable_bool" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldOptionalNullableBool(ctx context.Context) (v *bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOptionalNullableBool is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOptionalNullableBool requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOptionalNullableBool: %w", err)
-	}
-	return oldValue.OptionalNullableBool, nil
-}
-
-// ClearOptionalNullableBool clears the value of the "optional_nullable_bool" field.
-func (m *UserMutation) ClearOptionalNullableBool() {
-	m.optional_nullable_bool = nil
-	m.clearedFields[user.FieldOptionalNullableBool] = struct{}{}
-}
-
-// OptionalNullableBoolCleared returns if the "optional_nullable_bool" field was cleared in this mutation.
-func (m *UserMutation) OptionalNullableBoolCleared() bool {
-	_, ok := m.clearedFields[user.FieldOptionalNullableBool]
-	return ok
-}
-
-// ResetOptionalNullableBool resets all changes to the "optional_nullable_bool" field.
-func (m *UserMutation) ResetOptionalNullableBool() {
-	m.optional_nullable_bool = nil
-	delete(m.clearedFields, user.FieldOptionalNullableBool)
-}
-
-// SetHobbies sets the "hobbies" field.
-func (m *UserMutation) SetHobbies(s []string) {
-	m.hobbies = &s
-	m.appendhobbies = nil
-}
-
-// Hobbies returns the value of the "hobbies" field in the mutation.
-func (m *UserMutation) Hobbies() (r []string, exists bool) {
-	v := m.hobbies
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldHobbies returns the old "hobbies" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldHobbies(ctx context.Context) (v []string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHobbies is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHobbies requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHobbies: %w", err)
-	}
-	return oldValue.Hobbies, nil
-}
-
-// AppendHobbies adds s to the "hobbies" field.
-func (m *UserMutation) AppendHobbies(s []string) {
-	m.appendhobbies = append(m.appendhobbies, s...)
-}
-
-// AppendedHobbies returns the list of values that were appended to the "hobbies" field in this mutation.
-func (m *UserMutation) AppendedHobbies() ([]string, bool) {
-	if len(m.appendhobbies) == 0 {
-		return nil, false
-	}
-	return m.appendhobbies, true
-}
-
-// ResetHobbies resets all changes to the "hobbies" field.
-func (m *UserMutation) ResetHobbies() {
-	m.hobbies = nil
-	m.appendhobbies = nil
-}
-
-// SetRequiredCityID sets the "required_city" edge to the City entity by id.
-func (m *UserMutation) SetRequiredCityID(id int64) {
-	m.required_city = &id
-}
-
-// ClearRequiredCity clears the "required_city" edge to the City entity.
-func (m *UserMutation) ClearRequiredCity() {
-	m.clearedrequired_city = true
-}
-
-// RequiredCityCleared reports if the "required_city" edge to the City entity was cleared.
-func (m *UserMutation) RequiredCityCleared() bool {
-	return m.clearedrequired_city
-}
-
-// RequiredCityID returns the "required_city" edge ID in the mutation.
-func (m *UserMutation) RequiredCityID() (id int64, exists bool) {
-	if m.required_city != nil {
-		return *m.required_city, true
-	}
-	return
-}
-
-// RequiredCityIDs returns the "required_city" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequiredCityID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) RequiredCityIDs() (ids []int64) {
-	if id := m.required_city; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetRequiredCity resets all changes to the "required_city" edge.
-func (m *UserMutation) ResetRequiredCity() {
-	m.required_city = nil
-	m.clearedrequired_city = false
-}
-
-// SetOptionalCityID sets the "optional_city" edge to the City entity by id.
-func (m *UserMutation) SetOptionalCityID(id int64) {
-	m.optional_city = &id
-}
-
-// ClearOptionalCity clears the "optional_city" edge to the City entity.
-func (m *UserMutation) ClearOptionalCity() {
-	m.clearedoptional_city = true
-}
-
-// OptionalCityCleared reports if the "optional_city" edge to the City entity was cleared.
-func (m *UserMutation) OptionalCityCleared() bool {
-	return m.clearedoptional_city
-}
-
-// OptionalCityID returns the "optional_city" edge ID in the mutation.
-func (m *UserMutation) OptionalCityID() (id int64, exists bool) {
-	if m.optional_city != nil {
-		return *m.optional_city, true
-	}
-	return
-}
-
-// OptionalCityIDs returns the "optional_city" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// OptionalCityID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) OptionalCityIDs() (ids []int64) {
-	if id := m.optional_city; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetOptionalCity resets all changes to the "optional_city" edge.
-func (m *UserMutation) ResetOptionalCity() {
-	m.optional_city = nil
-	m.clearedoptional_city = false
-}
-
-// AddFriendListIDs adds the "friend_list" edge to the User entity by ids.
-func (m *UserMutation) AddFriendListIDs(ids ...int64) {
-	if m.friend_list == nil {
-		m.friend_list = make(map[int64]struct{})
-	}
-	for i := range ids {
-		m.friend_list[ids[i]] = struct{}{}
-	}
-}
-
-// ClearFriendList clears the "friend_list" edge to the User entity.
-func (m *UserMutation) ClearFriendList() {
-	m.clearedfriend_list = true
-}
-
-// FriendListCleared reports if the "friend_list" edge to the User entity was cleared.
-func (m *UserMutation) FriendListCleared() bool {
-	return m.clearedfriend_list
-}
-
-// RemoveFriendListIDs removes the "friend_list" edge to the User entity by IDs.
-func (m *UserMutation) RemoveFriendListIDs(ids ...int64) {
-	if m.removedfriend_list == nil {
-		m.removedfriend_list = make(map[int64]struct{})
-	}
-	for i := range ids {
-		delete(m.friend_list, ids[i])
-		m.removedfriend_list[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedFriendList returns the removed IDs of the "friend_list" edge to the User entity.
-func (m *UserMutation) RemovedFriendListIDs() (ids []int64) {
-	for id := range m.removedfriend_list {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// FriendListIDs returns the "friend_list" edge IDs in the mutation.
-func (m *UserMutation) FriendListIDs() (ids []int64) {
-	for id := range m.friend_list {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetFriendList resets all changes to the "friend_list" edge.
-func (m *UserMutation) ResetFriendList() {
-	m.friend_list = nil
-	m.clearedfriend_list = false
-	m.removedfriend_list = nil
-}
-
-// Where appends a list predicates to the UserMutation builder.
-func (m *UserMutation) Where(ps ...predicate.User) {
+// Where appends a list predicates to the KeycapModelMutation builder.
+func (m *KeycapModelMutation) Where(ps ...predicate.KeycapModel) {
 	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
-func (m *UserMutation) Op() Op {
+func (m *KeycapModelMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (User).
-func (m *UserMutation) Type() string {
+// Type returns the node type of this mutation (KeycapModel).
+func (m *KeycapModelMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.first_name != nil {
-		fields = append(fields, user.FieldFirstName)
+func (m *KeycapModelMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.name != nil {
+		fields = append(fields, keycapmodel.FieldName)
 	}
-	if m.last_name != nil {
-		fields = append(fields, user.FieldLastName)
+	if m.profile != nil {
+		fields = append(fields, keycapmodel.FieldProfile)
 	}
-	if m.user_name != nil {
-		fields = append(fields, user.FieldUserName)
-	}
-	if m.optional_nullable_bool != nil {
-		fields = append(fields, user.FieldOptionalNullableBool)
-	}
-	if m.hobbies != nil {
-		fields = append(fields, user.FieldHobbies)
+	if m.material != nil {
+		fields = append(fields, keycapmodel.FieldMaterial)
 	}
 	return fields
 }
@@ -985,18 +935,14 @@ func (m *UserMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *UserMutation) Field(name string) (ent.Value, bool) {
+func (m *KeycapModelMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case user.FieldFirstName:
-		return m.FirstName()
-	case user.FieldLastName:
-		return m.LastName()
-	case user.FieldUserName:
-		return m.UserName()
-	case user.FieldOptionalNullableBool:
-		return m.OptionalNullableBool()
-	case user.FieldHobbies:
-		return m.Hobbies()
+	case keycapmodel.FieldName:
+		return m.Name()
+	case keycapmodel.FieldProfile:
+		return m.Profile()
+	case keycapmodel.FieldMaterial:
+		return m.Material()
 	}
 	return nil, false
 }
@@ -1004,255 +950,521 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *KeycapModelMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case user.FieldFirstName:
-		return m.OldFirstName(ctx)
-	case user.FieldLastName:
-		return m.OldLastName(ctx)
-	case user.FieldUserName:
-		return m.OldUserName(ctx)
-	case user.FieldOptionalNullableBool:
-		return m.OldOptionalNullableBool(ctx)
-	case user.FieldHobbies:
-		return m.OldHobbies(ctx)
+	case keycapmodel.FieldName:
+		return m.OldName(ctx)
+	case keycapmodel.FieldProfile:
+		return m.OldProfile(ctx)
+	case keycapmodel.FieldMaterial:
+		return m.OldMaterial(ctx)
 	}
-	return nil, fmt.Errorf("unknown User field %s", name)
+	return nil, fmt.Errorf("unknown KeycapModel field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *UserMutation) SetField(name string, value ent.Value) error {
+func (m *KeycapModelMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case user.FieldFirstName:
+	case keycapmodel.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetFirstName(v)
+		m.SetName(v)
 		return nil
-	case user.FieldLastName:
+	case keycapmodel.FieldProfile:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLastName(v)
+		m.SetProfile(v)
 		return nil
-	case user.FieldUserName:
-		v, ok := value.(string)
+	case keycapmodel.FieldMaterial:
+		v, ok := value.(keycapmodel.Material)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetUserName(v)
-		return nil
-	case user.FieldOptionalNullableBool:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetOptionalNullableBool(v)
-		return nil
-	case user.FieldHobbies:
-		v, ok := value.([]string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetHobbies(v)
+		m.SetMaterial(v)
 		return nil
 	}
-	return fmt.Errorf("unknown User field %s", name)
+	return fmt.Errorf("unknown KeycapModel field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *UserMutation) AddedFields() []string {
+func (m *KeycapModelMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
+func (m *KeycapModelMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *UserMutation) AddField(name string, value ent.Value) error {
+func (m *KeycapModelMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown User numeric field %s", name)
+	return fmt.Errorf("unknown KeycapModel numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *UserMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(user.FieldOptionalNullableBool) {
-		fields = append(fields, user.FieldOptionalNullableBool)
-	}
-	return fields
+func (m *KeycapModelMutation) ClearedFields() []string {
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *UserMutation) FieldCleared(name string) bool {
+func (m *KeycapModelMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *UserMutation) ClearField(name string) error {
-	switch name {
-	case user.FieldOptionalNullableBool:
-		m.ClearOptionalNullableBool()
-		return nil
-	}
-	return fmt.Errorf("unknown User nullable field %s", name)
+func (m *KeycapModelMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown KeycapModel nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *UserMutation) ResetField(name string) error {
+func (m *KeycapModelMutation) ResetField(name string) error {
 	switch name {
-	case user.FieldFirstName:
-		m.ResetFirstName()
+	case keycapmodel.FieldName:
+		m.ResetName()
 		return nil
-	case user.FieldLastName:
-		m.ResetLastName()
+	case keycapmodel.FieldProfile:
+		m.ResetProfile()
 		return nil
-	case user.FieldUserName:
-		m.ResetUserName()
-		return nil
-	case user.FieldOptionalNullableBool:
-		m.ResetOptionalNullableBool()
-		return nil
-	case user.FieldHobbies:
-		m.ResetHobbies()
+	case keycapmodel.FieldMaterial:
+		m.ResetMaterial()
 		return nil
 	}
-	return fmt.Errorf("unknown User field %s", name)
+	return fmt.Errorf("unknown KeycapModel field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.required_city != nil {
-		edges = append(edges, user.EdgeRequiredCity)
-	}
-	if m.optional_city != nil {
-		edges = append(edges, user.EdgeOptionalCity)
-	}
-	if m.friend_list != nil {
-		edges = append(edges, user.EdgeFriendList)
-	}
+func (m *KeycapModelMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *UserMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case user.EdgeRequiredCity:
-		if id := m.required_city; id != nil {
-			return []ent.Value{*id}
-		}
-	case user.EdgeOptionalCity:
-		if id := m.optional_city; id != nil {
-			return []ent.Value{*id}
-		}
-	case user.EdgeFriendList:
-		ids := make([]ent.Value, 0, len(m.friend_list))
-		for id := range m.friend_list {
-			ids = append(ids, id)
-		}
-		return ids
-	}
+func (m *KeycapModelMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.removedfriend_list != nil {
-		edges = append(edges, user.EdgeFriendList)
-	}
+func (m *KeycapModelMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *UserMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case user.EdgeFriendList:
-		ids := make([]ent.Value, 0, len(m.removedfriend_list))
-		for id := range m.removedfriend_list {
-			ids = append(ids, id)
-		}
-		return ids
-	}
+func (m *KeycapModelMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.clearedrequired_city {
-		edges = append(edges, user.EdgeRequiredCity)
-	}
-	if m.clearedoptional_city {
-		edges = append(edges, user.EdgeOptionalCity)
-	}
-	if m.clearedfriend_list {
-		edges = append(edges, user.EdgeFriendList)
-	}
+func (m *KeycapModelMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *UserMutation) EdgeCleared(name string) bool {
-	switch name {
-	case user.EdgeRequiredCity:
-		return m.clearedrequired_city
-	case user.EdgeOptionalCity:
-		return m.clearedoptional_city
-	case user.EdgeFriendList:
-		return m.clearedfriend_list
-	}
+func (m *KeycapModelMutation) EdgeCleared(name string) bool {
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *UserMutation) ClearEdge(name string) error {
-	switch name {
-	case user.EdgeRequiredCity:
-		m.ClearRequiredCity()
-		return nil
-	case user.EdgeOptionalCity:
-		m.ClearOptionalCity()
-		return nil
-	}
-	return fmt.Errorf("unknown User unique edge %s", name)
+func (m *KeycapModelMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown KeycapModel unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *UserMutation) ResetEdge(name string) error {
+func (m *KeycapModelMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown KeycapModel edge %s", name)
+}
+
+// SwitchModelMutation represents an operation that mutates the SwitchModel nodes in the graph.
+type SwitchModelMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int64
+	name          *string
+	switch_type   *switchmodel.SwitchType
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*SwitchModel, error)
+	predicates    []predicate.SwitchModel
+}
+
+var _ ent.Mutation = (*SwitchModelMutation)(nil)
+
+// switchmodelOption allows management of the mutation configuration using functional options.
+type switchmodelOption func(*SwitchModelMutation)
+
+// newSwitchModelMutation creates new mutation for the SwitchModel entity.
+func newSwitchModelMutation(c config, op Op, opts ...switchmodelOption) *SwitchModelMutation {
+	m := &SwitchModelMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSwitchModel,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSwitchModelID sets the ID field of the mutation.
+func withSwitchModelID(id int64) switchmodelOption {
+	return func(m *SwitchModelMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SwitchModel
+		)
+		m.oldValue = func(ctx context.Context) (*SwitchModel, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SwitchModel.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSwitchModel sets the old SwitchModel of the mutation.
+func withSwitchModel(node *SwitchModel) switchmodelOption {
+	return func(m *SwitchModelMutation) {
+		m.oldValue = func(context.Context) (*SwitchModel, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SwitchModelMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SwitchModelMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SwitchModel entities.
+func (m *SwitchModelMutation) SetID(id int64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SwitchModelMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SwitchModelMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SwitchModel.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *SwitchModelMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *SwitchModelMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the SwitchModel entity.
+// If the SwitchModel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SwitchModelMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *SwitchModelMutation) ResetName() {
+	m.name = nil
+}
+
+// SetSwitchType sets the "switch_type" field.
+func (m *SwitchModelMutation) SetSwitchType(st switchmodel.SwitchType) {
+	m.switch_type = &st
+}
+
+// SwitchType returns the value of the "switch_type" field in the mutation.
+func (m *SwitchModelMutation) SwitchType() (r switchmodel.SwitchType, exists bool) {
+	v := m.switch_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSwitchType returns the old "switch_type" field's value of the SwitchModel entity.
+// If the SwitchModel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SwitchModelMutation) OldSwitchType(ctx context.Context) (v switchmodel.SwitchType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSwitchType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSwitchType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSwitchType: %w", err)
+	}
+	return oldValue.SwitchType, nil
+}
+
+// ResetSwitchType resets all changes to the "switch_type" field.
+func (m *SwitchModelMutation) ResetSwitchType() {
+	m.switch_type = nil
+}
+
+// Where appends a list predicates to the SwitchModelMutation builder.
+func (m *SwitchModelMutation) Where(ps ...predicate.SwitchModel) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *SwitchModelMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (SwitchModel).
+func (m *SwitchModelMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SwitchModelMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.name != nil {
+		fields = append(fields, switchmodel.FieldName)
+	}
+	if m.switch_type != nil {
+		fields = append(fields, switchmodel.FieldSwitchType)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SwitchModelMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case user.EdgeRequiredCity:
-		m.ResetRequiredCity()
+	case switchmodel.FieldName:
+		return m.Name()
+	case switchmodel.FieldSwitchType:
+		return m.SwitchType()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SwitchModelMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case switchmodel.FieldName:
+		return m.OldName(ctx)
+	case switchmodel.FieldSwitchType:
+		return m.OldSwitchType(ctx)
+	}
+	return nil, fmt.Errorf("unknown SwitchModel field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SwitchModelMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case switchmodel.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
 		return nil
-	case user.EdgeOptionalCity:
-		m.ResetOptionalCity()
-		return nil
-	case user.EdgeFriendList:
-		m.ResetFriendList()
+	case switchmodel.FieldSwitchType:
+		v, ok := value.(switchmodel.SwitchType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSwitchType(v)
 		return nil
 	}
-	return fmt.Errorf("unknown User edge %s", name)
+	return fmt.Errorf("unknown SwitchModel field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SwitchModelMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SwitchModelMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SwitchModelMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SwitchModel numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SwitchModelMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SwitchModelMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SwitchModelMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown SwitchModel nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SwitchModelMutation) ResetField(name string) error {
+	switch name {
+	case switchmodel.FieldName:
+		m.ResetName()
+		return nil
+	case switchmodel.FieldSwitchType:
+		m.ResetSwitchType()
+		return nil
+	}
+	return fmt.Errorf("unknown SwitchModel field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SwitchModelMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SwitchModelMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SwitchModelMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SwitchModelMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SwitchModelMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SwitchModelMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SwitchModelMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SwitchModel unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SwitchModelMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SwitchModel edge %s", name)
 }

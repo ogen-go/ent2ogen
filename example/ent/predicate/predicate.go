@@ -6,8 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// City is the predicate function for city builders.
-type City func(*sql.Selector)
+// Keyboard is the predicate function for keyboard builders.
+type Keyboard func(*sql.Selector)
 
-// User is the predicate function for user builders.
-type User func(*sql.Selector)
+// KeycapModel is the predicate function for keycapmodel builders.
+type KeycapModel func(*sql.Selector)
+
+// SwitchModel is the predicate function for switchmodel builders.
+type SwitchModel func(*sql.Selector)

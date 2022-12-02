@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	f, err := os.ReadFile("../_openapi/schema.json")
+	f, err := os.ReadFile("../_openapi/openapi.yml")
 	if err != nil {
 		log.Fatalf("reading openapi schema: %v", err)
 	}
@@ -33,15 +33,15 @@ func main() {
 
 	if err := g.WriteSource(ogengenfs.FormattedSource{
 		Format: true,
-		Root:   "../openapi",
-	}, "openapi"); err != nil {
+		Root:   "../api",
+	}, "api"); err != nil {
 		log.Fatalf("generating ogen sources: %v", err)
 	}
 
 	ex, err := ent2ogen.NewExtension(ent2ogen.ExtensionConfig{
 		API:         g.API(),
 		Types:       g.Types(),
-		OgenPackage: "github.com/ogen-go/ent2ogen/example/openapi",
+		OgenPackage: "github.com/ogen-go/ent2ogen/example/api",
 	})
 	if err != nil {
 		log.Fatalf("creating ent2ogen extension: %v", err)

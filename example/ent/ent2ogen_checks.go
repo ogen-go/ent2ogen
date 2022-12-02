@@ -3,44 +3,55 @@
 package ent
 
 import (
-	"github.com/ogen-go/ent2ogen/example/ent/city"
-	openapi "github.com/ogen-go/ent2ogen/example/openapi"
+	openapi "github.com/ogen-go/ent2ogen/example/api"
+	"github.com/ogen-go/ent2ogen/example/ent/keycapmodel"
+	"github.com/ogen-go/ent2ogen/example/ent/switchmodel"
 )
 
 func _() {
 	_ = struct {
-		Name         string
-		RequiredEnum openapi.CityRequiredEnum
-		NullableEnum openapi.NilCityNullableEnum
-	}(openapi.City{})
+		ID       int64
+		Name     string
+		Switches openapi.Switches
+		Keycaps  openapi.Keycaps
+		Price    int64
+		Discount openapi.NilInt64
+	}(openapi.Keyboard{})
+}
+
+func _() {
+	_ = struct {
+		ID       int64
+		Name     string
+		Profile  string
+		Material openapi.KeycapsMaterial
+	}(openapi.Keycaps{})
 	_ = map[bool]struct{}{
-		string(openapi.CityRequiredEnumA) == string(city.RequiredEnumA): {},
+		string(openapi.KeycapsMaterialABS) == string(keycapmodel.MaterialABS): {},
 		false: {},
 	}
 	_ = map[bool]struct{}{
-		string(openapi.CityRequiredEnumB) == string(city.RequiredEnumB): {},
-		false: {},
-	}
-	_ = map[bool]struct{}{
-		string(openapi.CityNullableEnumC) == string(city.NullableEnumC): {},
-		false: {},
-	}
-	_ = map[bool]struct{}{
-		string(openapi.CityNullableEnumD) == string(city.NullableEnumD): {},
+		string(openapi.KeycapsMaterialPBT) == string(keycapmodel.MaterialPBT): {},
 		false: {},
 	}
 }
 
 func _() {
 	_ = struct {
-		ID                   int64
-		FirstName            string
-		LastName             string
-		Username             string
-		OptionalNullableBool openapi.OptNilBool
-		RequiredCity         openapi.City
-		OptionalCity         openapi.OptCity
-		Friends              []openapi.User
-		Hobbies              []string
-	}(openapi.User{})
+		ID         int64
+		Name       string
+		SwitchType openapi.SwitchesSwitchType
+	}(openapi.Switches{})
+	_ = map[bool]struct{}{
+		string(openapi.SwitchesSwitchTypeMechanical) == string(switchmodel.SwitchTypeMechanical): {},
+		false: {},
+	}
+	_ = map[bool]struct{}{
+		string(openapi.SwitchesSwitchTypeOptical) == string(switchmodel.SwitchTypeOptical): {},
+		false: {},
+	}
+	_ = map[bool]struct{}{
+		string(openapi.SwitchesSwitchTypeElectrocapacitive) == string(switchmodel.SwitchTypeElectrocapacitive): {},
+		false: {},
+	}
 }

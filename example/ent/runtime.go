@@ -3,29 +3,32 @@
 package ent
 
 import (
-	"github.com/ogen-go/ent2ogen/example/ent/city"
+	"github.com/ogen-go/ent2ogen/example/ent/keyboard"
+	"github.com/ogen-go/ent2ogen/example/ent/keycapmodel"
 	"github.com/ogen-go/ent2ogen/example/ent/schema"
-	"github.com/ogen-go/ent2ogen/example/ent/user"
+	"github.com/ogen-go/ent2ogen/example/ent/switchmodel"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	cityFields := schema.City{}.Fields()
-	_ = cityFields
-	// cityDescName is the schema descriptor for name field.
-	cityDescName := cityFields[1].Descriptor()
-	// city.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	city.NameValidator = cityDescName.Validators[0].(func(string) error)
-	userFields := schema.User{}.Fields()
-	_ = userFields
-	// userDescFirstName is the schema descriptor for first_name field.
-	userDescFirstName := userFields[1].Descriptor()
-	// user.FirstNameValidator is a validator for the "first_name" field. It is called by the builders before save.
-	user.FirstNameValidator = userDescFirstName.Validators[0].(func(string) error)
-	// userDescLastName is the schema descriptor for last_name field.
-	userDescLastName := userFields[2].Descriptor()
-	// user.LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
-	user.LastNameValidator = userDescLastName.Validators[0].(func(string) error)
+	keyboardFields := schema.Keyboard{}.Fields()
+	_ = keyboardFields
+	// keyboardDescName is the schema descriptor for name field.
+	keyboardDescName := keyboardFields[1].Descriptor()
+	// keyboard.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	keyboard.NameValidator = keyboardDescName.Validators[0].(func(string) error)
+	keycapmodelFields := schema.KeycapModel{}.Fields()
+	_ = keycapmodelFields
+	// keycapmodelDescName is the schema descriptor for name field.
+	keycapmodelDescName := keycapmodelFields[1].Descriptor()
+	// keycapmodel.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	keycapmodel.NameValidator = keycapmodelDescName.Validators[0].(func(string) error)
+	switchmodelFields := schema.SwitchModel{}.Fields()
+	_ = switchmodelFields
+	// switchmodelDescName is the schema descriptor for name field.
+	switchmodelDescName := switchmodelFields[1].Descriptor()
+	// switchmodel.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	switchmodel.NameValidator = switchmodelDescName.Validators[0].(func(string) error)
 }

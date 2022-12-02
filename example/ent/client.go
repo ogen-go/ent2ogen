@@ -10,8 +10,9 @@ import (
 
 	"github.com/ogen-go/ent2ogen/example/ent/migrate"
 
-	"github.com/ogen-go/ent2ogen/example/ent/city"
-	"github.com/ogen-go/ent2ogen/example/ent/user"
+	"github.com/ogen-go/ent2ogen/example/ent/keyboard"
+	"github.com/ogen-go/ent2ogen/example/ent/keycapmodel"
+	"github.com/ogen-go/ent2ogen/example/ent/switchmodel"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -23,10 +24,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// City is the client for interacting with the City builders.
-	City *CityClient
-	// User is the client for interacting with the User builders.
-	User *UserClient
+	// Keyboard is the client for interacting with the Keyboard builders.
+	Keyboard *KeyboardClient
+	// KeycapModel is the client for interacting with the KeycapModel builders.
+	KeycapModel *KeycapModelClient
+	// SwitchModel is the client for interacting with the SwitchModel builders.
+	SwitchModel *SwitchModelClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -40,8 +43,9 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.City = NewCityClient(c.config)
-	c.User = NewUserClient(c.config)
+	c.Keyboard = NewKeyboardClient(c.config)
+	c.KeycapModel = NewKeycapModelClient(c.config)
+	c.SwitchModel = NewSwitchModelClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -73,10 +77,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		City:   NewCityClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Keyboard:    NewKeyboardClient(cfg),
+		KeycapModel: NewKeycapModelClient(cfg),
+		SwitchModel: NewSwitchModelClient(cfg),
 	}, nil
 }
 
@@ -94,17 +99,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		City:   NewCityClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Keyboard:    NewKeyboardClient(cfg),
+		KeycapModel: NewKeycapModelClient(cfg),
+		SwitchModel: NewSwitchModelClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		City.
+//		Keyboard.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -126,88 +132,211 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.City.Use(hooks...)
-	c.User.Use(hooks...)
+	c.Keyboard.Use(hooks...)
+	c.KeycapModel.Use(hooks...)
+	c.SwitchModel.Use(hooks...)
 }
 
-// CityClient is a client for the City schema.
-type CityClient struct {
+// KeyboardClient is a client for the Keyboard schema.
+type KeyboardClient struct {
 	config
 }
 
-// NewCityClient returns a client for the City from the given config.
-func NewCityClient(c config) *CityClient {
-	return &CityClient{config: c}
+// NewKeyboardClient returns a client for the Keyboard from the given config.
+func NewKeyboardClient(c config) *KeyboardClient {
+	return &KeyboardClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `city.Hooks(f(g(h())))`.
-func (c *CityClient) Use(hooks ...Hook) {
-	c.hooks.City = append(c.hooks.City, hooks...)
+// A call to `Use(f, g, h)` equals to `keyboard.Hooks(f(g(h())))`.
+func (c *KeyboardClient) Use(hooks ...Hook) {
+	c.hooks.Keyboard = append(c.hooks.Keyboard, hooks...)
 }
 
-// Create returns a builder for creating a City entity.
-func (c *CityClient) Create() *CityCreate {
-	mutation := newCityMutation(c.config, OpCreate)
-	return &CityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Keyboard entity.
+func (c *KeyboardClient) Create() *KeyboardCreate {
+	mutation := newKeyboardMutation(c.config, OpCreate)
+	return &KeyboardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of City entities.
-func (c *CityClient) CreateBulk(builders ...*CityCreate) *CityCreateBulk {
-	return &CityCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Keyboard entities.
+func (c *KeyboardClient) CreateBulk(builders ...*KeyboardCreate) *KeyboardCreateBulk {
+	return &KeyboardCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for City.
-func (c *CityClient) Update() *CityUpdate {
-	mutation := newCityMutation(c.config, OpUpdate)
-	return &CityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Keyboard.
+func (c *KeyboardClient) Update() *KeyboardUpdate {
+	mutation := newKeyboardMutation(c.config, OpUpdate)
+	return &KeyboardUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CityClient) UpdateOne(ci *City) *CityUpdateOne {
-	mutation := newCityMutation(c.config, OpUpdateOne, withCity(ci))
-	return &CityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *KeyboardClient) UpdateOne(k *Keyboard) *KeyboardUpdateOne {
+	mutation := newKeyboardMutation(c.config, OpUpdateOne, withKeyboard(k))
+	return &KeyboardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CityClient) UpdateOneID(id int64) *CityUpdateOne {
-	mutation := newCityMutation(c.config, OpUpdateOne, withCityID(id))
-	return &CityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *KeyboardClient) UpdateOneID(id int64) *KeyboardUpdateOne {
+	mutation := newKeyboardMutation(c.config, OpUpdateOne, withKeyboardID(id))
+	return &KeyboardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for City.
-func (c *CityClient) Delete() *CityDelete {
-	mutation := newCityMutation(c.config, OpDelete)
-	return &CityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Keyboard.
+func (c *KeyboardClient) Delete() *KeyboardDelete {
+	mutation := newKeyboardMutation(c.config, OpDelete)
+	return &KeyboardDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CityClient) DeleteOne(ci *City) *CityDeleteOne {
-	return c.DeleteOneID(ci.ID)
+func (c *KeyboardClient) DeleteOne(k *Keyboard) *KeyboardDeleteOne {
+	return c.DeleteOneID(k.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CityClient) DeleteOneID(id int64) *CityDeleteOne {
-	builder := c.Delete().Where(city.ID(id))
+func (c *KeyboardClient) DeleteOneID(id int64) *KeyboardDeleteOne {
+	builder := c.Delete().Where(keyboard.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &CityDeleteOne{builder}
+	return &KeyboardDeleteOne{builder}
 }
 
-// Query returns a query builder for City.
-func (c *CityClient) Query() *CityQuery {
-	return &CityQuery{
+// Query returns a query builder for Keyboard.
+func (c *KeyboardClient) Query() *KeyboardQuery {
+	return &KeyboardQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a City entity by its id.
-func (c *CityClient) Get(ctx context.Context, id int64) (*City, error) {
-	return c.Query().Where(city.ID(id)).Only(ctx)
+// Get returns a Keyboard entity by its id.
+func (c *KeyboardClient) Get(ctx context.Context, id int64) (*Keyboard, error) {
+	return c.Query().Where(keyboard.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CityClient) GetX(ctx context.Context, id int64) *City {
+func (c *KeyboardClient) GetX(ctx context.Context, id int64) *Keyboard {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySwitches queries the switches edge of a Keyboard.
+func (c *KeyboardClient) QuerySwitches(k *Keyboard) *SwitchModelQuery {
+	query := &SwitchModelQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := k.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(keyboard.Table, keyboard.FieldID, id),
+			sqlgraph.To(switchmodel.Table, switchmodel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, keyboard.SwitchesTable, keyboard.SwitchesColumn),
+		)
+		fromV = sqlgraph.Neighbors(k.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryKeycaps queries the keycaps edge of a Keyboard.
+func (c *KeyboardClient) QueryKeycaps(k *Keyboard) *KeycapModelQuery {
+	query := &KeycapModelQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := k.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(keyboard.Table, keyboard.FieldID, id),
+			sqlgraph.To(keycapmodel.Table, keycapmodel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, keyboard.KeycapsTable, keyboard.KeycapsColumn),
+		)
+		fromV = sqlgraph.Neighbors(k.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *KeyboardClient) Hooks() []Hook {
+	return c.hooks.Keyboard
+}
+
+// KeycapModelClient is a client for the KeycapModel schema.
+type KeycapModelClient struct {
+	config
+}
+
+// NewKeycapModelClient returns a client for the KeycapModel from the given config.
+func NewKeycapModelClient(c config) *KeycapModelClient {
+	return &KeycapModelClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `keycapmodel.Hooks(f(g(h())))`.
+func (c *KeycapModelClient) Use(hooks ...Hook) {
+	c.hooks.KeycapModel = append(c.hooks.KeycapModel, hooks...)
+}
+
+// Create returns a builder for creating a KeycapModel entity.
+func (c *KeycapModelClient) Create() *KeycapModelCreate {
+	mutation := newKeycapModelMutation(c.config, OpCreate)
+	return &KeycapModelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of KeycapModel entities.
+func (c *KeycapModelClient) CreateBulk(builders ...*KeycapModelCreate) *KeycapModelCreateBulk {
+	return &KeycapModelCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for KeycapModel.
+func (c *KeycapModelClient) Update() *KeycapModelUpdate {
+	mutation := newKeycapModelMutation(c.config, OpUpdate)
+	return &KeycapModelUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *KeycapModelClient) UpdateOne(km *KeycapModel) *KeycapModelUpdateOne {
+	mutation := newKeycapModelMutation(c.config, OpUpdateOne, withKeycapModel(km))
+	return &KeycapModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *KeycapModelClient) UpdateOneID(id int64) *KeycapModelUpdateOne {
+	mutation := newKeycapModelMutation(c.config, OpUpdateOne, withKeycapModelID(id))
+	return &KeycapModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for KeycapModel.
+func (c *KeycapModelClient) Delete() *KeycapModelDelete {
+	mutation := newKeycapModelMutation(c.config, OpDelete)
+	return &KeycapModelDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *KeycapModelClient) DeleteOne(km *KeycapModel) *KeycapModelDeleteOne {
+	return c.DeleteOneID(km.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *KeycapModelClient) DeleteOneID(id int64) *KeycapModelDeleteOne {
+	builder := c.Delete().Where(keycapmodel.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &KeycapModelDeleteOne{builder}
+}
+
+// Query returns a query builder for KeycapModel.
+func (c *KeycapModelClient) Query() *KeycapModelQuery {
+	return &KeycapModelQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a KeycapModel entity by its id.
+func (c *KeycapModelClient) Get(ctx context.Context, id int64) (*KeycapModel, error) {
+	return c.Query().Where(keycapmodel.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *KeycapModelClient) GetX(ctx context.Context, id int64) *KeycapModel {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -216,88 +345,88 @@ func (c *CityClient) GetX(ctx context.Context, id int64) *City {
 }
 
 // Hooks returns the client hooks.
-func (c *CityClient) Hooks() []Hook {
-	return c.hooks.City
+func (c *KeycapModelClient) Hooks() []Hook {
+	return c.hooks.KeycapModel
 }
 
-// UserClient is a client for the User schema.
-type UserClient struct {
+// SwitchModelClient is a client for the SwitchModel schema.
+type SwitchModelClient struct {
 	config
 }
 
-// NewUserClient returns a client for the User from the given config.
-func NewUserClient(c config) *UserClient {
-	return &UserClient{config: c}
+// NewSwitchModelClient returns a client for the SwitchModel from the given config.
+func NewSwitchModelClient(c config) *SwitchModelClient {
+	return &SwitchModelClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
-func (c *UserClient) Use(hooks ...Hook) {
-	c.hooks.User = append(c.hooks.User, hooks...)
+// A call to `Use(f, g, h)` equals to `switchmodel.Hooks(f(g(h())))`.
+func (c *SwitchModelClient) Use(hooks ...Hook) {
+	c.hooks.SwitchModel = append(c.hooks.SwitchModel, hooks...)
 }
 
-// Create returns a builder for creating a User entity.
-func (c *UserClient) Create() *UserCreate {
-	mutation := newUserMutation(c.config, OpCreate)
-	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a SwitchModel entity.
+func (c *SwitchModelClient) Create() *SwitchModelCreate {
+	mutation := newSwitchModelMutation(c.config, OpCreate)
+	return &SwitchModelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of User entities.
-func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
-	return &UserCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of SwitchModel entities.
+func (c *SwitchModelClient) CreateBulk(builders ...*SwitchModelCreate) *SwitchModelCreateBulk {
+	return &SwitchModelCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for User.
-func (c *UserClient) Update() *UserUpdate {
-	mutation := newUserMutation(c.config, OpUpdate)
-	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for SwitchModel.
+func (c *SwitchModelClient) Update() *SwitchModelUpdate {
+	mutation := newSwitchModelMutation(c.config, OpUpdate)
+	return &SwitchModelUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *SwitchModelClient) UpdateOne(sm *SwitchModel) *SwitchModelUpdateOne {
+	mutation := newSwitchModelMutation(c.config, OpUpdateOne, withSwitchModel(sm))
+	return &SwitchModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id int64) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *SwitchModelClient) UpdateOneID(id int64) *SwitchModelUpdateOne {
+	mutation := newSwitchModelMutation(c.config, OpUpdateOne, withSwitchModelID(id))
+	return &SwitchModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for User.
-func (c *UserClient) Delete() *UserDelete {
-	mutation := newUserMutation(c.config, OpDelete)
-	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for SwitchModel.
+func (c *SwitchModelClient) Delete() *SwitchModelDelete {
+	mutation := newSwitchModelMutation(c.config, OpDelete)
+	return &SwitchModelDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
-	return c.DeleteOneID(u.ID)
+func (c *SwitchModelClient) DeleteOne(sm *SwitchModel) *SwitchModelDeleteOne {
+	return c.DeleteOneID(sm.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *UserClient) DeleteOneID(id int64) *UserDeleteOne {
-	builder := c.Delete().Where(user.ID(id))
+func (c *SwitchModelClient) DeleteOneID(id int64) *SwitchModelDeleteOne {
+	builder := c.Delete().Where(switchmodel.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &UserDeleteOne{builder}
+	return &SwitchModelDeleteOne{builder}
 }
 
-// Query returns a query builder for User.
-func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{
+// Query returns a query builder for SwitchModel.
+func (c *SwitchModelClient) Query() *SwitchModelQuery {
+	return &SwitchModelQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id int64) (*User, error) {
-	return c.Query().Where(user.ID(id)).Only(ctx)
+// Get returns a SwitchModel entity by its id.
+func (c *SwitchModelClient) Get(ctx context.Context, id int64) (*SwitchModel, error) {
+	return c.Query().Where(switchmodel.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id int64) *User {
+func (c *SwitchModelClient) GetX(ctx context.Context, id int64) *SwitchModel {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -305,55 +434,7 @@ func (c *UserClient) GetX(ctx context.Context, id int64) *User {
 	return obj
 }
 
-// QueryRequiredCity queries the required_city edge of a User.
-func (c *UserClient) QueryRequiredCity(u *User) *CityQuery {
-	query := &CityQuery{config: c.config}
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(city.Table, city.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, user.RequiredCityTable, user.RequiredCityColumn),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryOptionalCity queries the optional_city edge of a User.
-func (c *UserClient) QueryOptionalCity(u *User) *CityQuery {
-	query := &CityQuery{config: c.config}
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(city.Table, city.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, user.OptionalCityTable, user.OptionalCityColumn),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryFriendList queries the friend_list edge of a User.
-func (c *UserClient) QueryFriendList(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendListTable, user.FriendListPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
-func (c *UserClient) Hooks() []Hook {
-	return c.hooks.User
+func (c *SwitchModelClient) Hooks() []Hook {
+	return c.hooks.SwitchModel
 }

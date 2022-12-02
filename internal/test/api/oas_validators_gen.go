@@ -24,6 +24,17 @@ func (s SchemaA) Validate() error {
 		})
 	}
 	if err := func() error {
+		if s.JsontypeInts == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "jsontype_ints",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.RequiredEnum.Validate(); err != nil {
 			return err
 		}

@@ -74,6 +74,8 @@ func (e *SchemaA) toOpenAPI() (t openapi.SchemaA, err error) {
 	}
 	t.JsontypeStrings = e.JsontypeStrings
 	t.JsontypeStringsOptional = e.JsontypeStringsOptional
+	t.JsontypeInts = e.JsontypeInts
+	t.JsontypeIntsOptional = e.JsontypeIntsOptional
 	t.RequiredEnum = openapi.SchemaARequiredEnum(e.RequiredEnum)
 	if e.OptionalNullableEnum != nil {
 		t.OptionalNullableEnum.SetTo(openapi.SchemaAOptionalNullableEnum(*e.OptionalNullableEnum))

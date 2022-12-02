@@ -425,6 +425,20 @@ func JsontypeStringsOptionalNotNil() predicate.SchemaA {
 	})
 }
 
+// JsontypeIntsOptionalIsNil applies the IsNil predicate on the "jsontype_ints_optional" field.
+func JsontypeIntsOptionalIsNil() predicate.SchemaA {
+	return predicate.SchemaA(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldJsontypeIntsOptional)))
+	})
+}
+
+// JsontypeIntsOptionalNotNil applies the NotNil predicate on the "jsontype_ints_optional" field.
+func JsontypeIntsOptionalNotNil() predicate.SchemaA {
+	return predicate.SchemaA(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldJsontypeIntsOptional)))
+	})
+}
+
 // RequiredEnumEQ applies the EQ predicate on the "required_enum" field.
 func RequiredEnumEQ(v RequiredEnum) predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {

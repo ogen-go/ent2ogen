@@ -204,6 +204,8 @@ type SchemaA struct {
 	OptionalNullableBool            OptNilBool                        `json:"optional_nullable_bool"`
 	JsontypeStrings                 []string                          `json:"jsontype_strings"`
 	JsontypeStringsOptional         []string                          `json:"jsontype_strings_optional"`
+	JsontypeInts                    []int                             `json:"jsontype_ints"`
+	JsontypeIntsOptional            []int                             `json:"jsontype_ints_optional"`
 	RequiredEnum                    SchemaARequiredEnum               `json:"required_enum"`
 	OptionalNullableEnum            OptNilSchemaAOptionalNullableEnum `json:"optional_nullable_enum"`
 	EdgeSchemabUniqueRequired       SchemaB                           `json:"edge_schemab_unique_required"`
@@ -241,6 +243,16 @@ func (s SchemaA) GetJsontypeStrings() []string {
 // GetJsontypeStringsOptional returns the value of JsontypeStringsOptional.
 func (s SchemaA) GetJsontypeStringsOptional() []string {
 	return s.JsontypeStringsOptional
+}
+
+// GetJsontypeInts returns the value of JsontypeInts.
+func (s SchemaA) GetJsontypeInts() []int {
+	return s.JsontypeInts
+}
+
+// GetJsontypeIntsOptional returns the value of JsontypeIntsOptional.
+func (s SchemaA) GetJsontypeIntsOptional() []int {
+	return s.JsontypeIntsOptional
 }
 
 // GetRequiredEnum returns the value of RequiredEnum.
@@ -306,6 +318,16 @@ func (s *SchemaA) SetJsontypeStrings(val []string) {
 // SetJsontypeStringsOptional sets the value of JsontypeStringsOptional.
 func (s *SchemaA) SetJsontypeStringsOptional(val []string) {
 	s.JsontypeStringsOptional = val
+}
+
+// SetJsontypeInts sets the value of JsontypeInts.
+func (s *SchemaA) SetJsontypeInts(val []int) {
+	s.JsontypeInts = val
+}
+
+// SetJsontypeIntsOptional sets the value of JsontypeIntsOptional.
+func (s *SchemaA) SetJsontypeIntsOptional(val []int) {
+	s.JsontypeIntsOptional = val
 }
 
 // SetRequiredEnum sets the value of RequiredEnum.

@@ -42,6 +42,10 @@ type SchemaAMutation struct {
 	appendjsontype_strings                        []string
 	jsontype_strings_optional                     *[]string
 	appendjsontype_strings_optional               []string
+	jsontype_ints                                 *[]int
+	appendjsontype_ints                           []int
+	jsontype_ints_optional                        *[]int
+	appendjsontype_ints_optional                  []int
 	required_enum                                 *schemaa.RequiredEnum
 	optional_nullable_enum                        *schemaa.OptionalNullableEnum
 	clearedFields                                 map[string]struct{}
@@ -466,6 +470,122 @@ func (m *SchemaAMutation) ResetJsontypeStringsOptional() {
 	delete(m.clearedFields, schemaa.FieldJsontypeStringsOptional)
 }
 
+// SetJsontypeInts sets the "jsontype_ints" field.
+func (m *SchemaAMutation) SetJsontypeInts(i []int) {
+	m.jsontype_ints = &i
+	m.appendjsontype_ints = nil
+}
+
+// JsontypeInts returns the value of the "jsontype_ints" field in the mutation.
+func (m *SchemaAMutation) JsontypeInts() (r []int, exists bool) {
+	v := m.jsontype_ints
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJsontypeInts returns the old "jsontype_ints" field's value of the SchemaA entity.
+// If the SchemaA object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SchemaAMutation) OldJsontypeInts(ctx context.Context) (v []int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJsontypeInts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJsontypeInts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJsontypeInts: %w", err)
+	}
+	return oldValue.JsontypeInts, nil
+}
+
+// AppendJsontypeInts adds i to the "jsontype_ints" field.
+func (m *SchemaAMutation) AppendJsontypeInts(i []int) {
+	m.appendjsontype_ints = append(m.appendjsontype_ints, i...)
+}
+
+// AppendedJsontypeInts returns the list of values that were appended to the "jsontype_ints" field in this mutation.
+func (m *SchemaAMutation) AppendedJsontypeInts() ([]int, bool) {
+	if len(m.appendjsontype_ints) == 0 {
+		return nil, false
+	}
+	return m.appendjsontype_ints, true
+}
+
+// ResetJsontypeInts resets all changes to the "jsontype_ints" field.
+func (m *SchemaAMutation) ResetJsontypeInts() {
+	m.jsontype_ints = nil
+	m.appendjsontype_ints = nil
+}
+
+// SetJsontypeIntsOptional sets the "jsontype_ints_optional" field.
+func (m *SchemaAMutation) SetJsontypeIntsOptional(i []int) {
+	m.jsontype_ints_optional = &i
+	m.appendjsontype_ints_optional = nil
+}
+
+// JsontypeIntsOptional returns the value of the "jsontype_ints_optional" field in the mutation.
+func (m *SchemaAMutation) JsontypeIntsOptional() (r []int, exists bool) {
+	v := m.jsontype_ints_optional
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJsontypeIntsOptional returns the old "jsontype_ints_optional" field's value of the SchemaA entity.
+// If the SchemaA object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SchemaAMutation) OldJsontypeIntsOptional(ctx context.Context) (v []int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJsontypeIntsOptional is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJsontypeIntsOptional requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJsontypeIntsOptional: %w", err)
+	}
+	return oldValue.JsontypeIntsOptional, nil
+}
+
+// AppendJsontypeIntsOptional adds i to the "jsontype_ints_optional" field.
+func (m *SchemaAMutation) AppendJsontypeIntsOptional(i []int) {
+	m.appendjsontype_ints_optional = append(m.appendjsontype_ints_optional, i...)
+}
+
+// AppendedJsontypeIntsOptional returns the list of values that were appended to the "jsontype_ints_optional" field in this mutation.
+func (m *SchemaAMutation) AppendedJsontypeIntsOptional() ([]int, bool) {
+	if len(m.appendjsontype_ints_optional) == 0 {
+		return nil, false
+	}
+	return m.appendjsontype_ints_optional, true
+}
+
+// ClearJsontypeIntsOptional clears the value of the "jsontype_ints_optional" field.
+func (m *SchemaAMutation) ClearJsontypeIntsOptional() {
+	m.jsontype_ints_optional = nil
+	m.appendjsontype_ints_optional = nil
+	m.clearedFields[schemaa.FieldJsontypeIntsOptional] = struct{}{}
+}
+
+// JsontypeIntsOptionalCleared returns if the "jsontype_ints_optional" field was cleared in this mutation.
+func (m *SchemaAMutation) JsontypeIntsOptionalCleared() bool {
+	_, ok := m.clearedFields[schemaa.FieldJsontypeIntsOptional]
+	return ok
+}
+
+// ResetJsontypeIntsOptional resets all changes to the "jsontype_ints_optional" field.
+func (m *SchemaAMutation) ResetJsontypeIntsOptional() {
+	m.jsontype_ints_optional = nil
+	m.appendjsontype_ints_optional = nil
+	delete(m.clearedFields, schemaa.FieldJsontypeIntsOptional)
+}
+
 // SetRequiredEnum sets the "required_enum" field.
 func (m *SchemaAMutation) SetRequiredEnum(se schemaa.RequiredEnum) {
 	m.required_enum = &se
@@ -795,7 +915,7 @@ func (m *SchemaAMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SchemaAMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 10)
 	if m.int64 != nil {
 		fields = append(fields, schemaa.FieldInt64)
 	}
@@ -813,6 +933,12 @@ func (m *SchemaAMutation) Fields() []string {
 	}
 	if m.jsontype_strings_optional != nil {
 		fields = append(fields, schemaa.FieldJsontypeStringsOptional)
+	}
+	if m.jsontype_ints != nil {
+		fields = append(fields, schemaa.FieldJsontypeInts)
+	}
+	if m.jsontype_ints_optional != nil {
+		fields = append(fields, schemaa.FieldJsontypeIntsOptional)
 	}
 	if m.required_enum != nil {
 		fields = append(fields, schemaa.FieldRequiredEnum)
@@ -840,6 +966,10 @@ func (m *SchemaAMutation) Field(name string) (ent.Value, bool) {
 		return m.JsontypeStrings()
 	case schemaa.FieldJsontypeStringsOptional:
 		return m.JsontypeStringsOptional()
+	case schemaa.FieldJsontypeInts:
+		return m.JsontypeInts()
+	case schemaa.FieldJsontypeIntsOptional:
+		return m.JsontypeIntsOptional()
 	case schemaa.FieldRequiredEnum:
 		return m.RequiredEnum()
 	case schemaa.FieldOptionalNullableEnum:
@@ -865,6 +995,10 @@ func (m *SchemaAMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldJsontypeStrings(ctx)
 	case schemaa.FieldJsontypeStringsOptional:
 		return m.OldJsontypeStringsOptional(ctx)
+	case schemaa.FieldJsontypeInts:
+		return m.OldJsontypeInts(ctx)
+	case schemaa.FieldJsontypeIntsOptional:
+		return m.OldJsontypeIntsOptional(ctx)
 	case schemaa.FieldRequiredEnum:
 		return m.OldRequiredEnum(ctx)
 	case schemaa.FieldOptionalNullableEnum:
@@ -919,6 +1053,20 @@ func (m *SchemaAMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetJsontypeStringsOptional(v)
+		return nil
+	case schemaa.FieldJsontypeInts:
+		v, ok := value.([]int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJsontypeInts(v)
+		return nil
+	case schemaa.FieldJsontypeIntsOptional:
+		v, ok := value.([]int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJsontypeIntsOptional(v)
 		return nil
 	case schemaa.FieldRequiredEnum:
 		v, ok := value.(schemaa.RequiredEnum)
@@ -988,6 +1136,9 @@ func (m *SchemaAMutation) ClearedFields() []string {
 	if m.FieldCleared(schemaa.FieldJsontypeStringsOptional) {
 		fields = append(fields, schemaa.FieldJsontypeStringsOptional)
 	}
+	if m.FieldCleared(schemaa.FieldJsontypeIntsOptional) {
+		fields = append(fields, schemaa.FieldJsontypeIntsOptional)
+	}
 	if m.FieldCleared(schemaa.FieldOptionalNullableEnum) {
 		fields = append(fields, schemaa.FieldOptionalNullableEnum)
 	}
@@ -1013,6 +1164,9 @@ func (m *SchemaAMutation) ClearField(name string) error {
 		return nil
 	case schemaa.FieldJsontypeStringsOptional:
 		m.ClearJsontypeStringsOptional()
+		return nil
+	case schemaa.FieldJsontypeIntsOptional:
+		m.ClearJsontypeIntsOptional()
 		return nil
 	case schemaa.FieldOptionalNullableEnum:
 		m.ClearOptionalNullableEnum()
@@ -1042,6 +1196,12 @@ func (m *SchemaAMutation) ResetField(name string) error {
 		return nil
 	case schemaa.FieldJsontypeStringsOptional:
 		m.ResetJsontypeStringsOptional()
+		return nil
+	case schemaa.FieldJsontypeInts:
+		m.ResetJsontypeInts()
+		return nil
+	case schemaa.FieldJsontypeIntsOptional:
+		m.ResetJsontypeIntsOptional()
 		return nil
 	case schemaa.FieldRequiredEnum:
 		m.ResetRequiredEnum()

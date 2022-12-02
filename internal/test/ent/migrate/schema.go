@@ -17,6 +17,8 @@ var (
 		{Name: "optional_nullable_bool", Type: field.TypeBool, Nullable: true},
 		{Name: "jsontype_strings", Type: field.TypeJSON},
 		{Name: "jsontype_strings_optional", Type: field.TypeJSON, Nullable: true},
+		{Name: "jsontype_ints", Type: field.TypeJSON},
+		{Name: "jsontype_ints_optional", Type: field.TypeJSON, Nullable: true},
 		{Name: "required_enum", Type: field.TypeEnum, Enums: []string{"a", "b"}},
 		{Name: "optional_nullable_enum", Type: field.TypeEnum, Nullable: true, Enums: []string{"c", "d"}},
 		{Name: "schemaa_edge_schemab_unique_required", Type: field.TypeInt64},
@@ -31,19 +33,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "schema_as_schema_bs_edge_schemab_unique_required",
-				Columns:    []*schema.Column{SchemaAsColumns[9]},
+				Columns:    []*schema.Column{SchemaAsColumns[11]},
 				RefColumns: []*schema.Column{SchemaBsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "schema_as_schema_bs_edge_schemab_unique_required_bindto_bs",
-				Columns:    []*schema.Column{SchemaAsColumns[10]},
+				Columns:    []*schema.Column{SchemaAsColumns[12]},
 				RefColumns: []*schema.Column{SchemaBsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "schema_as_schema_bs_edge_schemab_unique_optional",
-				Columns:    []*schema.Column{SchemaAsColumns[11]},
+				Columns:    []*schema.Column{SchemaAsColumns[13]},
 				RefColumns: []*schema.Column{SchemaBsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

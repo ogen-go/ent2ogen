@@ -23,6 +23,10 @@ const (
 	FieldJsontypeStrings = "jsontype_strings"
 	// FieldJsontypeStringsOptional holds the string denoting the jsontype_strings_optional field in the database.
 	FieldJsontypeStringsOptional = "jsontype_strings_optional"
+	// FieldJsontypeInts holds the string denoting the jsontype_ints field in the database.
+	FieldJsontypeInts = "jsontype_ints"
+	// FieldJsontypeIntsOptional holds the string denoting the jsontype_ints_optional field in the database.
+	FieldJsontypeIntsOptional = "jsontype_ints_optional"
 	// FieldRequiredEnum holds the string denoting the required_enum field in the database.
 	FieldRequiredEnum = "required_enum"
 	// FieldOptionalNullableEnum holds the string denoting the optional_nullable_enum field in the database.
@@ -80,6 +84,8 @@ var Columns = []string{
 	FieldOptionalNullableBool,
 	FieldJsontypeStrings,
 	FieldJsontypeStringsOptional,
+	FieldJsontypeInts,
+	FieldJsontypeIntsOptional,
 	FieldRequiredEnum,
 	FieldOptionalNullableEnum,
 }

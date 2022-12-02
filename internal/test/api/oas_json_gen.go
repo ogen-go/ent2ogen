@@ -242,6 +242,25 @@ func (s SchemaA) encodeFields(e *jx.Encoder) {
 	}
 	{
 
+		e.FieldStart("jsontype_ints")
+		e.ArrStart()
+		for _, elem := range s.JsontypeInts {
+			e.Int(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		if s.JsontypeIntsOptional != nil {
+			e.FieldStart("jsontype_ints_optional")
+			e.ArrStart()
+			for _, elem := range s.JsontypeIntsOptional {
+				e.Int(elem)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
+
 		e.FieldStart("required_enum")
 		s.RequiredEnum.Encode(e)
 	}
@@ -289,20 +308,22 @@ func (s SchemaA) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSchemaA = [13]string{
+var jsonFieldsNameOfSchemaA = [15]string{
 	0:  "int64",
 	1:  "string_foobar_bind",
 	2:  "string_optional_nullable",
 	3:  "optional_nullable_bool",
 	4:  "jsontype_strings",
 	5:  "jsontype_strings_optional",
-	6:  "required_enum",
-	7:  "optional_nullable_enum",
-	8:  "edge_schemab_unique_required",
-	9:  "edge_schemab_unique_required_bs_bind",
-	10: "edge_schemab_unique_optional",
-	11: "edge_schemab",
-	12: "edge_schemaa_recursive",
+	6:  "jsontype_ints",
+	7:  "jsontype_ints_optional",
+	8:  "required_enum",
+	9:  "optional_nullable_enum",
+	10: "edge_schemab_unique_required",
+	11: "edge_schemab_unique_required_bs_bind",
+	12: "edge_schemab_unique_optional",
+	13: "edge_schemab",
+	14: "edge_schemaa_recursive",
 }
 
 // Decode decodes SchemaA from json.
@@ -397,8 +418,47 @@ func (s *SchemaA) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"jsontype_strings_optional\"")
 			}
-		case "required_enum":
+		case "jsontype_ints":
 			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				s.JsontypeInts = make([]int, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem int
+					v, err := d.Int()
+					elem = int(v)
+					if err != nil {
+						return err
+					}
+					s.JsontypeInts = append(s.JsontypeInts, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"jsontype_ints\"")
+			}
+		case "jsontype_ints_optional":
+			if err := func() error {
+				s.JsontypeIntsOptional = make([]int, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem int
+					v, err := d.Int()
+					elem = int(v)
+					if err != nil {
+						return err
+					}
+					s.JsontypeIntsOptional = append(s.JsontypeIntsOptional, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"jsontype_ints_optional\"")
+			}
+		case "required_enum":
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.RequiredEnum.Decode(d); err != nil {
 					return err
@@ -418,7 +478,7 @@ func (s *SchemaA) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"optional_nullable_enum\"")
 			}
 		case "edge_schemab_unique_required":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				if err := s.EdgeSchemabUniqueRequired.Decode(d); err != nil {
 					return err
@@ -428,7 +488,7 @@ func (s *SchemaA) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"edge_schemab_unique_required\"")
 			}
 		case "edge_schemab_unique_required_bs_bind":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				if err := s.EdgeSchemabUniqueRequiredBsBind.Decode(d); err != nil {
 					return err
@@ -492,7 +552,7 @@ func (s *SchemaA) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b01010111,
-		0b00000011,
+		0b00001101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

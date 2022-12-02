@@ -118,6 +118,36 @@ func (sa *SchemaAUpdate) ClearJsontypeStringsOptional() *SchemaAUpdate {
 	return sa
 }
 
+// SetJsontypeInts sets the "jsontype_ints" field.
+func (sa *SchemaAUpdate) SetJsontypeInts(i []int) *SchemaAUpdate {
+	sa.mutation.SetJsontypeInts(i)
+	return sa
+}
+
+// AppendJsontypeInts appends i to the "jsontype_ints" field.
+func (sa *SchemaAUpdate) AppendJsontypeInts(i []int) *SchemaAUpdate {
+	sa.mutation.AppendJsontypeInts(i)
+	return sa
+}
+
+// SetJsontypeIntsOptional sets the "jsontype_ints_optional" field.
+func (sa *SchemaAUpdate) SetJsontypeIntsOptional(i []int) *SchemaAUpdate {
+	sa.mutation.SetJsontypeIntsOptional(i)
+	return sa
+}
+
+// AppendJsontypeIntsOptional appends i to the "jsontype_ints_optional" field.
+func (sa *SchemaAUpdate) AppendJsontypeIntsOptional(i []int) *SchemaAUpdate {
+	sa.mutation.AppendJsontypeIntsOptional(i)
+	return sa
+}
+
+// ClearJsontypeIntsOptional clears the value of the "jsontype_ints_optional" field.
+func (sa *SchemaAUpdate) ClearJsontypeIntsOptional() *SchemaAUpdate {
+	sa.mutation.ClearJsontypeIntsOptional()
+	return sa
+}
+
 // SetRequiredEnum sets the "required_enum" field.
 func (sa *SchemaAUpdate) SetRequiredEnum(se schemaa.RequiredEnum) *SchemaAUpdate {
 	sa.mutation.SetRequiredEnum(se)
@@ -418,6 +448,25 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if sa.mutation.JsontypeStringsOptionalCleared() {
 		_spec.ClearField(schemaa.FieldJsontypeStringsOptional, field.TypeJSON)
+	}
+	if value, ok := sa.mutation.JsontypeInts(); ok {
+		_spec.SetField(schemaa.FieldJsontypeInts, field.TypeJSON, value)
+	}
+	if value, ok := sa.mutation.AppendedJsontypeInts(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, schemaa.FieldJsontypeInts, value)
+		})
+	}
+	if value, ok := sa.mutation.JsontypeIntsOptional(); ok {
+		_spec.SetField(schemaa.FieldJsontypeIntsOptional, field.TypeJSON, value)
+	}
+	if value, ok := sa.mutation.AppendedJsontypeIntsOptional(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, schemaa.FieldJsontypeIntsOptional, value)
+		})
+	}
+	if sa.mutation.JsontypeIntsOptionalCleared() {
+		_spec.ClearField(schemaa.FieldJsontypeIntsOptional, field.TypeJSON)
 	}
 	if value, ok := sa.mutation.RequiredEnum(); ok {
 		_spec.SetField(schemaa.FieldRequiredEnum, field.TypeEnum, value)
@@ -746,6 +795,36 @@ func (sao *SchemaAUpdateOne) AppendJsontypeStringsOptional(s []string) *SchemaAU
 // ClearJsontypeStringsOptional clears the value of the "jsontype_strings_optional" field.
 func (sao *SchemaAUpdateOne) ClearJsontypeStringsOptional() *SchemaAUpdateOne {
 	sao.mutation.ClearJsontypeStringsOptional()
+	return sao
+}
+
+// SetJsontypeInts sets the "jsontype_ints" field.
+func (sao *SchemaAUpdateOne) SetJsontypeInts(i []int) *SchemaAUpdateOne {
+	sao.mutation.SetJsontypeInts(i)
+	return sao
+}
+
+// AppendJsontypeInts appends i to the "jsontype_ints" field.
+func (sao *SchemaAUpdateOne) AppendJsontypeInts(i []int) *SchemaAUpdateOne {
+	sao.mutation.AppendJsontypeInts(i)
+	return sao
+}
+
+// SetJsontypeIntsOptional sets the "jsontype_ints_optional" field.
+func (sao *SchemaAUpdateOne) SetJsontypeIntsOptional(i []int) *SchemaAUpdateOne {
+	sao.mutation.SetJsontypeIntsOptional(i)
+	return sao
+}
+
+// AppendJsontypeIntsOptional appends i to the "jsontype_ints_optional" field.
+func (sao *SchemaAUpdateOne) AppendJsontypeIntsOptional(i []int) *SchemaAUpdateOne {
+	sao.mutation.AppendJsontypeIntsOptional(i)
+	return sao
+}
+
+// ClearJsontypeIntsOptional clears the value of the "jsontype_ints_optional" field.
+func (sao *SchemaAUpdateOne) ClearJsontypeIntsOptional() *SchemaAUpdateOne {
+	sao.mutation.ClearJsontypeIntsOptional()
 	return sao
 }
 
@@ -1079,6 +1158,25 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 	}
 	if sao.mutation.JsontypeStringsOptionalCleared() {
 		_spec.ClearField(schemaa.FieldJsontypeStringsOptional, field.TypeJSON)
+	}
+	if value, ok := sao.mutation.JsontypeInts(); ok {
+		_spec.SetField(schemaa.FieldJsontypeInts, field.TypeJSON, value)
+	}
+	if value, ok := sao.mutation.AppendedJsontypeInts(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, schemaa.FieldJsontypeInts, value)
+		})
+	}
+	if value, ok := sao.mutation.JsontypeIntsOptional(); ok {
+		_spec.SetField(schemaa.FieldJsontypeIntsOptional, field.TypeJSON, value)
+	}
+	if value, ok := sao.mutation.AppendedJsontypeIntsOptional(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, schemaa.FieldJsontypeIntsOptional, value)
+		})
+	}
+	if sao.mutation.JsontypeIntsOptionalCleared() {
+		_spec.ClearField(schemaa.FieldJsontypeIntsOptional, field.TypeJSON)
 	}
 	if value, ok := sao.mutation.RequiredEnum(); ok {
 		_spec.SetField(schemaa.FieldRequiredEnum, field.TypeEnum, value)

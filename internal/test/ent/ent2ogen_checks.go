@@ -15,6 +15,8 @@ func _() {
 		OptionalNullableBool            openapi.OptNilBool
 		JsontypeStrings                 []string
 		JsontypeStringsOptional         []string
+		JsontypeInts                    []int
+		JsontypeIntsOptional            []int
 		RequiredEnum                    openapi.SchemaARequiredEnum
 		OptionalNullableEnum            openapi.OptNilSchemaAOptionalNullableEnum
 		EdgeSchemabUniqueRequired       openapi.SchemaB

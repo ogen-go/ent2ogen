@@ -29,6 +29,10 @@ type SchemaA struct {
 	JsontypeStrings []string `json:"jsontype_strings,omitempty"`
 	// JsontypeStringsOptional holds the value of the "jsontype_strings_optional" field.
 	JsontypeStringsOptional []string `json:"jsontype_strings_optional,omitempty"`
+	// JsontypeInts holds the value of the "jsontype_ints" field.
+	JsontypeInts []int `json:"jsontype_ints,omitempty"`
+	// JsontypeIntsOptional holds the value of the "jsontype_ints_optional" field.
+	JsontypeIntsOptional []int `json:"jsontype_ints_optional,omitempty"`
 	// RequiredEnum holds the value of the "required_enum" field.
 	RequiredEnum schemaa.RequiredEnum `json:"required_enum,omitempty"`
 	// OptionalNullableEnum holds the value of the "optional_nullable_enum" field.
@@ -120,7 +124,7 @@ func (*SchemaA) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case schemaa.FieldJsontypeStrings, schemaa.FieldJsontypeStringsOptional:
+		case schemaa.FieldJsontypeStrings, schemaa.FieldJsontypeStringsOptional, schemaa.FieldJsontypeInts, schemaa.FieldJsontypeIntsOptional:
 			values[i] = new([]byte)
 		case schemaa.FieldOptionalNullableBool:
 			values[i] = new(sql.NullBool)
@@ -195,6 +199,22 @@ func (s *SchemaA) assignValues(columns []string, values []any) error {
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &s.JsontypeStringsOptional); err != nil {
 					return fmt.Errorf("unmarshal field jsontype_strings_optional: %w", err)
+				}
+			}
+		case schemaa.FieldJsontypeInts:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field jsontype_ints", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &s.JsontypeInts); err != nil {
+					return fmt.Errorf("unmarshal field jsontype_ints: %w", err)
+				}
+			}
+		case schemaa.FieldJsontypeIntsOptional:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field jsontype_ints_optional", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &s.JsontypeIntsOptional); err != nil {
+					return fmt.Errorf("unmarshal field jsontype_ints_optional: %w", err)
 				}
 			}
 		case schemaa.FieldRequiredEnum:
@@ -305,6 +325,12 @@ func (s *SchemaA) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("jsontype_strings_optional=")
 	builder.WriteString(fmt.Sprintf("%v", s.JsontypeStringsOptional))
+	builder.WriteString(", ")
+	builder.WriteString("jsontype_ints=")
+	builder.WriteString(fmt.Sprintf("%v", s.JsontypeInts))
+	builder.WriteString(", ")
+	builder.WriteString("jsontype_ints_optional=")
+	builder.WriteString(fmt.Sprintf("%v", s.JsontypeIntsOptional))
 	builder.WriteString(", ")
 	builder.WriteString("required_enum=")
 	builder.WriteString(fmt.Sprintf("%v", s.RequiredEnum))

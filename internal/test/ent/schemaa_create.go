@@ -72,6 +72,18 @@ func (sa *SchemaACreate) SetJsontypeStringsOptional(s []string) *SchemaACreate {
 	return sa
 }
 
+// SetJsontypeInts sets the "jsontype_ints" field.
+func (sa *SchemaACreate) SetJsontypeInts(i []int) *SchemaACreate {
+	sa.mutation.SetJsontypeInts(i)
+	return sa
+}
+
+// SetJsontypeIntsOptional sets the "jsontype_ints_optional" field.
+func (sa *SchemaACreate) SetJsontypeIntsOptional(i []int) *SchemaACreate {
+	sa.mutation.SetJsontypeIntsOptional(i)
+	return sa
+}
+
 // SetRequiredEnum sets the "required_enum" field.
 func (sa *SchemaACreate) SetRequiredEnum(se schemaa.RequiredEnum) *SchemaACreate {
 	sa.mutation.SetRequiredEnum(se)
@@ -248,6 +260,9 @@ func (sa *SchemaACreate) check() error {
 	if _, ok := sa.mutation.JsontypeStrings(); !ok {
 		return &ValidationError{Name: "jsontype_strings", err: errors.New(`ent: missing required field "SchemaA.jsontype_strings"`)}
 	}
+	if _, ok := sa.mutation.JsontypeInts(); !ok {
+		return &ValidationError{Name: "jsontype_ints", err: errors.New(`ent: missing required field "SchemaA.jsontype_ints"`)}
+	}
 	if _, ok := sa.mutation.RequiredEnum(); !ok {
 		return &ValidationError{Name: "required_enum", err: errors.New(`ent: missing required field "SchemaA.required_enum"`)}
 	}
@@ -317,6 +332,14 @@ func (sa *SchemaACreate) createSpec() (*SchemaA, *sqlgraph.CreateSpec) {
 	if value, ok := sa.mutation.JsontypeStringsOptional(); ok {
 		_spec.SetField(schemaa.FieldJsontypeStringsOptional, field.TypeJSON, value)
 		_node.JsontypeStringsOptional = value
+	}
+	if value, ok := sa.mutation.JsontypeInts(); ok {
+		_spec.SetField(schemaa.FieldJsontypeInts, field.TypeJSON, value)
+		_node.JsontypeInts = value
+	}
+	if value, ok := sa.mutation.JsontypeIntsOptional(); ok {
+		_spec.SetField(schemaa.FieldJsontypeIntsOptional, field.TypeJSON, value)
+		_node.JsontypeIntsOptional = value
 	}
 	if value, ok := sa.mutation.RequiredEnum(); ok {
 		_spec.SetField(schemaa.FieldRequiredEnum, field.TypeEnum, value)

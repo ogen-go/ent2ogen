@@ -20,6 +20,8 @@ func (User) Fields() []ent.Field {
 		field.String("user_name").Unique().
 			Annotations(ent2ogen.BindTo("username")),
 		field.Bool("optional_nullable_bool").Optional().Nillable(),
+
+		field.Strings("hobbies"),
 	}
 }
 

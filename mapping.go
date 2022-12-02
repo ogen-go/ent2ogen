@@ -141,6 +141,22 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 		js = ogenField.Spec.Schema
 	)
 
+	assertJS := func(js *jsonschema.Schema, typ jsonschema.SchemaType, format string) error {
+		if js == nil {
+			return fmt.Errorf("unexpected null or empty schema")
+		}
+		if js.Type != typ {
+			return fmt.Errorf("type mismatch: expected %q but have %q", typ, js.Type)
+		}
+		if js.Format != format {
+			if format == "" {
+				return fmt.Errorf("unexpected format %q", js.Format)
+			}
+			return fmt.Errorf("format mismatch: expected %q but have %q", format, js.Format)
+		}
+		return nil
+	}
+
 	switch {
 	case entField.Optional && !entField.Nillable:
 		switch {
@@ -164,94 +180,44 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 		panic("unreachable")
 	}
 
-	switch entField.Type.Type {
-	case field.TypeBool:
-		if js.Type != jsonschema.Boolean {
-			return fmt.Errorf("type mismatch: expected boolean but have %q", js.Type)
-		}
-		if js.Format != "" {
-			return fmt.Errorf("unexpected format %q", js.Format)
-		}
-
-	case field.TypeString:
-		if js.Type != jsonschema.String {
-			return fmt.Errorf("type mismatch: expected string but have %q", js.Type)
-		}
-		if js.Format != "" {
-			return fmt.Errorf("unexpected format %q", js.Format)
-		}
-
-	case field.TypeInt:
-		if js.Type != jsonschema.Integer {
-			return fmt.Errorf("type mismatch: expected integer but have %q", js.Type)
-		}
-		if js.Format != "" {
-			return fmt.Errorf("unexpected format %q", js.Format)
-		}
-
-	case field.TypeInt32:
-		if js.Type != jsonschema.Integer {
-			return fmt.Errorf("type mismatch: expected integer but have %q", js.Type)
-		}
-		if js.Format != "int32" {
-			return fmt.Errorf("format mismatch: expected int32 but have %q", js.Format)
-		}
-
-	case field.TypeInt64:
-		if js.Type != jsonschema.Integer {
-			return fmt.Errorf("type mismatch: expected integer but have %q", js.Type)
-		}
-		if js.Format != "int64" {
-			return fmt.Errorf("format mismatch: expected int64 but have %q", js.Format)
-		}
-
-	case field.TypeTime:
-		if js.Type != jsonschema.String {
-			return fmt.Errorf("type mismatch: expected string but have %q", js.Type)
-		}
-		if js.Format != "date-time" {
-			return fmt.Errorf("format mismatch: expected date-time but have %q", js.Format)
-		}
-
-	case field.TypeUUID:
-		if js.Type != jsonschema.String {
-			return fmt.Errorf("type mismatch: expected string but have %q", js.Type)
-		}
-		if js.Format != "uuid" {
-			return fmt.Errorf("format mismatch: expected uuid but have %q", js.Format)
-		}
-
-	case field.TypeEnum:
-		if js.Type != jsonschema.String {
-			return fmt.Errorf("type mismatch: expected string but have %q", js.Type)
-		}
-
-	case field.TypeJSON:
-		switch et.Ident {
-		case "[]string":
-			if js.Type != jsonschema.Array {
-				return fmt.Errorf("type mismatch: expected array but have %q", js.Type)
+	checks := map[field.Type]func() error{
+		field.TypeBool:   func() error { return assertJS(js, jsonschema.Boolean, "") },
+		field.TypeString: func() error { return assertJS(js, jsonschema.String, "") },
+		field.TypeInt:    func() error { return assertJS(js, jsonschema.Integer, "") },
+		field.TypeInt32:  func() error { return assertJS(js, jsonschema.Integer, "int32") },
+		field.TypeInt64:  func() error { return assertJS(js, jsonschema.Integer, "int64") },
+		field.TypeTime:   func() error { return assertJS(js, jsonschema.String, "date-time") },
+		field.TypeUUID:   func() error { return assertJS(js, jsonschema.String, "uuid") },
+		field.TypeEnum:   func() error { return assertJS(js, jsonschema.String, "") },
+		field.TypeJSON: func() error {
+			switch et.Ident {
+			case "[]string":
+				if err := assertJS(js, jsonschema.Array, ""); err != nil {
+					return err
+				}
+				if err := assertJS(js.Item, jsonschema.String, ""); err != nil {
+					return fmt.Errorf("items: %w", err)
+				}
+			case "[]int":
+				if err := assertJS(js, jsonschema.Array, ""); err != nil {
+					return err
+				}
+				if err := assertJS(js.Item, jsonschema.Integer, ""); err != nil {
+					return fmt.Errorf("items: %w", err)
+				}
+			default:
+				return fmt.Errorf("unsupported ent json type: %s", et.Ident)
 			}
-			if js.Item == nil {
-				return fmt.Errorf("items field must be specified")
-			}
-			if js.Item.Type != jsonschema.String {
-				return fmt.Errorf("items: expected string but have %q", js.Item.Type)
-			}
-		case "[]int":
-			if js.Type != jsonschema.Array {
-				return fmt.Errorf("type mismatch: expected array but have %q", js.Type)
-			}
-			if js.Item == nil {
-				return fmt.Errorf("items field must be specified")
-			}
-			if js.Item.Type != jsonschema.Integer {
-				return fmt.Errorf("items: expected integer but have %q", js.Item.Type)
-			}
-		default:
-			return fmt.Errorf("unsupported ent json type: %s", et.Ident)
+
+			return nil
+		},
+	}
+
+	if f, ok := checks[et.Type]; ok {
+		if err := f(); err != nil {
+			return err
 		}
-	default:
+	} else {
 		return fmt.Errorf("unsupported ent type: %s", entField.Type.ConstName())
 	}
 

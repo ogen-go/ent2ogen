@@ -145,7 +145,7 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 	case entField.Optional && !entField.Nillable:
 		switch {
 		case et.Type == field.TypeJSON && et.Ident == "[]string":
-
+		case et.Type == field.TypeJSON && et.Ident == "[]int":
 		default:
 			return fmt.Errorf("optional ent fields are not supported - you need to make the field either optional and nullable or required")
 		}
@@ -237,6 +237,16 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 			}
 			if js.Item.Type != jsonschema.String {
 				return fmt.Errorf("items: expected string but have %q", js.Item.Type)
+			}
+		case "[]int":
+			if js.Type != jsonschema.Array {
+				return fmt.Errorf("type mismatch: expected array but have %q", js.Type)
+			}
+			if js.Item == nil {
+				return fmt.Errorf("items field must be specified")
+			}
+			if js.Item.Type != jsonschema.Integer {
+				return fmt.Errorf("items: expected integer but have %q", js.Item.Type)
 			}
 		default:
 			return fmt.Errorf("unsupported ent json type: %s", et.Ident)

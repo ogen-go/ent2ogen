@@ -21,6 +21,7 @@ func _() {
 		EdgeSchemabUniqueRequiredBsBind openapi.SchemaB
 		EdgeSchemabUniqueOptional       openapi.OptSchemaB
 		EdgeSchemab                     []openapi.SchemaB
+		EdgeSchemaaRecursive            []openapi.SchemaA
 	}(openapi.SchemaA{})
 	_ = map[bool]struct{}{
 		string(openapi.SchemaARequiredEnumA) == string(schemaa.RequiredEnumA): {},

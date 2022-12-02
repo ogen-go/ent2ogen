@@ -623,6 +623,34 @@ func HasEdgeSchemabWith(preds ...predicate.SchemaB) predicate.SchemaA {
 	})
 }
 
+// HasEdgeSchemaaRecursive applies the HasEdge predicate on the "edge_schemaa_recursive" edge.
+func HasEdgeSchemaaRecursive() predicate.SchemaA {
+	return predicate.SchemaA(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(EdgeSchemaaRecursiveTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, EdgeSchemaaRecursiveTable, EdgeSchemaaRecursivePrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasEdgeSchemaaRecursiveWith applies the HasEdge predicate on the "edge_schemaa_recursive" edge with a given conditions (other predicates).
+func HasEdgeSchemaaRecursiveWith(preds ...predicate.SchemaA) predicate.SchemaA {
+	return predicate.SchemaA(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, EdgeSchemaaRecursiveTable, EdgeSchemaaRecursivePrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.SchemaA) predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {

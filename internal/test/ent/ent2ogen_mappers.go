@@ -16,6 +16,12 @@ type SchemaASlice []*SchemaA
 //	edge_schemab_unique_required_bindto_bs
 //	edge_schemab_unique_optional
 //	edge_schemab
+//	edge_schemaa_recursive:
+//	  edge_schemab_unique_required
+//	  edge_schemab_unique_required_bindto_bs
+//	  edge_schemab_unique_optional
+//	  edge_schemab
+//	  edge_schemaa_recursive...
 func (s SchemaASlice) ToOpenAPI() ([]openapi.SchemaA, error) {
 	return s.toOpenAPI()
 }
@@ -38,6 +44,12 @@ func (s SchemaASlice) toOpenAPI() (_ []openapi.SchemaA, err error) {
 //	edge_schemab_unique_required_bindto_bs
 //	edge_schemab_unique_optional
 //	edge_schemab
+//	edge_schemaa_recursive:
+//	  edge_schemab_unique_required
+//	  edge_schemab_unique_required_bindto_bs
+//	  edge_schemab_unique_optional
+//	  edge_schemab
+//	  edge_schemaa_recursive...
 func (e *SchemaA) ToOpenAPI() (*openapi.SchemaA, error) {
 	t, err := e.toOpenAPI()
 	if err != nil {
@@ -133,6 +145,24 @@ func (e *SchemaA) toOpenAPI() (t openapi.SchemaA, err error) {
 		return nil
 	}(); err != nil {
 		return t, fmt.Errorf("edge 'edge_schemab': %w", err)
+	}
+	// Edge 'edge_schemaa_recursive'.
+	if err := func() error {
+		v, err := e.Edges.EdgeSchemaaRecursiveOrErr()
+		if err != nil {
+			if IsNotFound(err) {
+				return nil
+			}
+			return fmt.Errorf("load: %w", err)
+		}
+		openapiType, err := SchemaASlice(v).toOpenAPI()
+		if err != nil {
+			return fmt.Errorf("convert to openapi: %w", err)
+		}
+		t.EdgeSchemaaRecursive = openapiType
+		return nil
+	}(); err != nil {
+		return t, fmt.Errorf("edge 'edge_schemaa_recursive': %w", err)
 	}
 	return t, nil
 }

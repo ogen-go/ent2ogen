@@ -54,6 +54,9 @@ type SchemaAMutation struct {
 	edge_schemab                                  map[int64]struct{}
 	removededge_schemab                           map[int64]struct{}
 	clearededge_schemab                           bool
+	edge_schemaa_recursive                        map[int]struct{}
+	removededge_schemaa_recursive                 map[int]struct{}
+	clearededge_schemaa_recursive                 bool
 	done                                          bool
 	oldValue                                      func(context.Context) (*SchemaA, error)
 	predicates                                    []predicate.SchemaA
@@ -719,6 +722,60 @@ func (m *SchemaAMutation) ResetEdgeSchemab() {
 	m.removededge_schemab = nil
 }
 
+// AddEdgeSchemaaRecursiveIDs adds the "edge_schemaa_recursive" edge to the SchemaA entity by ids.
+func (m *SchemaAMutation) AddEdgeSchemaaRecursiveIDs(ids ...int) {
+	if m.edge_schemaa_recursive == nil {
+		m.edge_schemaa_recursive = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.edge_schemaa_recursive[ids[i]] = struct{}{}
+	}
+}
+
+// ClearEdgeSchemaaRecursive clears the "edge_schemaa_recursive" edge to the SchemaA entity.
+func (m *SchemaAMutation) ClearEdgeSchemaaRecursive() {
+	m.clearededge_schemaa_recursive = true
+}
+
+// EdgeSchemaaRecursiveCleared reports if the "edge_schemaa_recursive" edge to the SchemaA entity was cleared.
+func (m *SchemaAMutation) EdgeSchemaaRecursiveCleared() bool {
+	return m.clearededge_schemaa_recursive
+}
+
+// RemoveEdgeSchemaaRecursiveIDs removes the "edge_schemaa_recursive" edge to the SchemaA entity by IDs.
+func (m *SchemaAMutation) RemoveEdgeSchemaaRecursiveIDs(ids ...int) {
+	if m.removededge_schemaa_recursive == nil {
+		m.removededge_schemaa_recursive = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.edge_schemaa_recursive, ids[i])
+		m.removededge_schemaa_recursive[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedEdgeSchemaaRecursive returns the removed IDs of the "edge_schemaa_recursive" edge to the SchemaA entity.
+func (m *SchemaAMutation) RemovedEdgeSchemaaRecursiveIDs() (ids []int) {
+	for id := range m.removededge_schemaa_recursive {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// EdgeSchemaaRecursiveIDs returns the "edge_schemaa_recursive" edge IDs in the mutation.
+func (m *SchemaAMutation) EdgeSchemaaRecursiveIDs() (ids []int) {
+	for id := range m.edge_schemaa_recursive {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetEdgeSchemaaRecursive resets all changes to the "edge_schemaa_recursive" edge.
+func (m *SchemaAMutation) ResetEdgeSchemaaRecursive() {
+	m.edge_schemaa_recursive = nil
+	m.clearededge_schemaa_recursive = false
+	m.removededge_schemaa_recursive = nil
+}
+
 // Where appends a list predicates to the SchemaAMutation builder.
 func (m *SchemaAMutation) Where(ps ...predicate.SchemaA) {
 	m.predicates = append(m.predicates, ps...)
@@ -998,7 +1055,7 @@ func (m *SchemaAMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SchemaAMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.edge_schemab_unique_required != nil {
 		edges = append(edges, schemaa.EdgeEdgeSchemabUniqueRequired)
 	}
@@ -1010,6 +1067,9 @@ func (m *SchemaAMutation) AddedEdges() []string {
 	}
 	if m.edge_schemab != nil {
 		edges = append(edges, schemaa.EdgeEdgeSchemab)
+	}
+	if m.edge_schemaa_recursive != nil {
+		edges = append(edges, schemaa.EdgeEdgeSchemaaRecursive)
 	}
 	return edges
 }
@@ -1036,15 +1096,24 @@ func (m *SchemaAMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case schemaa.EdgeEdgeSchemaaRecursive:
+		ids := make([]ent.Value, 0, len(m.edge_schemaa_recursive))
+		for id := range m.edge_schemaa_recursive {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SchemaAMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.removededge_schemab != nil {
 		edges = append(edges, schemaa.EdgeEdgeSchemab)
+	}
+	if m.removededge_schemaa_recursive != nil {
+		edges = append(edges, schemaa.EdgeEdgeSchemaaRecursive)
 	}
 	return edges
 }
@@ -1059,13 +1128,19 @@ func (m *SchemaAMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case schemaa.EdgeEdgeSchemaaRecursive:
+		ids := make([]ent.Value, 0, len(m.removededge_schemaa_recursive))
+		for id := range m.removededge_schemaa_recursive {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SchemaAMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.clearededge_schemab_unique_required {
 		edges = append(edges, schemaa.EdgeEdgeSchemabUniqueRequired)
 	}
@@ -1077,6 +1152,9 @@ func (m *SchemaAMutation) ClearedEdges() []string {
 	}
 	if m.clearededge_schemab {
 		edges = append(edges, schemaa.EdgeEdgeSchemab)
+	}
+	if m.clearededge_schemaa_recursive {
+		edges = append(edges, schemaa.EdgeEdgeSchemaaRecursive)
 	}
 	return edges
 }
@@ -1093,6 +1171,8 @@ func (m *SchemaAMutation) EdgeCleared(name string) bool {
 		return m.clearededge_schemab_unique_optional
 	case schemaa.EdgeEdgeSchemab:
 		return m.clearededge_schemab
+	case schemaa.EdgeEdgeSchemaaRecursive:
+		return m.clearededge_schemaa_recursive
 	}
 	return false
 }
@@ -1129,6 +1209,9 @@ func (m *SchemaAMutation) ResetEdge(name string) error {
 		return nil
 	case schemaa.EdgeEdgeSchemab:
 		m.ResetEdgeSchemab()
+		return nil
+	case schemaa.EdgeEdgeSchemaaRecursive:
+		m.ResetEdgeSchemaaRecursive()
 		return nil
 	}
 	return fmt.Errorf("unknown SchemaA edge %s", name)

@@ -35,6 +35,8 @@ const (
 	EdgeEdgeSchemabUniqueOptional = "edge_schemab_unique_optional"
 	// EdgeEdgeSchemab holds the string denoting the edge_schemab edge name in mutations.
 	EdgeEdgeSchemab = "edge_schemab"
+	// EdgeEdgeSchemaaRecursive holds the string denoting the edge_schemaa_recursive edge name in mutations.
+	EdgeEdgeSchemaaRecursive = "edge_schemaa_recursive"
 	// Table holds the table name of the schemaa in the database.
 	Table = "schema_as"
 	// EdgeSchemabUniqueRequiredTable is the table that holds the edge_schemab_unique_required relation/edge.
@@ -65,6 +67,8 @@ const (
 	EdgeSchemabInverseTable = "schema_bs"
 	// EdgeSchemabColumn is the table column denoting the edge_schemab relation/edge.
 	EdgeSchemabColumn = "schemaa_edge_schemab"
+	// EdgeSchemaaRecursiveTable is the table that holds the edge_schemaa_recursive relation/edge. The primary key declared below.
+	EdgeSchemaaRecursiveTable = "schemaa_edge_schemaa_recursive"
 )
 
 // Columns holds all SQL columns for schemaa fields.
@@ -87,6 +91,12 @@ var ForeignKeys = []string{
 	"schemaa_edge_schemab_unique_required_bindto_bs",
 	"schemaa_edge_schemab_unique_optional",
 }
+
+var (
+	// EdgeSchemaaRecursivePrimaryKey and EdgeSchemaaRecursiveColumn2 are the table columns denoting the
+	// primary key for the edge_schemaa_recursive relation (M2M).
+	EdgeSchemaaRecursivePrimaryKey = []string{"schemaa_id", "edge_schemaa_recursive_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

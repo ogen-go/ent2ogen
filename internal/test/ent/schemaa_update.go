@@ -200,6 +200,21 @@ func (sa *SchemaAUpdate) AddEdgeSchemab(s ...*SchemaB) *SchemaAUpdate {
 	return sa.AddEdgeSchemabIDs(ids...)
 }
 
+// AddEdgeSchemaaRecursiveIDs adds the "edge_schemaa_recursive" edge to the SchemaA entity by IDs.
+func (sa *SchemaAUpdate) AddEdgeSchemaaRecursiveIDs(ids ...int) *SchemaAUpdate {
+	sa.mutation.AddEdgeSchemaaRecursiveIDs(ids...)
+	return sa
+}
+
+// AddEdgeSchemaaRecursive adds the "edge_schemaa_recursive" edges to the SchemaA entity.
+func (sa *SchemaAUpdate) AddEdgeSchemaaRecursive(s ...*SchemaA) *SchemaAUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return sa.AddEdgeSchemaaRecursiveIDs(ids...)
+}
+
 // Mutation returns the SchemaAMutation object of the builder.
 func (sa *SchemaAUpdate) Mutation() *SchemaAMutation {
 	return sa.mutation
@@ -242,6 +257,27 @@ func (sa *SchemaAUpdate) RemoveEdgeSchemab(s ...*SchemaB) *SchemaAUpdate {
 		ids[i] = s[i].ID
 	}
 	return sa.RemoveEdgeSchemabIDs(ids...)
+}
+
+// ClearEdgeSchemaaRecursive clears all "edge_schemaa_recursive" edges to the SchemaA entity.
+func (sa *SchemaAUpdate) ClearEdgeSchemaaRecursive() *SchemaAUpdate {
+	sa.mutation.ClearEdgeSchemaaRecursive()
+	return sa
+}
+
+// RemoveEdgeSchemaaRecursiveIDs removes the "edge_schemaa_recursive" edge to SchemaA entities by IDs.
+func (sa *SchemaAUpdate) RemoveEdgeSchemaaRecursiveIDs(ids ...int) *SchemaAUpdate {
+	sa.mutation.RemoveEdgeSchemaaRecursiveIDs(ids...)
+	return sa
+}
+
+// RemoveEdgeSchemaaRecursive removes "edge_schemaa_recursive" edges to SchemaA entities.
+func (sa *SchemaAUpdate) RemoveEdgeSchemaaRecursive(s ...*SchemaA) *SchemaAUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return sa.RemoveEdgeSchemaaRecursiveIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -551,6 +587,60 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if sa.mutation.EdgeSchemaaRecursiveCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   schemaa.EdgeSchemaaRecursiveTable,
+			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: schemaa.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := sa.mutation.RemovedEdgeSchemaaRecursiveIDs(); len(nodes) > 0 && !sa.mutation.EdgeSchemaaRecursiveCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   schemaa.EdgeSchemaaRecursiveTable,
+			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: schemaa.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := sa.mutation.EdgeSchemaaRecursiveIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   schemaa.EdgeSchemaaRecursiveTable,
+			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: schemaa.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, sa.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{schemaa.Label}
@@ -741,6 +831,21 @@ func (sao *SchemaAUpdateOne) AddEdgeSchemab(s ...*SchemaB) *SchemaAUpdateOne {
 	return sao.AddEdgeSchemabIDs(ids...)
 }
 
+// AddEdgeSchemaaRecursiveIDs adds the "edge_schemaa_recursive" edge to the SchemaA entity by IDs.
+func (sao *SchemaAUpdateOne) AddEdgeSchemaaRecursiveIDs(ids ...int) *SchemaAUpdateOne {
+	sao.mutation.AddEdgeSchemaaRecursiveIDs(ids...)
+	return sao
+}
+
+// AddEdgeSchemaaRecursive adds the "edge_schemaa_recursive" edges to the SchemaA entity.
+func (sao *SchemaAUpdateOne) AddEdgeSchemaaRecursive(s ...*SchemaA) *SchemaAUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return sao.AddEdgeSchemaaRecursiveIDs(ids...)
+}
+
 // Mutation returns the SchemaAMutation object of the builder.
 func (sao *SchemaAUpdateOne) Mutation() *SchemaAMutation {
 	return sao.mutation
@@ -783,6 +888,27 @@ func (sao *SchemaAUpdateOne) RemoveEdgeSchemab(s ...*SchemaB) *SchemaAUpdateOne 
 		ids[i] = s[i].ID
 	}
 	return sao.RemoveEdgeSchemabIDs(ids...)
+}
+
+// ClearEdgeSchemaaRecursive clears all "edge_schemaa_recursive" edges to the SchemaA entity.
+func (sao *SchemaAUpdateOne) ClearEdgeSchemaaRecursive() *SchemaAUpdateOne {
+	sao.mutation.ClearEdgeSchemaaRecursive()
+	return sao
+}
+
+// RemoveEdgeSchemaaRecursiveIDs removes the "edge_schemaa_recursive" edge to SchemaA entities by IDs.
+func (sao *SchemaAUpdateOne) RemoveEdgeSchemaaRecursiveIDs(ids ...int) *SchemaAUpdateOne {
+	sao.mutation.RemoveEdgeSchemaaRecursiveIDs(ids...)
+	return sao
+}
+
+// RemoveEdgeSchemaaRecursive removes "edge_schemaa_recursive" edges to SchemaA entities.
+func (sao *SchemaAUpdateOne) RemoveEdgeSchemaaRecursive(s ...*SchemaA) *SchemaAUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return sao.RemoveEdgeSchemaaRecursiveIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1114,6 +1240,60 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt64,
 					Column: schemab.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if sao.mutation.EdgeSchemaaRecursiveCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   schemaa.EdgeSchemaaRecursiveTable,
+			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: schemaa.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := sao.mutation.RemovedEdgeSchemaaRecursiveIDs(); len(nodes) > 0 && !sao.mutation.EdgeSchemaaRecursiveCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   schemaa.EdgeSchemaaRecursiveTable,
+			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: schemaa.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := sao.mutation.EdgeSchemaaRecursiveIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   schemaa.EdgeSchemaaRecursiveTable,
+			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: schemaa.FieldID,
 				},
 			},
 		}

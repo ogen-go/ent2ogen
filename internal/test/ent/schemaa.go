@@ -51,9 +51,11 @@ type SchemaAEdges struct {
 	EdgeSchemabUniqueOptional *SchemaB `json:"edge_schemab_unique_optional,omitempty"`
 	// EdgeSchemab holds the value of the edge_schemab edge.
 	EdgeSchemab []*SchemaB `json:"edge_schemab,omitempty"`
+	// EdgeSchemaaRecursive holds the value of the edge_schemaa_recursive edge.
+	EdgeSchemaaRecursive []*SchemaA `json:"edge_schemaa_recursive,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // EdgeSchemabUniqueRequiredOrErr returns the EdgeSchemabUniqueRequired value or an error if the edge
@@ -102,6 +104,15 @@ func (e SchemaAEdges) EdgeSchemabOrErr() ([]*SchemaB, error) {
 		return e.EdgeSchemab, nil
 	}
 	return nil, &NotLoadedError{edge: "edge_schemab"}
+}
+
+// EdgeSchemaaRecursiveOrErr returns the EdgeSchemaaRecursive value or an error if the edge
+// was not loaded in eager-loading.
+func (e SchemaAEdges) EdgeSchemaaRecursiveOrErr() ([]*SchemaA, error) {
+	if e.loadedTypes[4] {
+		return e.EdgeSchemaaRecursive, nil
+	}
+	return nil, &NotLoadedError{edge: "edge_schemaa_recursive"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -243,6 +254,11 @@ func (s *SchemaA) QueryEdgeSchemabUniqueOptional() *SchemaBQuery {
 // QueryEdgeSchemab queries the "edge_schemab" edge of the SchemaA entity.
 func (s *SchemaA) QueryEdgeSchemab() *SchemaBQuery {
 	return (&SchemaAClient{config: s.config}).QueryEdgeSchemab(s)
+}
+
+// QueryEdgeSchemaaRecursive queries the "edge_schemaa_recursive" edge of the SchemaA entity.
+func (s *SchemaA) QueryEdgeSchemaaRecursive() *SchemaAQuery {
+	return (&SchemaAClient{config: s.config}).QueryEdgeSchemaaRecursive(s)
 }
 
 // Update returns a builder for updating this SchemaA.

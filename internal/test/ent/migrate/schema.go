@@ -68,10 +68,36 @@ var (
 			},
 		},
 	}
+	// SchemaaEdgeSchemaaRecursiveColumns holds the columns for the "schemaa_edge_schemaa_recursive" table.
+	SchemaaEdgeSchemaaRecursiveColumns = []*schema.Column{
+		{Name: "schemaa_id", Type: field.TypeInt},
+		{Name: "edge_schemaa_recursive_id", Type: field.TypeInt},
+	}
+	// SchemaaEdgeSchemaaRecursiveTable holds the schema information for the "schemaa_edge_schemaa_recursive" table.
+	SchemaaEdgeSchemaaRecursiveTable = &schema.Table{
+		Name:       "schemaa_edge_schemaa_recursive",
+		Columns:    SchemaaEdgeSchemaaRecursiveColumns,
+		PrimaryKey: []*schema.Column{SchemaaEdgeSchemaaRecursiveColumns[0], SchemaaEdgeSchemaaRecursiveColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "schemaa_edge_schemaa_recursive_schemaa_id",
+				Columns:    []*schema.Column{SchemaaEdgeSchemaaRecursiveColumns[0]},
+				RefColumns: []*schema.Column{SchemaAsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "schemaa_edge_schemaa_recursive_edge_schemaa_recursive_id",
+				Columns:    []*schema.Column{SchemaaEdgeSchemaaRecursiveColumns[1]},
+				RefColumns: []*schema.Column{SchemaAsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		SchemaAsTable,
 		SchemaBsTable,
+		SchemaaEdgeSchemaaRecursiveTable,
 	}
 )
 
@@ -80,4 +106,6 @@ func init() {
 	SchemaAsTable.ForeignKeys[1].RefTable = SchemaBsTable
 	SchemaAsTable.ForeignKeys[2].RefTable = SchemaBsTable
 	SchemaBsTable.ForeignKeys[0].RefTable = SchemaAsTable
+	SchemaaEdgeSchemaaRecursiveTable.ForeignKeys[0].RefTable = SchemaAsTable
+	SchemaaEdgeSchemaaRecursiveTable.ForeignKeys[1].RefTable = SchemaAsTable
 }

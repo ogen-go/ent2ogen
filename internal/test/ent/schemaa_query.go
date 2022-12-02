@@ -29,6 +29,7 @@ type SchemaAQuery struct {
 	withEdgeSchemabUniqueRequiredBindtoBs *SchemaBQuery
 	withEdgeSchemabUniqueOptional         *SchemaBQuery
 	withEdgeSchemab                       *SchemaBQuery
+	withEdgeSchemaaRecursive              *SchemaAQuery
 	withFKs                               bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -147,6 +148,28 @@ func (sa *SchemaAQuery) QueryEdgeSchemab() *SchemaBQuery {
 			sqlgraph.From(schemaa.Table, schemaa.FieldID, selector),
 			sqlgraph.To(schemab.Table, schemab.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, schemaa.EdgeSchemabTable, schemaa.EdgeSchemabColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(sa.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryEdgeSchemaaRecursive chains the current query on the "edge_schemaa_recursive" edge.
+func (sa *SchemaAQuery) QueryEdgeSchemaaRecursive() *SchemaAQuery {
+	query := &SchemaAQuery{config: sa.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := sa.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := sa.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(schemaa.Table, schemaa.FieldID, selector),
+			sqlgraph.To(schemaa.Table, schemaa.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, schemaa.EdgeSchemaaRecursiveTable, schemaa.EdgeSchemaaRecursivePrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(sa.driver.Dialect(), step)
 		return fromU, nil
@@ -339,6 +362,7 @@ func (sa *SchemaAQuery) Clone() *SchemaAQuery {
 		withEdgeSchemabUniqueRequiredBindtoBs: sa.withEdgeSchemabUniqueRequiredBindtoBs.Clone(),
 		withEdgeSchemabUniqueOptional:         sa.withEdgeSchemabUniqueOptional.Clone(),
 		withEdgeSchemab:                       sa.withEdgeSchemab.Clone(),
+		withEdgeSchemaaRecursive:              sa.withEdgeSchemaaRecursive.Clone(),
 		// clone intermediate query.
 		sql:    sa.sql.Clone(),
 		path:   sa.path,
@@ -387,6 +411,17 @@ func (sa *SchemaAQuery) WithEdgeSchemab(opts ...func(*SchemaBQuery)) *SchemaAQue
 		opt(query)
 	}
 	sa.withEdgeSchemab = query
+	return sa
+}
+
+// WithEdgeSchemaaRecursive tells the query-builder to eager-load the nodes that are connected to
+// the "edge_schemaa_recursive" edge. The optional arguments are used to configure the query builder of the edge.
+func (sa *SchemaAQuery) WithEdgeSchemaaRecursive(opts ...func(*SchemaAQuery)) *SchemaAQuery {
+	query := &SchemaAQuery{config: sa.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	sa.withEdgeSchemaaRecursive = query
 	return sa
 }
 
@@ -464,11 +499,12 @@ func (sa *SchemaAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sche
 		nodes       = []*SchemaA{}
 		withFKs     = sa.withFKs
 		_spec       = sa.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			sa.withEdgeSchemabUniqueRequired != nil,
 			sa.withEdgeSchemabUniqueRequiredBindtoBs != nil,
 			sa.withEdgeSchemabUniqueOptional != nil,
 			sa.withEdgeSchemab != nil,
+			sa.withEdgeSchemaaRecursive != nil,
 		}
 	)
 	if sa.withEdgeSchemabUniqueRequired != nil || sa.withEdgeSchemabUniqueRequiredBindtoBs != nil || sa.withEdgeSchemabUniqueOptional != nil {
@@ -517,6 +553,13 @@ func (sa *SchemaAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sche
 		if err := sa.loadEdgeSchemab(ctx, query, nodes,
 			func(n *SchemaA) { n.Edges.EdgeSchemab = []*SchemaB{} },
 			func(n *SchemaA, e *SchemaB) { n.Edges.EdgeSchemab = append(n.Edges.EdgeSchemab, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := sa.withEdgeSchemaaRecursive; query != nil {
+		if err := sa.loadEdgeSchemaaRecursive(ctx, query, nodes,
+			func(n *SchemaA) { n.Edges.EdgeSchemaaRecursive = []*SchemaA{} },
+			func(n *SchemaA, e *SchemaA) { n.Edges.EdgeSchemaaRecursive = append(n.Edges.EdgeSchemaaRecursive, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -638,6 +681,64 @@ func (sa *SchemaAQuery) loadEdgeSchemab(ctx context.Context, query *SchemaBQuery
 			return fmt.Errorf(`unexpected foreign-key "schemaa_edge_schemab" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (sa *SchemaAQuery) loadEdgeSchemaaRecursive(ctx context.Context, query *SchemaAQuery, nodes []*SchemaA, init func(*SchemaA), assign func(*SchemaA, *SchemaA)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*SchemaA)
+	nids := make(map[int]map[*SchemaA]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(schemaa.EdgeSchemaaRecursiveTable)
+		s.Join(joinT).On(s.C(schemaa.FieldID), joinT.C(schemaa.EdgeSchemaaRecursivePrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(schemaa.EdgeSchemaaRecursivePrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(schemaa.EdgeSchemaaRecursivePrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*SchemaA]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "edge_schemaa_recursive" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }

@@ -148,6 +148,21 @@ func (sa *SchemaACreate) AddEdgeSchemab(s ...*SchemaB) *SchemaACreate {
 	return sa.AddEdgeSchemabIDs(ids...)
 }
 
+// AddEdgeSchemaaRecursiveIDs adds the "edge_schemaa_recursive" edge to the SchemaA entity by IDs.
+func (sa *SchemaACreate) AddEdgeSchemaaRecursiveIDs(ids ...int) *SchemaACreate {
+	sa.mutation.AddEdgeSchemaaRecursiveIDs(ids...)
+	return sa
+}
+
+// AddEdgeSchemaaRecursive adds the "edge_schemaa_recursive" edges to the SchemaA entity.
+func (sa *SchemaACreate) AddEdgeSchemaaRecursive(s ...*SchemaA) *SchemaACreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return sa.AddEdgeSchemaaRecursiveIDs(ids...)
+}
+
 // Mutation returns the SchemaAMutation object of the builder.
 func (sa *SchemaACreate) Mutation() *SchemaAMutation {
 	return sa.mutation
@@ -382,6 +397,25 @@ func (sa *SchemaACreate) createSpec() (*SchemaA, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt64,
 					Column: schemab.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := sa.mutation.EdgeSchemaaRecursiveIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   schemaa.EdgeSchemaaRecursiveTable,
+			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: schemaa.FieldID,
 				},
 			},
 		}

@@ -279,6 +279,22 @@ func (c *SchemaAClient) QueryEdgeSchemab(s *SchemaA) *SchemaBQuery {
 	return query
 }
 
+// QueryEdgeSchemaaRecursive queries the edge_schemaa_recursive edge of a SchemaA.
+func (c *SchemaAClient) QueryEdgeSchemaaRecursive(s *SchemaA) *SchemaAQuery {
+	query := &SchemaAQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(schemaa.Table, schemaa.FieldID, id),
+			sqlgraph.To(schemaa.Table, schemaa.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, schemaa.EdgeSchemaaRecursiveTable, schemaa.EdgeSchemaaRecursivePrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *SchemaAClient) Hooks() []Hook {
 	return c.hooks.SchemaA

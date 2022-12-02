@@ -210,6 +210,7 @@ type SchemaA struct {
 	EdgeSchemabUniqueRequiredBsBind SchemaB                           `json:"edge_schemab_unique_required_bs_bind"`
 	EdgeSchemabUniqueOptional       OptSchemaB                        `json:"edge_schemab_unique_optional"`
 	EdgeSchemab                     []SchemaB                         `json:"edge_schemab"`
+	EdgeSchemaaRecursive            []SchemaA                         `json:"edge_schemaa_recursive"`
 }
 
 // GetInt64 returns the value of Int64.
@@ -272,6 +273,11 @@ func (s SchemaA) GetEdgeSchemab() []SchemaB {
 	return s.EdgeSchemab
 }
 
+// GetEdgeSchemaaRecursive returns the value of EdgeSchemaaRecursive.
+func (s SchemaA) GetEdgeSchemaaRecursive() []SchemaA {
+	return s.EdgeSchemaaRecursive
+}
+
 // SetInt64 sets the value of Int64.
 func (s *SchemaA) SetInt64(val int64) {
 	s.Int64 = val
@@ -330,6 +336,11 @@ func (s *SchemaA) SetEdgeSchemabUniqueOptional(val OptSchemaB) {
 // SetEdgeSchemab sets the value of EdgeSchemab.
 func (s *SchemaA) SetEdgeSchemab(val []SchemaB) {
 	s.EdgeSchemab = val
+}
+
+// SetEdgeSchemaaRecursive sets the value of EdgeSchemaaRecursive.
+func (s *SchemaA) SetEdgeSchemaaRecursive(val []SchemaA) {
+	s.EdgeSchemaaRecursive = val
 }
 
 type SchemaAOptionalNullableEnum string

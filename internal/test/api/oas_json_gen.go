@@ -277,9 +277,19 @@ func (s SchemaA) encodeFields(e *jx.Encoder) {
 			e.ArrEnd()
 		}
 	}
+	{
+		if s.EdgeSchemaaRecursive != nil {
+			e.FieldStart("edge_schemaa_recursive")
+			e.ArrStart()
+			for _, elem := range s.EdgeSchemaaRecursive {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfSchemaA = [12]string{
+var jsonFieldsNameOfSchemaA = [13]string{
 	0:  "int64",
 	1:  "string_foobar_bind",
 	2:  "string_optional_nullable",
@@ -292,6 +302,7 @@ var jsonFieldsNameOfSchemaA = [12]string{
 	9:  "edge_schemab_unique_required_bs_bind",
 	10: "edge_schemab_unique_optional",
 	11: "edge_schemab",
+	12: "edge_schemaa_recursive",
 }
 
 // Decode decodes SchemaA from json.
@@ -452,6 +463,23 @@ func (s *SchemaA) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"edge_schemab\"")
+			}
+		case "edge_schemaa_recursive":
+			if err := func() error {
+				s.EdgeSchemaaRecursive = make([]SchemaA, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem SchemaA
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.EdgeSchemaaRecursive = append(s.EdgeSchemaaRecursive, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"edge_schemaa_recursive\"")
 			}
 		default:
 			return d.Skip()

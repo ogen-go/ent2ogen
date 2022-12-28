@@ -181,14 +181,22 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 	}
 
 	checks := map[field.Type]func() error{
-		field.TypeBool:   func() error { return assertJS(js, jsonschema.Boolean, "") },
+		field.TypeBool: func() error { return assertJS(js, jsonschema.Boolean, "") },
+
 		field.TypeString: func() error { return assertJS(js, jsonschema.String, "") },
-		field.TypeInt:    func() error { return assertJS(js, jsonschema.Integer, "") },
-		field.TypeInt32:  func() error { return assertJS(js, jsonschema.Integer, "int32") },
-		field.TypeInt64:  func() error { return assertJS(js, jsonschema.Integer, "int64") },
 		field.TypeTime:   func() error { return assertJS(js, jsonschema.String, "date-time") },
 		field.TypeUUID:   func() error { return assertJS(js, jsonschema.String, "uuid") },
 		field.TypeEnum:   func() error { return assertJS(js, jsonschema.String, "") },
+
+		field.TypeInt:    func() error { return assertJS(js, jsonschema.Integer, "") },
+		field.TypeInt16:  func() error { return assertJS(js, jsonschema.Integer, "int16") },
+		field.TypeInt32:  func() error { return assertJS(js, jsonschema.Integer, "int32") },
+		field.TypeInt64:  func() error { return assertJS(js, jsonschema.Integer, "int64") },
+		field.TypeUint:   func() error { return assertJS(js, jsonschema.Integer, "uint") },
+		field.TypeUint16: func() error { return assertJS(js, jsonschema.Integer, "uint16") },
+		field.TypeUint32: func() error { return assertJS(js, jsonschema.Integer, "uint32") },
+		field.TypeUint64: func() error { return assertJS(js, jsonschema.Integer, "uint64") },
+
 		field.TypeJSON: func() error {
 			switch et.Ident {
 			case "[]string":

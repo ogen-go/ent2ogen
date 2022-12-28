@@ -16,6 +16,6 @@ var _ Handler = UnimplementedHandler{}
 // Test implements test operation.
 //
 // GET /test
-func (UnimplementedHandler) Test(ctx context.Context) (r SchemaA, _ error) {
+func (UnimplementedHandler) Test(ctx context.Context) (r *SchemaA, _ error) {
 	return r, ht.ErrNotImplemented
 }

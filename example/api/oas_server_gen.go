@@ -11,7 +11,7 @@ type Handler interface {
 	// GetKeyboard implements getKeyboard operation.
 	//
 	// GET /keyboard/{id}
-	GetKeyboard(ctx context.Context, params GetKeyboardParams) (Keyboard, error)
+	GetKeyboard(ctx context.Context, params GetKeyboardParams) (*Keyboard, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

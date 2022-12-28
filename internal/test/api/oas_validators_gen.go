@@ -10,7 +10,7 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s SchemaA) Validate() error {
+func (s *SchemaA) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.JsontypeStrings == nil {

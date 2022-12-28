@@ -2,6 +2,10 @@
 
 package openapi
 
+import (
+	"github.com/go-faster/errors"
+)
+
 // NewNilString returns new NilString with value set to v.
 func NewNilString(v string) NilString {
 	return NilString{
@@ -216,77 +220,77 @@ type SchemaA struct {
 }
 
 // GetInt64 returns the value of Int64.
-func (s SchemaA) GetInt64() int64 {
+func (s *SchemaA) GetInt64() int64 {
 	return s.Int64
 }
 
 // GetStringFoobarBind returns the value of StringFoobarBind.
-func (s SchemaA) GetStringFoobarBind() string {
+func (s *SchemaA) GetStringFoobarBind() string {
 	return s.StringFoobarBind
 }
 
 // GetStringOptionalNullable returns the value of StringOptionalNullable.
-func (s SchemaA) GetStringOptionalNullable() NilString {
+func (s *SchemaA) GetStringOptionalNullable() NilString {
 	return s.StringOptionalNullable
 }
 
 // GetOptionalNullableBool returns the value of OptionalNullableBool.
-func (s SchemaA) GetOptionalNullableBool() OptNilBool {
+func (s *SchemaA) GetOptionalNullableBool() OptNilBool {
 	return s.OptionalNullableBool
 }
 
 // GetJsontypeStrings returns the value of JsontypeStrings.
-func (s SchemaA) GetJsontypeStrings() []string {
+func (s *SchemaA) GetJsontypeStrings() []string {
 	return s.JsontypeStrings
 }
 
 // GetJsontypeStringsOptional returns the value of JsontypeStringsOptional.
-func (s SchemaA) GetJsontypeStringsOptional() []string {
+func (s *SchemaA) GetJsontypeStringsOptional() []string {
 	return s.JsontypeStringsOptional
 }
 
 // GetJsontypeInts returns the value of JsontypeInts.
-func (s SchemaA) GetJsontypeInts() []int {
+func (s *SchemaA) GetJsontypeInts() []int {
 	return s.JsontypeInts
 }
 
 // GetJsontypeIntsOptional returns the value of JsontypeIntsOptional.
-func (s SchemaA) GetJsontypeIntsOptional() []int {
+func (s *SchemaA) GetJsontypeIntsOptional() []int {
 	return s.JsontypeIntsOptional
 }
 
 // GetRequiredEnum returns the value of RequiredEnum.
-func (s SchemaA) GetRequiredEnum() SchemaARequiredEnum {
+func (s *SchemaA) GetRequiredEnum() SchemaARequiredEnum {
 	return s.RequiredEnum
 }
 
 // GetOptionalNullableEnum returns the value of OptionalNullableEnum.
-func (s SchemaA) GetOptionalNullableEnum() OptNilSchemaAOptionalNullableEnum {
+func (s *SchemaA) GetOptionalNullableEnum() OptNilSchemaAOptionalNullableEnum {
 	return s.OptionalNullableEnum
 }
 
 // GetEdgeSchemabUniqueRequired returns the value of EdgeSchemabUniqueRequired.
-func (s SchemaA) GetEdgeSchemabUniqueRequired() SchemaB {
+func (s *SchemaA) GetEdgeSchemabUniqueRequired() SchemaB {
 	return s.EdgeSchemabUniqueRequired
 }
 
 // GetEdgeSchemabUniqueRequiredBsBind returns the value of EdgeSchemabUniqueRequiredBsBind.
-func (s SchemaA) GetEdgeSchemabUniqueRequiredBsBind() SchemaB {
+func (s *SchemaA) GetEdgeSchemabUniqueRequiredBsBind() SchemaB {
 	return s.EdgeSchemabUniqueRequiredBsBind
 }
 
 // GetEdgeSchemabUniqueOptional returns the value of EdgeSchemabUniqueOptional.
-func (s SchemaA) GetEdgeSchemabUniqueOptional() OptSchemaB {
+func (s *SchemaA) GetEdgeSchemabUniqueOptional() OptSchemaB {
 	return s.EdgeSchemabUniqueOptional
 }
 
 // GetEdgeSchemab returns the value of EdgeSchemab.
-func (s SchemaA) GetEdgeSchemab() []SchemaB {
+func (s *SchemaA) GetEdgeSchemab() []SchemaB {
 	return s.EdgeSchemab
 }
 
 // GetEdgeSchemaaRecursive returns the value of EdgeSchemaaRecursive.
-func (s SchemaA) GetEdgeSchemaaRecursive() []SchemaA {
+func (s *SchemaA) GetEdgeSchemaaRecursive() []SchemaA {
 	return s.EdgeSchemaaRecursive
 }
 
@@ -372,6 +376,32 @@ const (
 	SchemaAOptionalNullableEnumD SchemaAOptionalNullableEnum = "d"
 )
 
+// MarshalText implements encoding.TextMarshaler.
+func (s SchemaAOptionalNullableEnum) MarshalText() ([]byte, error) {
+	switch s {
+	case SchemaAOptionalNullableEnumC:
+		return []byte(s), nil
+	case SchemaAOptionalNullableEnumD:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SchemaAOptionalNullableEnum) UnmarshalText(data []byte) error {
+	switch SchemaAOptionalNullableEnum(data) {
+	case SchemaAOptionalNullableEnumC:
+		*s = SchemaAOptionalNullableEnumC
+		return nil
+	case SchemaAOptionalNullableEnumD:
+		*s = SchemaAOptionalNullableEnumD
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type SchemaARequiredEnum string
 
 const (
@@ -379,13 +409,39 @@ const (
 	SchemaARequiredEnumB SchemaARequiredEnum = "b"
 )
 
+// MarshalText implements encoding.TextMarshaler.
+func (s SchemaARequiredEnum) MarshalText() ([]byte, error) {
+	switch s {
+	case SchemaARequiredEnumA:
+		return []byte(s), nil
+	case SchemaARequiredEnumB:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SchemaARequiredEnum) UnmarshalText(data []byte) error {
+	switch SchemaARequiredEnum(data) {
+	case SchemaARequiredEnumA:
+		*s = SchemaARequiredEnumA
+		return nil
+	case SchemaARequiredEnumB:
+		*s = SchemaARequiredEnumB
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/SchemaB
 type SchemaB struct {
 	ID int64 `json:"id"`
 }
 
 // GetID returns the value of ID.
-func (s SchemaB) GetID() int64 {
+func (s *SchemaB) GetID() int64 {
 	return s.ID
 }
 

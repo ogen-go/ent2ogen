@@ -4,12 +4,15 @@ package api
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/go-faster/errors"
 
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/middleware"
+	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/uri"
+	"github.com/ogen-go/ogen/validate"
 )
 
 // GetKeyboardParams is parameters of getKeyboard operation.
@@ -30,8 +33,11 @@ func unpackGetKeyboardParams(packed middleware.Parameters) (params GetKeyboardPa
 
 func decodeGetKeyboardParams(args [1]string, r *http.Request) (params GetKeyboardParams, _ error) {
 	// Decode path: id.
-	{
-		param := args[0]
+	if err := func() error {
+		param, err := url.PathUnescape(args[0])
+		if err != nil {
+			return errors.Wrap(err, "unescape path")
+		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
 				Param:   "id",
@@ -54,10 +60,17 @@ func decodeGetKeyboardParams(args [1]string, r *http.Request) (params GetKeyboar
 				params.ID = c
 				return nil
 			}(); err != nil {
-				return params, errors.Wrap(err, "path: id: parse")
+				return err
 			}
 		} else {
-			return params, errors.New("path: id: not specified")
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "id",
+			In:   "path",
+			Err:  err,
 		}
 	}
 	return params, nil

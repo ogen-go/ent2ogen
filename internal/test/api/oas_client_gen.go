@@ -17,15 +17,15 @@ import (
 	"github.com/ogen-go/ogen/uri"
 )
 
-var _ Handler = struct {
-	*Client
-}{}
-
 // Client implements OAS client.
 type Client struct {
 	serverURL *url.URL
 	baseClient
 }
+
+var _ Handler = struct {
+	*Client
+}{}
 
 // NewClient initializes new Client defined by OAS.
 func NewClient(serverURL string, opts ...ClientOption) (*Client, error) {
@@ -61,7 +61,13 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 // Test invokes test operation.
 //
 // GET /test
-func (c *Client) Test(ctx context.Context) (res SchemaA, err error) {
+func (c *Client) Test(ctx context.Context) (*SchemaA, error) {
+	res, err := c.sendTest(ctx)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendTest(ctx context.Context) (res *SchemaA, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("test"),
 	}

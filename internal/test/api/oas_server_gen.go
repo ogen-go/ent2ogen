@@ -11,7 +11,7 @@ type Handler interface {
 	// Test implements test operation.
 	//
 	// GET /test
-	Test(ctx context.Context) (SchemaA, error)
+	Test(ctx context.Context) (*SchemaA, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

@@ -8,7 +8,7 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s Keyboard) Validate() error {
+func (s *Keyboard) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Switches.Validate(); err != nil {
@@ -37,7 +37,7 @@ func (s Keyboard) Validate() error {
 	}
 	return nil
 }
-func (s Keycaps) Validate() error {
+func (s *Keycaps) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Material.Validate(); err != nil {
@@ -65,7 +65,7 @@ func (s KeycapsMaterial) Validate() error {
 		return errors.Errorf("invalid value: %v", s)
 	}
 }
-func (s Switches) Validate() error {
+func (s *Switches) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.SwitchType.Validate(); err != nil {

@@ -16,6 +16,6 @@ var _ Handler = UnimplementedHandler{}
 // GetKeyboard implements getKeyboard operation.
 //
 // GET /keyboard/{id}
-func (UnimplementedHandler) GetKeyboard(ctx context.Context, params GetKeyboardParams) (r Keyboard, _ error) {
+func (UnimplementedHandler) GetKeyboard(ctx context.Context, params GetKeyboardParams) (r *Keyboard, _ error) {
 	return r, ht.ErrNotImplemented
 }

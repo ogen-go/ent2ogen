@@ -13,14 +13,14 @@ import (
 )
 
 // Encode implements json.Marshaler.
-func (s Keyboard) Encode(e *jx.Encoder) {
+func (s *Keyboard) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s Keyboard) encodeFields(e *jx.Encoder) {
+func (s *Keyboard) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("id")
@@ -181,7 +181,7 @@ func (s *Keyboard) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s Keyboard) MarshalJSON() ([]byte, error) {
+func (s *Keyboard) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -194,14 +194,14 @@ func (s *Keyboard) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s Keycaps) Encode(e *jx.Encoder) {
+func (s *Keycaps) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s Keycaps) encodeFields(e *jx.Encoder) {
+func (s *Keycaps) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("id")
@@ -330,7 +330,7 @@ func (s *Keycaps) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s Keycaps) MarshalJSON() ([]byte, error) {
+func (s *Keycaps) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -429,14 +429,14 @@ func (s *NilInt64) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s Switches) Encode(e *jx.Encoder) {
+func (s *Switches) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s Switches) encodeFields(e *jx.Encoder) {
+func (s *Switches) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("id")
@@ -547,7 +547,7 @@ func (s *Switches) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s Switches) MarshalJSON() ([]byte, error) {
+func (s *Switches) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil

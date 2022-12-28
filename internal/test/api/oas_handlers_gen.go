@@ -49,7 +49,7 @@ func (s *Server) handleTestRequest(args [0]string, w http.ResponseWriter, r *htt
 		err error
 	)
 
-	var response SchemaA
+	var response *SchemaA
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -63,7 +63,7 @@ func (s *Server) handleTestRequest(args [0]string, w http.ResponseWriter, r *htt
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = SchemaA
+			Response = *SchemaA
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -73,8 +73,9 @@ func (s *Server) handleTestRequest(args [0]string, w http.ResponseWriter, r *htt
 			m,
 			mreq,
 			nil,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.Test(ctx)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.Test(ctx)
+				return response, err
 			},
 		)
 	} else {

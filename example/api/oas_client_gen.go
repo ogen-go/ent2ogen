@@ -18,15 +18,15 @@ import (
 	"github.com/ogen-go/ogen/uri"
 )
 
-var _ Handler = struct {
-	*Client
-}{}
-
 // Client implements OAS client.
 type Client struct {
 	serverURL *url.URL
 	baseClient
 }
+
+var _ Handler = struct {
+	*Client
+}{}
 
 // NewClient initializes new Client defined by OAS.
 func NewClient(serverURL string, opts ...ClientOption) (*Client, error) {
@@ -62,7 +62,13 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 // GetKeyboard invokes getKeyboard operation.
 //
 // GET /keyboard/{id}
-func (c *Client) GetKeyboard(ctx context.Context, params GetKeyboardParams) (res Keyboard, err error) {
+func (c *Client) GetKeyboard(ctx context.Context, params GetKeyboardParams) (*Keyboard, error) {
+	res, err := c.sendGetKeyboard(ctx, params)
+	_ = res
+	return res, err
+}
+
+func (c *Client) sendGetKeyboard(ctx context.Context, params GetKeyboardParams) (res *Keyboard, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getKeyboard"),
 	}

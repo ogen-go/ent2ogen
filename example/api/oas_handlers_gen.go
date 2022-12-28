@@ -64,7 +64,7 @@ func (s *Server) handleGetKeyboardRequest(args [1]string, w http.ResponseWriter,
 		return
 	}
 
-	var response Keyboard
+	var response *Keyboard
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -83,7 +83,7 @@ func (s *Server) handleGetKeyboardRequest(args [1]string, w http.ResponseWriter,
 		type (
 			Request  = struct{}
 			Params   = GetKeyboardParams
-			Response = Keyboard
+			Response = *Keyboard
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -93,8 +93,9 @@ func (s *Server) handleGetKeyboardRequest(args [1]string, w http.ResponseWriter,
 			m,
 			mreq,
 			unpackGetKeyboardParams,
-			func(ctx context.Context, request Request, params Params) (Response, error) {
-				return s.h.GetKeyboard(ctx, params)
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetKeyboard(ctx, params)
+				return response, err
 			},
 		)
 	} else {

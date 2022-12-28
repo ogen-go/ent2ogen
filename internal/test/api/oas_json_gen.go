@@ -192,14 +192,14 @@ func (s *OptSchemaB) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s SchemaA) Encode(e *jx.Encoder) {
+func (s *SchemaA) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s SchemaA) encodeFields(e *jx.Encoder) {
+func (s *SchemaA) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("int64")
@@ -586,7 +586,7 @@ func (s *SchemaA) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s SchemaA) MarshalJSON() ([]byte, error) {
+func (s *SchemaA) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -679,14 +679,14 @@ func (s *SchemaARequiredEnum) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s SchemaB) Encode(e *jx.Encoder) {
+func (s *SchemaB) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s SchemaB) encodeFields(e *jx.Encoder) {
+func (s *SchemaB) encodeFields(e *jx.Encoder) {
 	{
 
 		e.FieldStart("id")
@@ -763,7 +763,7 @@ func (s *SchemaB) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s SchemaB) MarshalJSON() ([]byte, error) {
+func (s *SchemaB) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil

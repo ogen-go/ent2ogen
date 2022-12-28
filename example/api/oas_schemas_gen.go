@@ -2,6 +2,10 @@
 
 package api
 
+import (
+	"github.com/go-faster/errors"
+)
+
 // Ref: #/components/schemas/Keyboard
 type Keyboard struct {
 	ID       int64    `json:"id"`
@@ -13,32 +17,32 @@ type Keyboard struct {
 }
 
 // GetID returns the value of ID.
-func (s Keyboard) GetID() int64 {
+func (s *Keyboard) GetID() int64 {
 	return s.ID
 }
 
 // GetName returns the value of Name.
-func (s Keyboard) GetName() string {
+func (s *Keyboard) GetName() string {
 	return s.Name
 }
 
 // GetSwitches returns the value of Switches.
-func (s Keyboard) GetSwitches() Switches {
+func (s *Keyboard) GetSwitches() Switches {
 	return s.Switches
 }
 
 // GetKeycaps returns the value of Keycaps.
-func (s Keyboard) GetKeycaps() Keycaps {
+func (s *Keyboard) GetKeycaps() Keycaps {
 	return s.Keycaps
 }
 
 // GetPrice returns the value of Price.
-func (s Keyboard) GetPrice() int64 {
+func (s *Keyboard) GetPrice() int64 {
 	return s.Price
 }
 
 // GetDiscount returns the value of Discount.
-func (s Keyboard) GetDiscount() NilInt64 {
+func (s *Keyboard) GetDiscount() NilInt64 {
 	return s.Discount
 }
 
@@ -81,22 +85,22 @@ type Keycaps struct {
 }
 
 // GetID returns the value of ID.
-func (s Keycaps) GetID() int64 {
+func (s *Keycaps) GetID() int64 {
 	return s.ID
 }
 
 // GetName returns the value of Name.
-func (s Keycaps) GetName() string {
+func (s *Keycaps) GetName() string {
 	return s.Name
 }
 
 // GetProfile returns the value of Profile.
-func (s Keycaps) GetProfile() string {
+func (s *Keycaps) GetProfile() string {
 	return s.Profile
 }
 
 // GetMaterial returns the value of Material.
-func (s Keycaps) GetMaterial() KeycapsMaterial {
+func (s *Keycaps) GetMaterial() KeycapsMaterial {
 	return s.Material
 }
 
@@ -126,6 +130,32 @@ const (
 	KeycapsMaterialABS KeycapsMaterial = "ABS"
 	KeycapsMaterialPBT KeycapsMaterial = "PBT"
 )
+
+// MarshalText implements encoding.TextMarshaler.
+func (s KeycapsMaterial) MarshalText() ([]byte, error) {
+	switch s {
+	case KeycapsMaterialABS:
+		return []byte(s), nil
+	case KeycapsMaterialPBT:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *KeycapsMaterial) UnmarshalText(data []byte) error {
+	switch KeycapsMaterial(data) {
+	case KeycapsMaterialABS:
+		*s = KeycapsMaterialABS
+		return nil
+	case KeycapsMaterialPBT:
+		*s = KeycapsMaterialPBT
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // NewNilInt64 returns new NilInt64 with value set to v.
 func NewNilInt64(v int64) NilInt64 {
@@ -173,17 +203,17 @@ type Switches struct {
 }
 
 // GetID returns the value of ID.
-func (s Switches) GetID() int64 {
+func (s *Switches) GetID() int64 {
 	return s.ID
 }
 
 // GetName returns the value of Name.
-func (s Switches) GetName() string {
+func (s *Switches) GetName() string {
 	return s.Name
 }
 
 // GetSwitchType returns the value of SwitchType.
-func (s Switches) GetSwitchType() SwitchesSwitchType {
+func (s *Switches) GetSwitchType() SwitchesSwitchType {
 	return s.SwitchType
 }
 
@@ -209,3 +239,34 @@ const (
 	SwitchesSwitchTypeOptical           SwitchesSwitchType = "optical"
 	SwitchesSwitchTypeElectrocapacitive SwitchesSwitchType = "electrocapacitive"
 )
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SwitchesSwitchType) MarshalText() ([]byte, error) {
+	switch s {
+	case SwitchesSwitchTypeMechanical:
+		return []byte(s), nil
+	case SwitchesSwitchTypeOptical:
+		return []byte(s), nil
+	case SwitchesSwitchTypeElectrocapacitive:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SwitchesSwitchType) UnmarshalText(data []byte) error {
+	switch SwitchesSwitchType(data) {
+	case SwitchesSwitchTypeMechanical:
+		*s = SwitchesSwitchTypeMechanical
+		return nil
+	case SwitchesSwitchTypeOptical:
+		*s = SwitchesSwitchTypeOptical
+		return nil
+	case SwitchesSwitchTypeElectrocapacitive:
+		*s = SwitchesSwitchTypeElectrocapacitive
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}

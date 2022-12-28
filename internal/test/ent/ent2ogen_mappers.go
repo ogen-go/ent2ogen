@@ -8,8 +8,6 @@ import (
 	openapi "github.com/ogen-go/ent2ogen/internal/test/api"
 )
 
-type SchemaASlice []*SchemaA
-
 // Following edges must be loaded:
 //
 //	edge_schemab_unique_required
@@ -22,11 +20,7 @@ type SchemaASlice []*SchemaA
 //	  edge_schemab_unique_optional
 //	  edge_schemab
 //	  edge_schemaa_recursive...
-func (s SchemaASlice) ToOpenAPI() ([]openapi.SchemaA, error) {
-	return s.toOpenAPI()
-}
-
-func (s SchemaASlice) toOpenAPI() (_ []openapi.SchemaA, err error) {
+func SchemaASliceToOpenAPI(s []*SchemaA) (_ []openapi.SchemaA, err error) {
 	result := make([]openapi.SchemaA, len(s))
 	for i, v := range s {
 		result[i], err = v.toOpenAPI()
@@ -139,7 +133,7 @@ func (e *SchemaA) toOpenAPI() (t openapi.SchemaA, err error) {
 			}
 			return fmt.Errorf("load: %w", err)
 		}
-		openapiType, err := SchemaBSlice(v).toOpenAPI()
+		openapiType, err := SchemaBSliceToOpenAPI(v)
 		if err != nil {
 			return fmt.Errorf("convert to openapi: %w", err)
 		}
@@ -157,7 +151,7 @@ func (e *SchemaA) toOpenAPI() (t openapi.SchemaA, err error) {
 			}
 			return fmt.Errorf("load: %w", err)
 		}
-		openapiType, err := SchemaASlice(v).toOpenAPI()
+		openapiType, err := SchemaASliceToOpenAPI(v)
 		if err != nil {
 			return fmt.Errorf("convert to openapi: %w", err)
 		}
@@ -169,13 +163,7 @@ func (e *SchemaA) toOpenAPI() (t openapi.SchemaA, err error) {
 	return t, nil
 }
 
-type SchemaBSlice []*SchemaB
-
-func (s SchemaBSlice) ToOpenAPI() ([]openapi.SchemaB, error) {
-	return s.toOpenAPI()
-}
-
-func (s SchemaBSlice) toOpenAPI() (_ []openapi.SchemaB, err error) {
+func SchemaBSliceToOpenAPI(s []*SchemaB) (_ []openapi.SchemaB, err error) {
 	result := make([]openapi.SchemaB, len(s))
 	for i, v := range s {
 		result[i], err = v.toOpenAPI()

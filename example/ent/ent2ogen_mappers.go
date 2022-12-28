@@ -8,17 +8,11 @@ import (
 	openapi "github.com/ogen-go/ent2ogen/example/api"
 )
 
-type KeyboardSlice []*Keyboard
-
 // Following edges must be loaded:
 //
 //	switches
 //	keycaps
-func (s KeyboardSlice) ToOpenAPI() ([]openapi.Keyboard, error) {
-	return s.toOpenAPI()
-}
-
-func (s KeyboardSlice) toOpenAPI() (_ []openapi.Keyboard, err error) {
+func KeyboardSliceToOpenAPI(s []*Keyboard) (_ []openapi.Keyboard, err error) {
 	result := make([]openapi.Keyboard, len(s))
 	for i, v := range s {
 		result[i], err = v.toOpenAPI()
@@ -85,13 +79,7 @@ func (e *Keyboard) toOpenAPI() (t openapi.Keyboard, err error) {
 	return t, nil
 }
 
-type KeycapModelSlice []*KeycapModel
-
-func (s KeycapModelSlice) ToOpenAPI() ([]openapi.Keycaps, error) {
-	return s.toOpenAPI()
-}
-
-func (s KeycapModelSlice) toOpenAPI() (_ []openapi.Keycaps, err error) {
+func KeycapModelSliceToOpenAPI(s []*KeycapModel) (_ []openapi.Keycaps, err error) {
 	result := make([]openapi.Keycaps, len(s))
 	for i, v := range s {
 		result[i], err = v.toOpenAPI()
@@ -120,13 +108,7 @@ func (e *KeycapModel) toOpenAPI() (t openapi.Keycaps, err error) {
 	return t, nil
 }
 
-type SwitchModelSlice []*SwitchModel
-
-func (s SwitchModelSlice) ToOpenAPI() ([]openapi.Switches, error) {
-	return s.toOpenAPI()
-}
-
-func (s SwitchModelSlice) toOpenAPI() (_ []openapi.Switches, err error) {
+func SwitchModelSliceToOpenAPI(s []*SwitchModel) (_ []openapi.Switches, err error) {
 	result := make([]openapi.Switches, len(s))
 	for i, v := range s {
 		result[i], err = v.toOpenAPI()

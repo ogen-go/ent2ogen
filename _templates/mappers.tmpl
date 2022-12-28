@@ -7,14 +7,8 @@ import openapi "{{ $cfg.OgenPackage }}"
 
 {{- range $_, $m := $cfg.Mappings }}
 
-type {{ $m.From.Name }}Slice []*{{ $m.From.Name }}
-
 {{ $m.Comment }}
-func (s {{ $m.From.Name }}Slice) ToOpenAPI() ([]openapi.{{ $m.To.Name }}, error) {
-    return s.toOpenAPI()
-}
-
-func (s {{ $m.From.Name }}Slice) toOpenAPI() (_ []openapi.{{ $m.To.Name }}, err error) {
+func {{ $m.From.Name }}SliceToOpenAPI(s []*{{ $m.From.Name }})  (_ []openapi.{{ $m.To.Name }}, err error) {
     result := make([]openapi.{{ $m.To.Name }}, len(s))
     for i, v := range s {
         result[i], err = v.toOpenAPI()
@@ -70,7 +64,7 @@ func (e *{{ $m.From.Name }}) toOpenAPI() (t openapi.{{ $m.To.Name }}, err error)
         {{- if $edge.Unique }}
         openapiType, err := v.toOpenAPI()
         {{- else }}
-        openapiType, err := {{ $edge.Type.Name }}Slice(v).toOpenAPI()
+        openapiType, err := {{ $edge.Type.Name }}SliceToOpenAPI(v)
         {{- end }}
         if err != nil {
             return fmt.Errorf("convert to openapi: %w", err)

@@ -19,8 +19,8 @@ github.com/go-faster/errors v0.6.1 h1:nNIPOBkprlKzkThvS/0YaX8Zs9KewLCOSFQS5BU06F
 github.com/go-faster/errors v0.6.1/go.mod h1:5MGV2/2T9yvlrbhe9pD9LO5Z/2zCSq2T8j+Jpi2LAyY=
 github.com/go-faster/jx v0.40.0 h1:Y9cDVPguBRX4WbZFJlEVHwA1/YDmWWOyHtzyfxaByk0=
 github.com/go-faster/jx v0.40.0/go.mod h1:ALDOh8oc4TjEID/ytTY0Yqlf1ZnNAZ0GJF3SCNo2c8s=
-github.com/go-faster/yamlx v0.4.0 h1:JkZM/4xIAw1ll0m7TGjY34KwJVEIpw/qB0HqTZ6kXh8=
-github.com/go-faster/yamlx v0.4.0/go.mod h1:y3ycw0JOKv3joUzjYcCZVylNNpFlj4x1t6x8WoRSlmE=
+github.com/go-faster/yamlx v0.4.1 h1:00RQkZopoLDF1SgBDJVHuN6epTOK7T0TkN427vbvEBk=
+github.com/go-faster/yamlx v0.4.1/go.mod h1:QXr/i3Z00jRhskgyWkoGsEdseebd/ZbZEpGS6DJv8oo=
 github.com/go-logr/logr v1.2.2/go.mod h1:jdQByPbusPIv2/zmleS9BjJVeZ6kBagPoEUsqbVz/1A=
 github.com/go-logr/logr v1.2.3 h1:2DntVwHkVopvECVRSlL5PSo9eG+cAkDCuckLubN+rq0=
 github.com/go-logr/logr v1.2.3/go.mod h1:jdQByPbusPIv2/zmleS9BjJVeZ6kBagPoEUsqbVz/1A=
@@ -48,8 +48,8 @@ github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/
 github.com/mattn/go-sqlite3 v1.14.16 h1:yOQRA0RpS5PFz/oikGwBEqvAWhWg5ufRz4ETLjwpU1Y=
 github.com/mitchellh/go-wordwrap v1.0.1 h1:TLuKupo69TCn6TQSyGxwI1EblZZEsQ0vMlAFQflz0v0=
 github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTSsCt+hzestvNj0=
-github.com/ogen-go/ogen v0.56.0 h1:ePuE2ZV66LzdMu/16uI0HymHRurKFvr+4zNkLQSMrXw=
-github.com/ogen-go/ogen v0.56.0/go.mod h1:WyHr5GHfDy3IANXK3OUUWkA91Zx/lm4YJ7z95Q+0F9Q=
+github.com/ogen-go/ogen v0.56.1 h1:nvjeoT8wBu4oYVK8b4veOjBHA1puwVEE56Enx2blNDI=
+github.com/ogen-go/ogen v0.56.1/go.mod h1:osu6PQcNyie8QsQcGk2P74HpCcxCL08mnbHmPmQm4rE=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/segmentio/asm v1.2.0 h1:9BQrFxC+YOHJlTlHGkTrFWf59nbL3XnCoFLTwDCI7ys=

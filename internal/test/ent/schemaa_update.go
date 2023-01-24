@@ -318,40 +318,7 @@ func (sa *SchemaAUpdate) RemoveEdgeSchemaaRecursive(s ...*SchemaA) *SchemaAUpdat
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (sa *SchemaAUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(sa.hooks) == 0 {
-		if err = sa.check(); err != nil {
-			return 0, err
-		}
-		affected, err = sa.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SchemaAMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = sa.check(); err != nil {
-				return 0, err
-			}
-			sa.mutation = mutation
-			affected, err = sa.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(sa.hooks) - 1; i >= 0; i-- {
-			if sa.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = sa.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, sa.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, SchemaAMutation](ctx, sa.sqlSave, sa.mutation, sa.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -398,6 +365,9 @@ func (sa *SchemaAUpdate) check() error {
 }
 
 func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := sa.check(); err != nil {
+		return n, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   schemaa.Table,
@@ -707,6 +677,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	sa.mutation.done = true
 	return n, nil
 }
 
@@ -1014,46 +985,7 @@ func (sao *SchemaAUpdateOne) Select(field string, fields ...string) *SchemaAUpda
 
 // Save executes the query and returns the updated SchemaA entity.
 func (sao *SchemaAUpdateOne) Save(ctx context.Context) (*SchemaA, error) {
-	var (
-		err  error
-		node *SchemaA
-	)
-	if len(sao.hooks) == 0 {
-		if err = sao.check(); err != nil {
-			return nil, err
-		}
-		node, err = sao.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SchemaAMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = sao.check(); err != nil {
-				return nil, err
-			}
-			sao.mutation = mutation
-			node, err = sao.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(sao.hooks) - 1; i >= 0; i-- {
-			if sao.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = sao.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, sao.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*SchemaA)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from SchemaAMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*SchemaA, SchemaAMutation](ctx, sao.sqlSave, sao.mutation, sao.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1100,6 +1032,9 @@ func (sao *SchemaAUpdateOne) check() error {
 }
 
 func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err error) {
+	if err := sao.check(); err != nil {
+		return _node, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   schemaa.Table,
@@ -1429,5 +1364,6 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 		}
 		return nil, err
 	}
+	sao.mutation.done = true
 	return _node, nil
 }

@@ -64,7 +64,7 @@ func (s *SchemaB) assignValues(columns []string, values []any) error {
 // Note that you need to call SchemaB.Unwrap() before calling this method if this SchemaB
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (s *SchemaB) Update() *SchemaBUpdateOne {
-	return (&SchemaBClient{config: s.config}).UpdateOne(s)
+	return NewSchemaBClient(s.config).UpdateOne(s)
 }
 
 // Unwrap unwraps the SchemaB entity that was returned from a transaction after it was closed,

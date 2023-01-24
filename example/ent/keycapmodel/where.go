@@ -9,321 +9,207 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int64) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.KeycapModel(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int64) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.KeycapModel(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int64) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.KeycapModel(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int64) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.KeycapModel(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int64) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.KeycapModel(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int64) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.KeycapModel(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int64) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.KeycapModel(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int64) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.KeycapModel(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int64) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.KeycapModel(sql.FieldLTE(FieldID, id))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldEQ(FieldName, v))
 }
 
 // Profile applies equality check predicate on the "profile" field. It's identical to ProfileEQ.
 func Profile(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldEQ(FieldProfile, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldEQ(FieldName, v))
 }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
 func NameNEQ(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldNEQ(FieldName, v))
 }
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.KeycapModel {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldName), v...))
-	})
+	return predicate.KeycapModel(sql.FieldIn(FieldName, vs...))
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.KeycapModel {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldName), v...))
-	})
+	return predicate.KeycapModel(sql.FieldNotIn(FieldName, vs...))
 }
 
 // NameGT applies the GT predicate on the "name" field.
 func NameGT(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldGT(FieldName, v))
 }
 
 // NameGTE applies the GTE predicate on the "name" field.
 func NameGTE(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldGTE(FieldName, v))
 }
 
 // NameLT applies the LT predicate on the "name" field.
 func NameLT(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldLT(FieldName, v))
 }
 
 // NameLTE applies the LTE predicate on the "name" field.
 func NameLTE(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldLTE(FieldName, v))
 }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldContains(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldHasPrefix(FieldName, v))
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldHasSuffix(FieldName, v))
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldEqualFold(FieldName, v))
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldName), v))
-	})
+	return predicate.KeycapModel(sql.FieldContainsFold(FieldName, v))
 }
 
 // ProfileEQ applies the EQ predicate on the "profile" field.
 func ProfileEQ(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldEQ(FieldProfile, v))
 }
 
 // ProfileNEQ applies the NEQ predicate on the "profile" field.
 func ProfileNEQ(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldNEQ(FieldProfile, v))
 }
 
 // ProfileIn applies the In predicate on the "profile" field.
 func ProfileIn(vs ...string) predicate.KeycapModel {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldProfile), v...))
-	})
+	return predicate.KeycapModel(sql.FieldIn(FieldProfile, vs...))
 }
 
 // ProfileNotIn applies the NotIn predicate on the "profile" field.
 func ProfileNotIn(vs ...string) predicate.KeycapModel {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldProfile), v...))
-	})
+	return predicate.KeycapModel(sql.FieldNotIn(FieldProfile, vs...))
 }
 
 // ProfileGT applies the GT predicate on the "profile" field.
 func ProfileGT(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldGT(FieldProfile, v))
 }
 
 // ProfileGTE applies the GTE predicate on the "profile" field.
 func ProfileGTE(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldGTE(FieldProfile, v))
 }
 
 // ProfileLT applies the LT predicate on the "profile" field.
 func ProfileLT(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldLT(FieldProfile, v))
 }
 
 // ProfileLTE applies the LTE predicate on the "profile" field.
 func ProfileLTE(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldLTE(FieldProfile, v))
 }
 
 // ProfileContains applies the Contains predicate on the "profile" field.
 func ProfileContains(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldContains(FieldProfile, v))
 }
 
 // ProfileHasPrefix applies the HasPrefix predicate on the "profile" field.
 func ProfileHasPrefix(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldHasPrefix(FieldProfile, v))
 }
 
 // ProfileHasSuffix applies the HasSuffix predicate on the "profile" field.
 func ProfileHasSuffix(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldHasSuffix(FieldProfile, v))
 }
 
 // ProfileEqualFold applies the EqualFold predicate on the "profile" field.
 func ProfileEqualFold(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldEqualFold(FieldProfile, v))
 }
 
 // ProfileContainsFold applies the ContainsFold predicate on the "profile" field.
 func ProfileContainsFold(v string) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldProfile), v))
-	})
+	return predicate.KeycapModel(sql.FieldContainsFold(FieldProfile, v))
 }
 
 // MaterialEQ applies the EQ predicate on the "material" field.
 func MaterialEQ(v Material) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMaterial), v))
-	})
+	return predicate.KeycapModel(sql.FieldEQ(FieldMaterial, v))
 }
 
 // MaterialNEQ applies the NEQ predicate on the "material" field.
 func MaterialNEQ(v Material) predicate.KeycapModel {
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMaterial), v))
-	})
+	return predicate.KeycapModel(sql.FieldNEQ(FieldMaterial, v))
 }
 
 // MaterialIn applies the In predicate on the "material" field.
 func MaterialIn(vs ...Material) predicate.KeycapModel {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMaterial), v...))
-	})
+	return predicate.KeycapModel(sql.FieldIn(FieldMaterial, vs...))
 }
 
 // MaterialNotIn applies the NotIn predicate on the "material" field.
 func MaterialNotIn(vs ...Material) predicate.KeycapModel {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.KeycapModel(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMaterial), v...))
-	})
+	return predicate.KeycapModel(sql.FieldNotIn(FieldMaterial, vs...))
 }
 
 // And groups predicates with the AND operator between them.

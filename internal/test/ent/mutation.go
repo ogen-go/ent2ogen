@@ -12,6 +12,7 @@ import (
 	"github.com/ogen-go/ent2ogen/internal/test/ent/schemaa"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 )
 
 const (
@@ -938,9 +939,24 @@ func (m *SchemaAMutation) Where(ps ...predicate.SchemaA) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the SchemaAMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SchemaAMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SchemaA, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *SchemaAMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SchemaAMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (SchemaA).
@@ -1552,9 +1568,24 @@ func (m *SchemaBMutation) Where(ps ...predicate.SchemaB) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the SchemaBMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SchemaBMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SchemaB, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *SchemaBMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SchemaBMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (SchemaB).

@@ -44,49 +44,7 @@ func (smc *SwitchModelCreate) Mutation() *SwitchModelMutation {
 
 // Save creates the SwitchModel in the database.
 func (smc *SwitchModelCreate) Save(ctx context.Context) (*SwitchModel, error) {
-	var (
-		err  error
-		node *SwitchModel
-	)
-	if len(smc.hooks) == 0 {
-		if err = smc.check(); err != nil {
-			return nil, err
-		}
-		node, err = smc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SwitchModelMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = smc.check(); err != nil {
-				return nil, err
-			}
-			smc.mutation = mutation
-			if node, err = smc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(smc.hooks) - 1; i >= 0; i-- {
-			if smc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = smc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, smc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*SwitchModel)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from SwitchModelMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*SwitchModel, SwitchModelMutation](ctx, smc.sqlSave, smc.mutation, smc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -133,6 +91,9 @@ func (smc *SwitchModelCreate) check() error {
 }
 
 func (smc *SwitchModelCreate) sqlSave(ctx context.Context) (*SwitchModel, error) {
+	if err := smc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := smc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, smc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -144,6 +105,8 @@ func (smc *SwitchModelCreate) sqlSave(ctx context.Context) (*SwitchModel, error)
 		id := _spec.ID.Value.(int64)
 		_node.ID = int64(id)
 	}
+	smc.mutation.id = &_node.ID
+	smc.mutation.done = true
 	return _node, nil
 }
 

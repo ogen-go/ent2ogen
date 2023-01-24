@@ -188,49 +188,7 @@ func (sa *SchemaACreate) Mutation() *SchemaAMutation {
 
 // Save creates the SchemaA in the database.
 func (sa *SchemaACreate) Save(ctx context.Context) (*SchemaA, error) {
-	var (
-		err  error
-		node *SchemaA
-	)
-	if len(sa.hooks) == 0 {
-		if err = sa.check(); err != nil {
-			return nil, err
-		}
-		node, err = sa.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SchemaAMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = sa.check(); err != nil {
-				return nil, err
-			}
-			sa.mutation = mutation
-			if node, err = sa.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(sa.hooks) - 1; i >= 0; i-- {
-			if sa.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = sa.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, sa.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*SchemaA)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from SchemaAMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*SchemaA, SchemaAMutation](ctx, sa.sqlSave, sa.mutation, sa.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -295,6 +253,9 @@ func (sa *SchemaACreate) check() error {
 }
 
 func (sa *SchemaACreate) sqlSave(ctx context.Context) (*SchemaA, error) {
+	if err := sa.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := sa.createSpec()
 	if err := sqlgraph.CreateNode(ctx, sa.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -304,6 +265,8 @@ func (sa *SchemaACreate) sqlSave(ctx context.Context) (*SchemaA, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	sa.mutation.id = &_node.ID
+	sa.mutation.done = true
 	return _node, nil
 }
 

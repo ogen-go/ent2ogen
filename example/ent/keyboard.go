@@ -141,19 +141,19 @@ func (k *Keyboard) assignValues(columns []string, values []any) error {
 
 // QuerySwitches queries the "switches" edge of the Keyboard entity.
 func (k *Keyboard) QuerySwitches() *SwitchModelQuery {
-	return (&KeyboardClient{config: k.config}).QuerySwitches(k)
+	return NewKeyboardClient(k.config).QuerySwitches(k)
 }
 
 // QueryKeycaps queries the "keycaps" edge of the Keyboard entity.
 func (k *Keyboard) QueryKeycaps() *KeycapModelQuery {
-	return (&KeyboardClient{config: k.config}).QueryKeycaps(k)
+	return NewKeyboardClient(k.config).QueryKeycaps(k)
 }
 
 // Update returns a builder for updating this Keyboard.
 // Note that you need to call Keyboard.Unwrap() before calling this method if this Keyboard
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (k *Keyboard) Update() *KeyboardUpdateOne {
-	return (&KeyboardClient{config: k.config}).UpdateOne(k)
+	return NewKeyboardClient(k.config).UpdateOne(k)
 }
 
 // Unwrap unwraps the Keyboard entity that was returned from a transaction after it was closed,

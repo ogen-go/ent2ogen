@@ -17,11 +17,9 @@ import (
 // SwitchModelQuery is the builder for querying SwitchModel entities.
 type SwitchModelQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
+	inters     []Interceptor
 	predicates []predicate.SwitchModel
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -34,26 +32,26 @@ func (smq *SwitchModelQuery) Where(ps ...predicate.SwitchModel) *SwitchModelQuer
 	return smq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (smq *SwitchModelQuery) Limit(limit int) *SwitchModelQuery {
-	smq.limit = &limit
+	smq.ctx.Limit = &limit
 	return smq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (smq *SwitchModelQuery) Offset(offset int) *SwitchModelQuery {
-	smq.offset = &offset
+	smq.ctx.Offset = &offset
 	return smq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (smq *SwitchModelQuery) Unique(unique bool) *SwitchModelQuery {
-	smq.unique = &unique
+	smq.ctx.Unique = &unique
 	return smq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (smq *SwitchModelQuery) Order(o ...OrderFunc) *SwitchModelQuery {
 	smq.order = append(smq.order, o...)
 	return smq
@@ -62,7 +60,7 @@ func (smq *SwitchModelQuery) Order(o ...OrderFunc) *SwitchModelQuery {
 // First returns the first SwitchModel entity from the query.
 // Returns a *NotFoundError when no SwitchModel was found.
 func (smq *SwitchModelQuery) First(ctx context.Context) (*SwitchModel, error) {
-	nodes, err := smq.Limit(1).All(ctx)
+	nodes, err := smq.Limit(1).All(setContextOp(ctx, smq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +83,7 @@ func (smq *SwitchModelQuery) FirstX(ctx context.Context) *SwitchModel {
 // Returns a *NotFoundError when no SwitchModel ID was found.
 func (smq *SwitchModelQuery) FirstID(ctx context.Context) (id int64, err error) {
 	var ids []int64
-	if ids, err = smq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = smq.Limit(1).IDs(setContextOp(ctx, smq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -108,7 +106,7 @@ func (smq *SwitchModelQuery) FirstIDX(ctx context.Context) int64 {
 // Returns a *NotSingularError when more than one SwitchModel entity is found.
 // Returns a *NotFoundError when no SwitchModel entities are found.
 func (smq *SwitchModelQuery) Only(ctx context.Context) (*SwitchModel, error) {
-	nodes, err := smq.Limit(2).All(ctx)
+	nodes, err := smq.Limit(2).All(setContextOp(ctx, smq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +134,7 @@ func (smq *SwitchModelQuery) OnlyX(ctx context.Context) *SwitchModel {
 // Returns a *NotFoundError when no entities are found.
 func (smq *SwitchModelQuery) OnlyID(ctx context.Context) (id int64, err error) {
 	var ids []int64
-	if ids, err = smq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = smq.Limit(2).IDs(setContextOp(ctx, smq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -161,10 +159,12 @@ func (smq *SwitchModelQuery) OnlyIDX(ctx context.Context) int64 {
 
 // All executes the query and returns a list of SwitchModels.
 func (smq *SwitchModelQuery) All(ctx context.Context) ([]*SwitchModel, error) {
+	ctx = setContextOp(ctx, smq.ctx, "All")
 	if err := smq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return smq.sqlAll(ctx)
+	qr := querierAll[[]*SwitchModel, *SwitchModelQuery]()
+	return withInterceptors[[]*SwitchModel](ctx, smq, qr, smq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -179,6 +179,7 @@ func (smq *SwitchModelQuery) AllX(ctx context.Context) []*SwitchModel {
 // IDs executes the query and returns a list of SwitchModel IDs.
 func (smq *SwitchModelQuery) IDs(ctx context.Context) ([]int64, error) {
 	var ids []int64
+	ctx = setContextOp(ctx, smq.ctx, "IDs")
 	if err := smq.Select(switchmodel.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -196,10 +197,11 @@ func (smq *SwitchModelQuery) IDsX(ctx context.Context) []int64 {
 
 // Count returns the count of the given query.
 func (smq *SwitchModelQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, smq.ctx, "Count")
 	if err := smq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return smq.sqlCount(ctx)
+	return withInterceptors[int](ctx, smq, querierCount[*SwitchModelQuery](), smq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -213,10 +215,15 @@ func (smq *SwitchModelQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (smq *SwitchModelQuery) Exist(ctx context.Context) (bool, error) {
-	if err := smq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, smq.ctx, "Exist")
+	switch _, err := smq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return smq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -236,14 +243,13 @@ func (smq *SwitchModelQuery) Clone() *SwitchModelQuery {
 	}
 	return &SwitchModelQuery{
 		config:     smq.config,
-		limit:      smq.limit,
-		offset:     smq.offset,
+		ctx:        smq.ctx.Clone(),
 		order:      append([]OrderFunc{}, smq.order...),
+		inters:     append([]Interceptor{}, smq.inters...),
 		predicates: append([]predicate.SwitchModel{}, smq.predicates...),
 		// clone intermediate query.
-		sql:    smq.sql.Clone(),
-		path:   smq.path,
-		unique: smq.unique,
+		sql:  smq.sql.Clone(),
+		path: smq.path,
 	}
 }
 
@@ -262,16 +268,11 @@ func (smq *SwitchModelQuery) Clone() *SwitchModelQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (smq *SwitchModelQuery) GroupBy(field string, fields ...string) *SwitchModelGroupBy {
-	grbuild := &SwitchModelGroupBy{config: smq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := smq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return smq.sqlQuery(ctx), nil
-	}
+	smq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &SwitchModelGroupBy{build: smq}
+	grbuild.flds = &smq.ctx.Fields
 	grbuild.label = switchmodel.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -288,11 +289,11 @@ func (smq *SwitchModelQuery) GroupBy(field string, fields ...string) *SwitchMode
 //		Select(switchmodel.FieldName).
 //		Scan(ctx, &v)
 func (smq *SwitchModelQuery) Select(fields ...string) *SwitchModelSelect {
-	smq.fields = append(smq.fields, fields...)
-	selbuild := &SwitchModelSelect{SwitchModelQuery: smq}
-	selbuild.label = switchmodel.Label
-	selbuild.flds, selbuild.scan = &smq.fields, selbuild.Scan
-	return selbuild
+	smq.ctx.Fields = append(smq.ctx.Fields, fields...)
+	sbuild := &SwitchModelSelect{SwitchModelQuery: smq}
+	sbuild.label = switchmodel.Label
+	sbuild.flds, sbuild.scan = &smq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a SwitchModelSelect configured with the given aggregations.
@@ -301,7 +302,17 @@ func (smq *SwitchModelQuery) Aggregate(fns ...AggregateFunc) *SwitchModelSelect 
 }
 
 func (smq *SwitchModelQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range smq.fields {
+	for _, inter := range smq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, smq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range smq.ctx.Fields {
 		if !switchmodel.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -343,22 +354,11 @@ func (smq *SwitchModelQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 
 func (smq *SwitchModelQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := smq.querySpec()
-	_spec.Node.Columns = smq.fields
-	if len(smq.fields) > 0 {
-		_spec.Unique = smq.unique != nil && *smq.unique
+	_spec.Node.Columns = smq.ctx.Fields
+	if len(smq.ctx.Fields) > 0 {
+		_spec.Unique = smq.ctx.Unique != nil && *smq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, smq.driver, _spec)
-}
-
-func (smq *SwitchModelQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := smq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (smq *SwitchModelQuery) querySpec() *sqlgraph.QuerySpec {
@@ -374,10 +374,10 @@ func (smq *SwitchModelQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   smq.sql,
 		Unique: true,
 	}
-	if unique := smq.unique; unique != nil {
+	if unique := smq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := smq.fields; len(fields) > 0 {
+	if fields := smq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, switchmodel.FieldID)
 		for i := range fields {
@@ -393,10 +393,10 @@ func (smq *SwitchModelQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := smq.limit; limit != nil {
+	if limit := smq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := smq.offset; offset != nil {
+	if offset := smq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := smq.order; len(ps) > 0 {
@@ -412,7 +412,7 @@ func (smq *SwitchModelQuery) querySpec() *sqlgraph.QuerySpec {
 func (smq *SwitchModelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(smq.driver.Dialect())
 	t1 := builder.Table(switchmodel.Table)
-	columns := smq.fields
+	columns := smq.ctx.Fields
 	if len(columns) == 0 {
 		columns = switchmodel.Columns
 	}
@@ -421,7 +421,7 @@ func (smq *SwitchModelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = smq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if smq.unique != nil && *smq.unique {
+	if smq.ctx.Unique != nil && *smq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range smq.predicates {
@@ -430,12 +430,12 @@ func (smq *SwitchModelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range smq.order {
 		p(selector)
 	}
-	if offset := smq.offset; offset != nil {
+	if offset := smq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := smq.limit; limit != nil {
+	if limit := smq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -443,13 +443,8 @@ func (smq *SwitchModelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // SwitchModelGroupBy is the group-by builder for SwitchModel entities.
 type SwitchModelGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *SwitchModelQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -458,58 +453,46 @@ func (smgb *SwitchModelGroupBy) Aggregate(fns ...AggregateFunc) *SwitchModelGrou
 	return smgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (smgb *SwitchModelGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := smgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, smgb.build.ctx, "GroupBy")
+	if err := smgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	smgb.sql = query
-	return smgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*SwitchModelQuery, *SwitchModelGroupBy](ctx, smgb.build, smgb, smgb.build.inters, v)
 }
 
-func (smgb *SwitchModelGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range smgb.fields {
-		if !switchmodel.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (smgb *SwitchModelGroupBy) sqlScan(ctx context.Context, root *SwitchModelQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(smgb.fns))
+	for _, fn := range smgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := smgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*smgb.flds)+len(smgb.fns))
+		for _, f := range *smgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*smgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := smgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := smgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (smgb *SwitchModelGroupBy) sqlQuery() *sql.Selector {
-	selector := smgb.sql.Select()
-	aggregation := make([]string, 0, len(smgb.fns))
-	for _, fn := range smgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(smgb.fields)+len(smgb.fns))
-		for _, f := range smgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(smgb.fields...)...)
-}
-
 // SwitchModelSelect is the builder for selecting fields of SwitchModel entities.
 type SwitchModelSelect struct {
 	*SwitchModelQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -520,26 +503,27 @@ func (sms *SwitchModelSelect) Aggregate(fns ...AggregateFunc) *SwitchModelSelect
 
 // Scan applies the selector query and scans the result into the given value.
 func (sms *SwitchModelSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, sms.ctx, "Select")
 	if err := sms.prepareQuery(ctx); err != nil {
 		return err
 	}
-	sms.sql = sms.SwitchModelQuery.sqlQuery(ctx)
-	return sms.sqlScan(ctx, v)
+	return scanWithInterceptors[*SwitchModelQuery, *SwitchModelSelect](ctx, sms.SwitchModelQuery, sms, sms.inters, v)
 }
 
-func (sms *SwitchModelSelect) sqlScan(ctx context.Context, v any) error {
+func (sms *SwitchModelSelect) sqlScan(ctx context.Context, root *SwitchModelQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(sms.fns))
 	for _, fn := range sms.fns {
-		aggregation = append(aggregation, fn(sms.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*sms.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		sms.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		sms.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := sms.sql.Query()
+	query, args := selector.Query()
 	if err := sms.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

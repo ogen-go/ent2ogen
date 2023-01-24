@@ -31,49 +31,7 @@ func (sb *SchemaBCreate) Mutation() *SchemaBMutation {
 
 // Save creates the SchemaB in the database.
 func (sb *SchemaBCreate) Save(ctx context.Context) (*SchemaB, error) {
-	var (
-		err  error
-		node *SchemaB
-	)
-	if len(sb.hooks) == 0 {
-		if err = sb.check(); err != nil {
-			return nil, err
-		}
-		node, err = sb.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SchemaBMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = sb.check(); err != nil {
-				return nil, err
-			}
-			sb.mutation = mutation
-			if node, err = sb.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(sb.hooks) - 1; i >= 0; i-- {
-			if sb.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = sb.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, sb.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*SchemaB)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from SchemaBMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*SchemaB, SchemaBMutation](ctx, sb.sqlSave, sb.mutation, sb.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -104,6 +62,9 @@ func (sb *SchemaBCreate) check() error {
 }
 
 func (sb *SchemaBCreate) sqlSave(ctx context.Context) (*SchemaB, error) {
+	if err := sb.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := sb.createSpec()
 	if err := sqlgraph.CreateNode(ctx, sb.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -115,6 +76,8 @@ func (sb *SchemaBCreate) sqlSave(ctx context.Context) (*SchemaB, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int64(id)
 	}
+	sb.mutation.id = &_node.ID
+	sb.mutation.done = true
 	return _node, nil
 }
 

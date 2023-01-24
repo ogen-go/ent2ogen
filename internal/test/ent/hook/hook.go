@@ -15,11 +15,10 @@ type SchemaAFunc func(context.Context, *ent.SchemaAMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f SchemaAFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.SchemaAMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SchemaAMutation", m)
+	if mv, ok := m.(*ent.SchemaAMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SchemaAMutation", m)
 }
 
 // The SchemaBFunc type is an adapter to allow the use of ordinary
@@ -28,11 +27,10 @@ type SchemaBFunc func(context.Context, *ent.SchemaBMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f SchemaBFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.SchemaBMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SchemaBMutation", m)
+	if mv, ok := m.(*ent.SchemaBMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SchemaBMutation", m)
 }
 
 // Condition is a hook condition function.

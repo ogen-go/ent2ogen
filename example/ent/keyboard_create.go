@@ -82,49 +82,7 @@ func (kc *KeyboardCreate) Mutation() *KeyboardMutation {
 
 // Save creates the Keyboard in the database.
 func (kc *KeyboardCreate) Save(ctx context.Context) (*Keyboard, error) {
-	var (
-		err  error
-		node *Keyboard
-	)
-	if len(kc.hooks) == 0 {
-		if err = kc.check(); err != nil {
-			return nil, err
-		}
-		node, err = kc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*KeyboardMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = kc.check(); err != nil {
-				return nil, err
-			}
-			kc.mutation = mutation
-			if node, err = kc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(kc.hooks) - 1; i >= 0; i-- {
-			if kc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = kc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, kc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Keyboard)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from KeyboardMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Keyboard, KeyboardMutation](ctx, kc.sqlSave, kc.mutation, kc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -172,6 +130,9 @@ func (kc *KeyboardCreate) check() error {
 }
 
 func (kc *KeyboardCreate) sqlSave(ctx context.Context) (*Keyboard, error) {
+	if err := kc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := kc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, kc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -183,6 +144,8 @@ func (kc *KeyboardCreate) sqlSave(ctx context.Context) (*Keyboard, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int64(id)
 	}
+	kc.mutation.id = &_node.ID
+	kc.mutation.done = true
 	return _node, nil
 }
 

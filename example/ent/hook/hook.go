@@ -15,11 +15,10 @@ type KeyboardFunc func(context.Context, *ent.KeyboardMutation) (ent.Value, error
 
 // Mutate calls f(ctx, m).
 func (f KeyboardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.KeyboardMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.KeyboardMutation", m)
+	if mv, ok := m.(*ent.KeyboardMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.KeyboardMutation", m)
 }
 
 // The KeycapModelFunc type is an adapter to allow the use of ordinary
@@ -28,11 +27,10 @@ type KeycapModelFunc func(context.Context, *ent.KeycapModelMutation) (ent.Value,
 
 // Mutate calls f(ctx, m).
 func (f KeycapModelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.KeycapModelMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.KeycapModelMutation", m)
+	if mv, ok := m.(*ent.KeycapModelMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.KeycapModelMutation", m)
 }
 
 // The SwitchModelFunc type is an adapter to allow the use of ordinary
@@ -41,11 +39,10 @@ type SwitchModelFunc func(context.Context, *ent.SwitchModelMutation) (ent.Value,
 
 // Mutate calls f(ctx, m).
 func (f SwitchModelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.SwitchModelMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SwitchModelMutation", m)
+	if mv, ok := m.(*ent.SwitchModelMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SwitchModelMutation", m)
 }
 
 // Condition is a hook condition function.

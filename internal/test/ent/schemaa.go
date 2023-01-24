@@ -266,34 +266,34 @@ func (s *SchemaA) assignValues(columns []string, values []any) error {
 
 // QueryEdgeSchemabUniqueRequired queries the "edge_schemab_unique_required" edge of the SchemaA entity.
 func (s *SchemaA) QueryEdgeSchemabUniqueRequired() *SchemaBQuery {
-	return (&SchemaAClient{config: s.config}).QueryEdgeSchemabUniqueRequired(s)
+	return NewSchemaAClient(s.config).QueryEdgeSchemabUniqueRequired(s)
 }
 
 // QueryEdgeSchemabUniqueRequiredBindtoBs queries the "edge_schemab_unique_required_bindto_bs" edge of the SchemaA entity.
 func (s *SchemaA) QueryEdgeSchemabUniqueRequiredBindtoBs() *SchemaBQuery {
-	return (&SchemaAClient{config: s.config}).QueryEdgeSchemabUniqueRequiredBindtoBs(s)
+	return NewSchemaAClient(s.config).QueryEdgeSchemabUniqueRequiredBindtoBs(s)
 }
 
 // QueryEdgeSchemabUniqueOptional queries the "edge_schemab_unique_optional" edge of the SchemaA entity.
 func (s *SchemaA) QueryEdgeSchemabUniqueOptional() *SchemaBQuery {
-	return (&SchemaAClient{config: s.config}).QueryEdgeSchemabUniqueOptional(s)
+	return NewSchemaAClient(s.config).QueryEdgeSchemabUniqueOptional(s)
 }
 
 // QueryEdgeSchemab queries the "edge_schemab" edge of the SchemaA entity.
 func (s *SchemaA) QueryEdgeSchemab() *SchemaBQuery {
-	return (&SchemaAClient{config: s.config}).QueryEdgeSchemab(s)
+	return NewSchemaAClient(s.config).QueryEdgeSchemab(s)
 }
 
 // QueryEdgeSchemaaRecursive queries the "edge_schemaa_recursive" edge of the SchemaA entity.
 func (s *SchemaA) QueryEdgeSchemaaRecursive() *SchemaAQuery {
-	return (&SchemaAClient{config: s.config}).QueryEdgeSchemaaRecursive(s)
+	return NewSchemaAClient(s.config).QueryEdgeSchemaaRecursive(s)
 }
 
 // Update returns a builder for updating this SchemaA.
 // Note that you need to call SchemaA.Unwrap() before calling this method if this SchemaA
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (s *SchemaA) Update() *SchemaAUpdateOne {
-	return (&SchemaAClient{config: s.config}).UpdateOne(s)
+	return NewSchemaAClient(s.config).UpdateOne(s)
 }
 
 // Unwrap unwraps the SchemaA entity that was returned from a transaction after it was closed,

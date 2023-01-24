@@ -19,11 +19,9 @@ import (
 // KeyboardQuery is the builder for querying Keyboard entities.
 type KeyboardQuery struct {
 	config
-	limit        *int
-	offset       *int
-	unique       *bool
+	ctx          *QueryContext
 	order        []OrderFunc
-	fields       []string
+	inters       []Interceptor
 	predicates   []predicate.Keyboard
 	withSwitches *SwitchModelQuery
 	withKeycaps  *KeycapModelQuery
@@ -39,26 +37,26 @@ func (kq *KeyboardQuery) Where(ps ...predicate.Keyboard) *KeyboardQuery {
 	return kq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (kq *KeyboardQuery) Limit(limit int) *KeyboardQuery {
-	kq.limit = &limit
+	kq.ctx.Limit = &limit
 	return kq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (kq *KeyboardQuery) Offset(offset int) *KeyboardQuery {
-	kq.offset = &offset
+	kq.ctx.Offset = &offset
 	return kq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (kq *KeyboardQuery) Unique(unique bool) *KeyboardQuery {
-	kq.unique = &unique
+	kq.ctx.Unique = &unique
 	return kq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (kq *KeyboardQuery) Order(o ...OrderFunc) *KeyboardQuery {
 	kq.order = append(kq.order, o...)
 	return kq
@@ -66,7 +64,7 @@ func (kq *KeyboardQuery) Order(o ...OrderFunc) *KeyboardQuery {
 
 // QuerySwitches chains the current query on the "switches" edge.
 func (kq *KeyboardQuery) QuerySwitches() *SwitchModelQuery {
-	query := &SwitchModelQuery{config: kq.config}
+	query := (&SwitchModelClient{config: kq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := kq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -88,7 +86,7 @@ func (kq *KeyboardQuery) QuerySwitches() *SwitchModelQuery {
 
 // QueryKeycaps chains the current query on the "keycaps" edge.
 func (kq *KeyboardQuery) QueryKeycaps() *KeycapModelQuery {
-	query := &KeycapModelQuery{config: kq.config}
+	query := (&KeycapModelClient{config: kq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := kq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -111,7 +109,7 @@ func (kq *KeyboardQuery) QueryKeycaps() *KeycapModelQuery {
 // First returns the first Keyboard entity from the query.
 // Returns a *NotFoundError when no Keyboard was found.
 func (kq *KeyboardQuery) First(ctx context.Context) (*Keyboard, error) {
-	nodes, err := kq.Limit(1).All(ctx)
+	nodes, err := kq.Limit(1).All(setContextOp(ctx, kq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +132,7 @@ func (kq *KeyboardQuery) FirstX(ctx context.Context) *Keyboard {
 // Returns a *NotFoundError when no Keyboard ID was found.
 func (kq *KeyboardQuery) FirstID(ctx context.Context) (id int64, err error) {
 	var ids []int64
-	if ids, err = kq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = kq.Limit(1).IDs(setContextOp(ctx, kq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -157,7 +155,7 @@ func (kq *KeyboardQuery) FirstIDX(ctx context.Context) int64 {
 // Returns a *NotSingularError when more than one Keyboard entity is found.
 // Returns a *NotFoundError when no Keyboard entities are found.
 func (kq *KeyboardQuery) Only(ctx context.Context) (*Keyboard, error) {
-	nodes, err := kq.Limit(2).All(ctx)
+	nodes, err := kq.Limit(2).All(setContextOp(ctx, kq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +183,7 @@ func (kq *KeyboardQuery) OnlyX(ctx context.Context) *Keyboard {
 // Returns a *NotFoundError when no entities are found.
 func (kq *KeyboardQuery) OnlyID(ctx context.Context) (id int64, err error) {
 	var ids []int64
-	if ids, err = kq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = kq.Limit(2).IDs(setContextOp(ctx, kq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -210,10 +208,12 @@ func (kq *KeyboardQuery) OnlyIDX(ctx context.Context) int64 {
 
 // All executes the query and returns a list of Keyboards.
 func (kq *KeyboardQuery) All(ctx context.Context) ([]*Keyboard, error) {
+	ctx = setContextOp(ctx, kq.ctx, "All")
 	if err := kq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return kq.sqlAll(ctx)
+	qr := querierAll[[]*Keyboard, *KeyboardQuery]()
+	return withInterceptors[[]*Keyboard](ctx, kq, qr, kq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -228,6 +228,7 @@ func (kq *KeyboardQuery) AllX(ctx context.Context) []*Keyboard {
 // IDs executes the query and returns a list of Keyboard IDs.
 func (kq *KeyboardQuery) IDs(ctx context.Context) ([]int64, error) {
 	var ids []int64
+	ctx = setContextOp(ctx, kq.ctx, "IDs")
 	if err := kq.Select(keyboard.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -245,10 +246,11 @@ func (kq *KeyboardQuery) IDsX(ctx context.Context) []int64 {
 
 // Count returns the count of the given query.
 func (kq *KeyboardQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, kq.ctx, "Count")
 	if err := kq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return kq.sqlCount(ctx)
+	return withInterceptors[int](ctx, kq, querierCount[*KeyboardQuery](), kq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -262,10 +264,15 @@ func (kq *KeyboardQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (kq *KeyboardQuery) Exist(ctx context.Context) (bool, error) {
-	if err := kq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, kq.ctx, "Exist")
+	switch _, err := kq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return kq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -285,23 +292,22 @@ func (kq *KeyboardQuery) Clone() *KeyboardQuery {
 	}
 	return &KeyboardQuery{
 		config:       kq.config,
-		limit:        kq.limit,
-		offset:       kq.offset,
+		ctx:          kq.ctx.Clone(),
 		order:        append([]OrderFunc{}, kq.order...),
+		inters:       append([]Interceptor{}, kq.inters...),
 		predicates:   append([]predicate.Keyboard{}, kq.predicates...),
 		withSwitches: kq.withSwitches.Clone(),
 		withKeycaps:  kq.withKeycaps.Clone(),
 		// clone intermediate query.
-		sql:    kq.sql.Clone(),
-		path:   kq.path,
-		unique: kq.unique,
+		sql:  kq.sql.Clone(),
+		path: kq.path,
 	}
 }
 
 // WithSwitches tells the query-builder to eager-load the nodes that are connected to
 // the "switches" edge. The optional arguments are used to configure the query builder of the edge.
 func (kq *KeyboardQuery) WithSwitches(opts ...func(*SwitchModelQuery)) *KeyboardQuery {
-	query := &SwitchModelQuery{config: kq.config}
+	query := (&SwitchModelClient{config: kq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -312,7 +318,7 @@ func (kq *KeyboardQuery) WithSwitches(opts ...func(*SwitchModelQuery)) *Keyboard
 // WithKeycaps tells the query-builder to eager-load the nodes that are connected to
 // the "keycaps" edge. The optional arguments are used to configure the query builder of the edge.
 func (kq *KeyboardQuery) WithKeycaps(opts ...func(*KeycapModelQuery)) *KeyboardQuery {
-	query := &KeycapModelQuery{config: kq.config}
+	query := (&KeycapModelClient{config: kq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -335,16 +341,11 @@ func (kq *KeyboardQuery) WithKeycaps(opts ...func(*KeycapModelQuery)) *KeyboardQ
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (kq *KeyboardQuery) GroupBy(field string, fields ...string) *KeyboardGroupBy {
-	grbuild := &KeyboardGroupBy{config: kq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := kq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return kq.sqlQuery(ctx), nil
-	}
+	kq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &KeyboardGroupBy{build: kq}
+	grbuild.flds = &kq.ctx.Fields
 	grbuild.label = keyboard.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -361,11 +362,11 @@ func (kq *KeyboardQuery) GroupBy(field string, fields ...string) *KeyboardGroupB
 //		Select(keyboard.FieldName).
 //		Scan(ctx, &v)
 func (kq *KeyboardQuery) Select(fields ...string) *KeyboardSelect {
-	kq.fields = append(kq.fields, fields...)
-	selbuild := &KeyboardSelect{KeyboardQuery: kq}
-	selbuild.label = keyboard.Label
-	selbuild.flds, selbuild.scan = &kq.fields, selbuild.Scan
-	return selbuild
+	kq.ctx.Fields = append(kq.ctx.Fields, fields...)
+	sbuild := &KeyboardSelect{KeyboardQuery: kq}
+	sbuild.label = keyboard.Label
+	sbuild.flds, sbuild.scan = &kq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a KeyboardSelect configured with the given aggregations.
@@ -374,7 +375,17 @@ func (kq *KeyboardQuery) Aggregate(fns ...AggregateFunc) *KeyboardSelect {
 }
 
 func (kq *KeyboardQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range kq.fields {
+	for _, inter := range kq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, kq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range kq.ctx.Fields {
 		if !keyboard.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -451,6 +462,9 @@ func (kq *KeyboardQuery) loadSwitches(ctx context.Context, query *SwitchModelQue
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(switchmodel.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -480,6 +494,9 @@ func (kq *KeyboardQuery) loadKeycaps(ctx context.Context, query *KeycapModelQuer
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(keycapmodel.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -499,22 +516,11 @@ func (kq *KeyboardQuery) loadKeycaps(ctx context.Context, query *KeycapModelQuer
 
 func (kq *KeyboardQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := kq.querySpec()
-	_spec.Node.Columns = kq.fields
-	if len(kq.fields) > 0 {
-		_spec.Unique = kq.unique != nil && *kq.unique
+	_spec.Node.Columns = kq.ctx.Fields
+	if len(kq.ctx.Fields) > 0 {
+		_spec.Unique = kq.ctx.Unique != nil && *kq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, kq.driver, _spec)
-}
-
-func (kq *KeyboardQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := kq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (kq *KeyboardQuery) querySpec() *sqlgraph.QuerySpec {
@@ -530,10 +536,10 @@ func (kq *KeyboardQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   kq.sql,
 		Unique: true,
 	}
-	if unique := kq.unique; unique != nil {
+	if unique := kq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := kq.fields; len(fields) > 0 {
+	if fields := kq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, keyboard.FieldID)
 		for i := range fields {
@@ -549,10 +555,10 @@ func (kq *KeyboardQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := kq.limit; limit != nil {
+	if limit := kq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := kq.offset; offset != nil {
+	if offset := kq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := kq.order; len(ps) > 0 {
@@ -568,7 +574,7 @@ func (kq *KeyboardQuery) querySpec() *sqlgraph.QuerySpec {
 func (kq *KeyboardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(kq.driver.Dialect())
 	t1 := builder.Table(keyboard.Table)
-	columns := kq.fields
+	columns := kq.ctx.Fields
 	if len(columns) == 0 {
 		columns = keyboard.Columns
 	}
@@ -577,7 +583,7 @@ func (kq *KeyboardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = kq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if kq.unique != nil && *kq.unique {
+	if kq.ctx.Unique != nil && *kq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range kq.predicates {
@@ -586,12 +592,12 @@ func (kq *KeyboardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range kq.order {
 		p(selector)
 	}
-	if offset := kq.offset; offset != nil {
+	if offset := kq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := kq.limit; limit != nil {
+	if limit := kq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -599,13 +605,8 @@ func (kq *KeyboardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // KeyboardGroupBy is the group-by builder for Keyboard entities.
 type KeyboardGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *KeyboardQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -614,58 +615,46 @@ func (kgb *KeyboardGroupBy) Aggregate(fns ...AggregateFunc) *KeyboardGroupBy {
 	return kgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (kgb *KeyboardGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := kgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, kgb.build.ctx, "GroupBy")
+	if err := kgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	kgb.sql = query
-	return kgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*KeyboardQuery, *KeyboardGroupBy](ctx, kgb.build, kgb, kgb.build.inters, v)
 }
 
-func (kgb *KeyboardGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range kgb.fields {
-		if !keyboard.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (kgb *KeyboardGroupBy) sqlScan(ctx context.Context, root *KeyboardQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(kgb.fns))
+	for _, fn := range kgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := kgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*kgb.flds)+len(kgb.fns))
+		for _, f := range *kgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*kgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := kgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := kgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (kgb *KeyboardGroupBy) sqlQuery() *sql.Selector {
-	selector := kgb.sql.Select()
-	aggregation := make([]string, 0, len(kgb.fns))
-	for _, fn := range kgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(kgb.fields)+len(kgb.fns))
-		for _, f := range kgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(kgb.fields...)...)
-}
-
 // KeyboardSelect is the builder for selecting fields of Keyboard entities.
 type KeyboardSelect struct {
 	*KeyboardQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -676,26 +665,27 @@ func (ks *KeyboardSelect) Aggregate(fns ...AggregateFunc) *KeyboardSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ks *KeyboardSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, ks.ctx, "Select")
 	if err := ks.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ks.sql = ks.KeyboardQuery.sqlQuery(ctx)
-	return ks.sqlScan(ctx, v)
+	return scanWithInterceptors[*KeyboardQuery, *KeyboardSelect](ctx, ks.KeyboardQuery, ks, ks.inters, v)
 }
 
-func (ks *KeyboardSelect) sqlScan(ctx context.Context, v any) error {
+func (ks *KeyboardSelect) sqlScan(ctx context.Context, root *KeyboardQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ks.fns))
 	for _, fn := range ks.fns {
-		aggregation = append(aggregation, fn(ks.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ks.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ks.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ks.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ks.sql.Query()
+	query, args := selector.Query()
 	if err := ks.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

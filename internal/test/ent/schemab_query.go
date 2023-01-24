@@ -17,11 +17,9 @@ import (
 // SchemaBQuery is the builder for querying SchemaB entities.
 type SchemaBQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
+	inters     []Interceptor
 	predicates []predicate.SchemaB
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
@@ -35,26 +33,26 @@ func (sb *SchemaBQuery) Where(ps ...predicate.SchemaB) *SchemaBQuery {
 	return sb
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (sb *SchemaBQuery) Limit(limit int) *SchemaBQuery {
-	sb.limit = &limit
+	sb.ctx.Limit = &limit
 	return sb
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (sb *SchemaBQuery) Offset(offset int) *SchemaBQuery {
-	sb.offset = &offset
+	sb.ctx.Offset = &offset
 	return sb
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (sb *SchemaBQuery) Unique(unique bool) *SchemaBQuery {
-	sb.unique = &unique
+	sb.ctx.Unique = &unique
 	return sb
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (sb *SchemaBQuery) Order(o ...OrderFunc) *SchemaBQuery {
 	sb.order = append(sb.order, o...)
 	return sb
@@ -63,7 +61,7 @@ func (sb *SchemaBQuery) Order(o ...OrderFunc) *SchemaBQuery {
 // First returns the first SchemaB entity from the query.
 // Returns a *NotFoundError when no SchemaB was found.
 func (sb *SchemaBQuery) First(ctx context.Context) (*SchemaB, error) {
-	nodes, err := sb.Limit(1).All(ctx)
+	nodes, err := sb.Limit(1).All(setContextOp(ctx, sb.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +84,7 @@ func (sb *SchemaBQuery) FirstX(ctx context.Context) *SchemaB {
 // Returns a *NotFoundError when no SchemaB ID was found.
 func (sb *SchemaBQuery) FirstID(ctx context.Context) (id int64, err error) {
 	var ids []int64
-	if ids, err = sb.Limit(1).IDs(ctx); err != nil {
+	if ids, err = sb.Limit(1).IDs(setContextOp(ctx, sb.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -109,7 +107,7 @@ func (sb *SchemaBQuery) FirstIDX(ctx context.Context) int64 {
 // Returns a *NotSingularError when more than one SchemaB entity is found.
 // Returns a *NotFoundError when no SchemaB entities are found.
 func (sb *SchemaBQuery) Only(ctx context.Context) (*SchemaB, error) {
-	nodes, err := sb.Limit(2).All(ctx)
+	nodes, err := sb.Limit(2).All(setContextOp(ctx, sb.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +135,7 @@ func (sb *SchemaBQuery) OnlyX(ctx context.Context) *SchemaB {
 // Returns a *NotFoundError when no entities are found.
 func (sb *SchemaBQuery) OnlyID(ctx context.Context) (id int64, err error) {
 	var ids []int64
-	if ids, err = sb.Limit(2).IDs(ctx); err != nil {
+	if ids, err = sb.Limit(2).IDs(setContextOp(ctx, sb.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -162,10 +160,12 @@ func (sb *SchemaBQuery) OnlyIDX(ctx context.Context) int64 {
 
 // All executes the query and returns a list of SchemaBs.
 func (sb *SchemaBQuery) All(ctx context.Context) ([]*SchemaB, error) {
+	ctx = setContextOp(ctx, sb.ctx, "All")
 	if err := sb.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return sb.sqlAll(ctx)
+	qr := querierAll[[]*SchemaB, *SchemaBQuery]()
+	return withInterceptors[[]*SchemaB](ctx, sb, qr, sb.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -180,6 +180,7 @@ func (sb *SchemaBQuery) AllX(ctx context.Context) []*SchemaB {
 // IDs executes the query and returns a list of SchemaB IDs.
 func (sb *SchemaBQuery) IDs(ctx context.Context) ([]int64, error) {
 	var ids []int64
+	ctx = setContextOp(ctx, sb.ctx, "IDs")
 	if err := sb.Select(schemab.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -197,10 +198,11 @@ func (sb *SchemaBQuery) IDsX(ctx context.Context) []int64 {
 
 // Count returns the count of the given query.
 func (sb *SchemaBQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, sb.ctx, "Count")
 	if err := sb.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return sb.sqlCount(ctx)
+	return withInterceptors[int](ctx, sb, querierCount[*SchemaBQuery](), sb.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -214,10 +216,15 @@ func (sb *SchemaBQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sb *SchemaBQuery) Exist(ctx context.Context) (bool, error) {
-	if err := sb.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, sb.ctx, "Exist")
+	switch _, err := sb.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return sb.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -237,41 +244,35 @@ func (sb *SchemaBQuery) Clone() *SchemaBQuery {
 	}
 	return &SchemaBQuery{
 		config:     sb.config,
-		limit:      sb.limit,
-		offset:     sb.offset,
+		ctx:        sb.ctx.Clone(),
 		order:      append([]OrderFunc{}, sb.order...),
+		inters:     append([]Interceptor{}, sb.inters...),
 		predicates: append([]predicate.SchemaB{}, sb.predicates...),
 		// clone intermediate query.
-		sql:    sb.sql.Clone(),
-		path:   sb.path,
-		unique: sb.unique,
+		sql:  sb.sql.Clone(),
+		path: sb.path,
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (sb *SchemaBQuery) GroupBy(field string, fields ...string) *SchemaBGroupBy {
-	grbuild := &SchemaBGroupBy{config: sb.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := sb.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return sb.sqlQuery(ctx), nil
-	}
+	sb.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &SchemaBGroupBy{build: sb}
+	grbuild.flds = &sb.ctx.Fields
 	grbuild.label = schemab.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (sb *SchemaBQuery) Select(fields ...string) *SchemaBSelect {
-	sb.fields = append(sb.fields, fields...)
-	selbuild := &SchemaBSelect{SchemaBQuery: sb}
-	selbuild.label = schemab.Label
-	selbuild.flds, selbuild.scan = &sb.fields, selbuild.Scan
-	return selbuild
+	sb.ctx.Fields = append(sb.ctx.Fields, fields...)
+	sbuild := &SchemaBSelect{SchemaBQuery: sb}
+	sbuild.label = schemab.Label
+	sbuild.flds, sbuild.scan = &sb.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a SchemaBSelect configured with the given aggregations.
@@ -280,7 +281,17 @@ func (sb *SchemaBQuery) Aggregate(fns ...AggregateFunc) *SchemaBSelect {
 }
 
 func (sb *SchemaBQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range sb.fields {
+	for _, inter := range sb.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, sb); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range sb.ctx.Fields {
 		if !schemab.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -326,22 +337,11 @@ func (sb *SchemaBQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sche
 
 func (sb *SchemaBQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := sb.querySpec()
-	_spec.Node.Columns = sb.fields
-	if len(sb.fields) > 0 {
-		_spec.Unique = sb.unique != nil && *sb.unique
+	_spec.Node.Columns = sb.ctx.Fields
+	if len(sb.ctx.Fields) > 0 {
+		_spec.Unique = sb.ctx.Unique != nil && *sb.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, sb.driver, _spec)
-}
-
-func (sb *SchemaBQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := sb.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (sb *SchemaBQuery) querySpec() *sqlgraph.QuerySpec {
@@ -357,10 +357,10 @@ func (sb *SchemaBQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   sb.sql,
 		Unique: true,
 	}
-	if unique := sb.unique; unique != nil {
+	if unique := sb.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := sb.fields; len(fields) > 0 {
+	if fields := sb.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, schemab.FieldID)
 		for i := range fields {
@@ -376,10 +376,10 @@ func (sb *SchemaBQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := sb.limit; limit != nil {
+	if limit := sb.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := sb.offset; offset != nil {
+	if offset := sb.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := sb.order; len(ps) > 0 {
@@ -395,7 +395,7 @@ func (sb *SchemaBQuery) querySpec() *sqlgraph.QuerySpec {
 func (sb *SchemaBQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(sb.driver.Dialect())
 	t1 := builder.Table(schemab.Table)
-	columns := sb.fields
+	columns := sb.ctx.Fields
 	if len(columns) == 0 {
 		columns = schemab.Columns
 	}
@@ -404,7 +404,7 @@ func (sb *SchemaBQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = sb.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if sb.unique != nil && *sb.unique {
+	if sb.ctx.Unique != nil && *sb.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range sb.predicates {
@@ -413,12 +413,12 @@ func (sb *SchemaBQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range sb.order {
 		p(selector)
 	}
-	if offset := sb.offset; offset != nil {
+	if offset := sb.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := sb.limit; limit != nil {
+	if limit := sb.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -426,13 +426,8 @@ func (sb *SchemaBQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // SchemaBGroupBy is the group-by builder for SchemaB entities.
 type SchemaBGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *SchemaBQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -441,58 +436,46 @@ func (sbb *SchemaBGroupBy) Aggregate(fns ...AggregateFunc) *SchemaBGroupBy {
 	return sbb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (sbb *SchemaBGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := sbb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, sbb.build.ctx, "GroupBy")
+	if err := sbb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	sbb.sql = query
-	return sbb.sqlScan(ctx, v)
+	return scanWithInterceptors[*SchemaBQuery, *SchemaBGroupBy](ctx, sbb.build, sbb, sbb.build.inters, v)
 }
 
-func (sbb *SchemaBGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range sbb.fields {
-		if !schemab.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (sbb *SchemaBGroupBy) sqlScan(ctx context.Context, root *SchemaBQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(sbb.fns))
+	for _, fn := range sbb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := sbb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*sbb.flds)+len(sbb.fns))
+		for _, f := range *sbb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*sbb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := sbb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := sbb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (sbb *SchemaBGroupBy) sqlQuery() *sql.Selector {
-	selector := sbb.sql.Select()
-	aggregation := make([]string, 0, len(sbb.fns))
-	for _, fn := range sbb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(sbb.fields)+len(sbb.fns))
-		for _, f := range sbb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(sbb.fields...)...)
-}
-
 // SchemaBSelect is the builder for selecting fields of SchemaB entities.
 type SchemaBSelect struct {
 	*SchemaBQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -503,26 +486,27 @@ func (sb *SchemaBSelect) Aggregate(fns ...AggregateFunc) *SchemaBSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (sb *SchemaBSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, sb.ctx, "Select")
 	if err := sb.prepareQuery(ctx); err != nil {
 		return err
 	}
-	sb.sql = sb.SchemaBQuery.sqlQuery(ctx)
-	return sb.sqlScan(ctx, v)
+	return scanWithInterceptors[*SchemaBQuery, *SchemaBSelect](ctx, sb.SchemaBQuery, sb, sb.inters, v)
 }
 
-func (sb *SchemaBSelect) sqlScan(ctx context.Context, v any) error {
+func (sb *SchemaBSelect) sqlScan(ctx context.Context, root *SchemaBQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(sb.fns))
 	for _, fn := range sb.fns {
-		aggregation = append(aggregation, fn(sb.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*sb.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		sb.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		sb.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := sb.sql.Query()
+	query, args := selector.Query()
 	if err := sb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

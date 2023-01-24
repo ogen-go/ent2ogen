@@ -17,11 +17,9 @@ import (
 // KeycapModelQuery is the builder for querying KeycapModel entities.
 type KeycapModelQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
+	inters     []Interceptor
 	predicates []predicate.KeycapModel
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -34,26 +32,26 @@ func (kmq *KeycapModelQuery) Where(ps ...predicate.KeycapModel) *KeycapModelQuer
 	return kmq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (kmq *KeycapModelQuery) Limit(limit int) *KeycapModelQuery {
-	kmq.limit = &limit
+	kmq.ctx.Limit = &limit
 	return kmq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (kmq *KeycapModelQuery) Offset(offset int) *KeycapModelQuery {
-	kmq.offset = &offset
+	kmq.ctx.Offset = &offset
 	return kmq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (kmq *KeycapModelQuery) Unique(unique bool) *KeycapModelQuery {
-	kmq.unique = &unique
+	kmq.ctx.Unique = &unique
 	return kmq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (kmq *KeycapModelQuery) Order(o ...OrderFunc) *KeycapModelQuery {
 	kmq.order = append(kmq.order, o...)
 	return kmq
@@ -62,7 +60,7 @@ func (kmq *KeycapModelQuery) Order(o ...OrderFunc) *KeycapModelQuery {
 // First returns the first KeycapModel entity from the query.
 // Returns a *NotFoundError when no KeycapModel was found.
 func (kmq *KeycapModelQuery) First(ctx context.Context) (*KeycapModel, error) {
-	nodes, err := kmq.Limit(1).All(ctx)
+	nodes, err := kmq.Limit(1).All(setContextOp(ctx, kmq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +83,7 @@ func (kmq *KeycapModelQuery) FirstX(ctx context.Context) *KeycapModel {
 // Returns a *NotFoundError when no KeycapModel ID was found.
 func (kmq *KeycapModelQuery) FirstID(ctx context.Context) (id int64, err error) {
 	var ids []int64
-	if ids, err = kmq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = kmq.Limit(1).IDs(setContextOp(ctx, kmq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -108,7 +106,7 @@ func (kmq *KeycapModelQuery) FirstIDX(ctx context.Context) int64 {
 // Returns a *NotSingularError when more than one KeycapModel entity is found.
 // Returns a *NotFoundError when no KeycapModel entities are found.
 func (kmq *KeycapModelQuery) Only(ctx context.Context) (*KeycapModel, error) {
-	nodes, err := kmq.Limit(2).All(ctx)
+	nodes, err := kmq.Limit(2).All(setContextOp(ctx, kmq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +134,7 @@ func (kmq *KeycapModelQuery) OnlyX(ctx context.Context) *KeycapModel {
 // Returns a *NotFoundError when no entities are found.
 func (kmq *KeycapModelQuery) OnlyID(ctx context.Context) (id int64, err error) {
 	var ids []int64
-	if ids, err = kmq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = kmq.Limit(2).IDs(setContextOp(ctx, kmq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -161,10 +159,12 @@ func (kmq *KeycapModelQuery) OnlyIDX(ctx context.Context) int64 {
 
 // All executes the query and returns a list of KeycapModels.
 func (kmq *KeycapModelQuery) All(ctx context.Context) ([]*KeycapModel, error) {
+	ctx = setContextOp(ctx, kmq.ctx, "All")
 	if err := kmq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return kmq.sqlAll(ctx)
+	qr := querierAll[[]*KeycapModel, *KeycapModelQuery]()
+	return withInterceptors[[]*KeycapModel](ctx, kmq, qr, kmq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -179,6 +179,7 @@ func (kmq *KeycapModelQuery) AllX(ctx context.Context) []*KeycapModel {
 // IDs executes the query and returns a list of KeycapModel IDs.
 func (kmq *KeycapModelQuery) IDs(ctx context.Context) ([]int64, error) {
 	var ids []int64
+	ctx = setContextOp(ctx, kmq.ctx, "IDs")
 	if err := kmq.Select(keycapmodel.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -196,10 +197,11 @@ func (kmq *KeycapModelQuery) IDsX(ctx context.Context) []int64 {
 
 // Count returns the count of the given query.
 func (kmq *KeycapModelQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, kmq.ctx, "Count")
 	if err := kmq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return kmq.sqlCount(ctx)
+	return withInterceptors[int](ctx, kmq, querierCount[*KeycapModelQuery](), kmq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -213,10 +215,15 @@ func (kmq *KeycapModelQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (kmq *KeycapModelQuery) Exist(ctx context.Context) (bool, error) {
-	if err := kmq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, kmq.ctx, "Exist")
+	switch _, err := kmq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return kmq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -236,14 +243,13 @@ func (kmq *KeycapModelQuery) Clone() *KeycapModelQuery {
 	}
 	return &KeycapModelQuery{
 		config:     kmq.config,
-		limit:      kmq.limit,
-		offset:     kmq.offset,
+		ctx:        kmq.ctx.Clone(),
 		order:      append([]OrderFunc{}, kmq.order...),
+		inters:     append([]Interceptor{}, kmq.inters...),
 		predicates: append([]predicate.KeycapModel{}, kmq.predicates...),
 		// clone intermediate query.
-		sql:    kmq.sql.Clone(),
-		path:   kmq.path,
-		unique: kmq.unique,
+		sql:  kmq.sql.Clone(),
+		path: kmq.path,
 	}
 }
 
@@ -262,16 +268,11 @@ func (kmq *KeycapModelQuery) Clone() *KeycapModelQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (kmq *KeycapModelQuery) GroupBy(field string, fields ...string) *KeycapModelGroupBy {
-	grbuild := &KeycapModelGroupBy{config: kmq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := kmq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return kmq.sqlQuery(ctx), nil
-	}
+	kmq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &KeycapModelGroupBy{build: kmq}
+	grbuild.flds = &kmq.ctx.Fields
 	grbuild.label = keycapmodel.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -288,11 +289,11 @@ func (kmq *KeycapModelQuery) GroupBy(field string, fields ...string) *KeycapMode
 //		Select(keycapmodel.FieldName).
 //		Scan(ctx, &v)
 func (kmq *KeycapModelQuery) Select(fields ...string) *KeycapModelSelect {
-	kmq.fields = append(kmq.fields, fields...)
-	selbuild := &KeycapModelSelect{KeycapModelQuery: kmq}
-	selbuild.label = keycapmodel.Label
-	selbuild.flds, selbuild.scan = &kmq.fields, selbuild.Scan
-	return selbuild
+	kmq.ctx.Fields = append(kmq.ctx.Fields, fields...)
+	sbuild := &KeycapModelSelect{KeycapModelQuery: kmq}
+	sbuild.label = keycapmodel.Label
+	sbuild.flds, sbuild.scan = &kmq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a KeycapModelSelect configured with the given aggregations.
@@ -301,7 +302,17 @@ func (kmq *KeycapModelQuery) Aggregate(fns ...AggregateFunc) *KeycapModelSelect 
 }
 
 func (kmq *KeycapModelQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range kmq.fields {
+	for _, inter := range kmq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, kmq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range kmq.ctx.Fields {
 		if !keycapmodel.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -343,22 +354,11 @@ func (kmq *KeycapModelQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 
 func (kmq *KeycapModelQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := kmq.querySpec()
-	_spec.Node.Columns = kmq.fields
-	if len(kmq.fields) > 0 {
-		_spec.Unique = kmq.unique != nil && *kmq.unique
+	_spec.Node.Columns = kmq.ctx.Fields
+	if len(kmq.ctx.Fields) > 0 {
+		_spec.Unique = kmq.ctx.Unique != nil && *kmq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, kmq.driver, _spec)
-}
-
-func (kmq *KeycapModelQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := kmq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (kmq *KeycapModelQuery) querySpec() *sqlgraph.QuerySpec {
@@ -374,10 +374,10 @@ func (kmq *KeycapModelQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   kmq.sql,
 		Unique: true,
 	}
-	if unique := kmq.unique; unique != nil {
+	if unique := kmq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := kmq.fields; len(fields) > 0 {
+	if fields := kmq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, keycapmodel.FieldID)
 		for i := range fields {
@@ -393,10 +393,10 @@ func (kmq *KeycapModelQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := kmq.limit; limit != nil {
+	if limit := kmq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := kmq.offset; offset != nil {
+	if offset := kmq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := kmq.order; len(ps) > 0 {
@@ -412,7 +412,7 @@ func (kmq *KeycapModelQuery) querySpec() *sqlgraph.QuerySpec {
 func (kmq *KeycapModelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(kmq.driver.Dialect())
 	t1 := builder.Table(keycapmodel.Table)
-	columns := kmq.fields
+	columns := kmq.ctx.Fields
 	if len(columns) == 0 {
 		columns = keycapmodel.Columns
 	}
@@ -421,7 +421,7 @@ func (kmq *KeycapModelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = kmq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if kmq.unique != nil && *kmq.unique {
+	if kmq.ctx.Unique != nil && *kmq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range kmq.predicates {
@@ -430,12 +430,12 @@ func (kmq *KeycapModelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range kmq.order {
 		p(selector)
 	}
-	if offset := kmq.offset; offset != nil {
+	if offset := kmq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := kmq.limit; limit != nil {
+	if limit := kmq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -443,13 +443,8 @@ func (kmq *KeycapModelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // KeycapModelGroupBy is the group-by builder for KeycapModel entities.
 type KeycapModelGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *KeycapModelQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -458,58 +453,46 @@ func (kmgb *KeycapModelGroupBy) Aggregate(fns ...AggregateFunc) *KeycapModelGrou
 	return kmgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (kmgb *KeycapModelGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := kmgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, kmgb.build.ctx, "GroupBy")
+	if err := kmgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	kmgb.sql = query
-	return kmgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*KeycapModelQuery, *KeycapModelGroupBy](ctx, kmgb.build, kmgb, kmgb.build.inters, v)
 }
 
-func (kmgb *KeycapModelGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range kmgb.fields {
-		if !keycapmodel.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (kmgb *KeycapModelGroupBy) sqlScan(ctx context.Context, root *KeycapModelQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(kmgb.fns))
+	for _, fn := range kmgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := kmgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*kmgb.flds)+len(kmgb.fns))
+		for _, f := range *kmgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*kmgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := kmgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := kmgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (kmgb *KeycapModelGroupBy) sqlQuery() *sql.Selector {
-	selector := kmgb.sql.Select()
-	aggregation := make([]string, 0, len(kmgb.fns))
-	for _, fn := range kmgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(kmgb.fields)+len(kmgb.fns))
-		for _, f := range kmgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(kmgb.fields...)...)
-}
-
 // KeycapModelSelect is the builder for selecting fields of KeycapModel entities.
 type KeycapModelSelect struct {
 	*KeycapModelQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -520,26 +503,27 @@ func (kms *KeycapModelSelect) Aggregate(fns ...AggregateFunc) *KeycapModelSelect
 
 // Scan applies the selector query and scans the result into the given value.
 func (kms *KeycapModelSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, kms.ctx, "Select")
 	if err := kms.prepareQuery(ctx); err != nil {
 		return err
 	}
-	kms.sql = kms.KeycapModelQuery.sqlQuery(ctx)
-	return kms.sqlScan(ctx, v)
+	return scanWithInterceptors[*KeycapModelQuery, *KeycapModelSelect](ctx, kms.KeycapModelQuery, kms, kms.inters, v)
 }
 
-func (kms *KeycapModelSelect) sqlScan(ctx context.Context, v any) error {
+func (kms *KeycapModelSelect) sqlScan(ctx context.Context, root *KeycapModelQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(kms.fns))
 	for _, fn := range kms.fns {
-		aggregation = append(aggregation, fn(kms.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*kms.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		kms.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		kms.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := kms.sql.Query()
+	query, args := selector.Query()
 	if err := kms.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

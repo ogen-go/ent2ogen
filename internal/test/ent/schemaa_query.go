@@ -19,11 +19,9 @@ import (
 // SchemaAQuery is the builder for querying SchemaA entities.
 type SchemaAQuery struct {
 	config
-	limit                                 *int
-	offset                                *int
-	unique                                *bool
+	ctx                                   *QueryContext
 	order                                 []OrderFunc
-	fields                                []string
+	inters                                []Interceptor
 	predicates                            []predicate.SchemaA
 	withEdgeSchemabUniqueRequired         *SchemaBQuery
 	withEdgeSchemabUniqueRequiredBindtoBs *SchemaBQuery
@@ -42,26 +40,26 @@ func (sa *SchemaAQuery) Where(ps ...predicate.SchemaA) *SchemaAQuery {
 	return sa
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (sa *SchemaAQuery) Limit(limit int) *SchemaAQuery {
-	sa.limit = &limit
+	sa.ctx.Limit = &limit
 	return sa
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (sa *SchemaAQuery) Offset(offset int) *SchemaAQuery {
-	sa.offset = &offset
+	sa.ctx.Offset = &offset
 	return sa
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (sa *SchemaAQuery) Unique(unique bool) *SchemaAQuery {
-	sa.unique = &unique
+	sa.ctx.Unique = &unique
 	return sa
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (sa *SchemaAQuery) Order(o ...OrderFunc) *SchemaAQuery {
 	sa.order = append(sa.order, o...)
 	return sa
@@ -69,7 +67,7 @@ func (sa *SchemaAQuery) Order(o ...OrderFunc) *SchemaAQuery {
 
 // QueryEdgeSchemabUniqueRequired chains the current query on the "edge_schemab_unique_required" edge.
 func (sa *SchemaAQuery) QueryEdgeSchemabUniqueRequired() *SchemaBQuery {
-	query := &SchemaBQuery{config: sa.config}
+	query := (&SchemaBClient{config: sa.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := sa.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -91,7 +89,7 @@ func (sa *SchemaAQuery) QueryEdgeSchemabUniqueRequired() *SchemaBQuery {
 
 // QueryEdgeSchemabUniqueRequiredBindtoBs chains the current query on the "edge_schemab_unique_required_bindto_bs" edge.
 func (sa *SchemaAQuery) QueryEdgeSchemabUniqueRequiredBindtoBs() *SchemaBQuery {
-	query := &SchemaBQuery{config: sa.config}
+	query := (&SchemaBClient{config: sa.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := sa.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -113,7 +111,7 @@ func (sa *SchemaAQuery) QueryEdgeSchemabUniqueRequiredBindtoBs() *SchemaBQuery {
 
 // QueryEdgeSchemabUniqueOptional chains the current query on the "edge_schemab_unique_optional" edge.
 func (sa *SchemaAQuery) QueryEdgeSchemabUniqueOptional() *SchemaBQuery {
-	query := &SchemaBQuery{config: sa.config}
+	query := (&SchemaBClient{config: sa.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := sa.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -135,7 +133,7 @@ func (sa *SchemaAQuery) QueryEdgeSchemabUniqueOptional() *SchemaBQuery {
 
 // QueryEdgeSchemab chains the current query on the "edge_schemab" edge.
 func (sa *SchemaAQuery) QueryEdgeSchemab() *SchemaBQuery {
-	query := &SchemaBQuery{config: sa.config}
+	query := (&SchemaBClient{config: sa.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := sa.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -157,7 +155,7 @@ func (sa *SchemaAQuery) QueryEdgeSchemab() *SchemaBQuery {
 
 // QueryEdgeSchemaaRecursive chains the current query on the "edge_schemaa_recursive" edge.
 func (sa *SchemaAQuery) QueryEdgeSchemaaRecursive() *SchemaAQuery {
-	query := &SchemaAQuery{config: sa.config}
+	query := (&SchemaAClient{config: sa.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := sa.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -180,7 +178,7 @@ func (sa *SchemaAQuery) QueryEdgeSchemaaRecursive() *SchemaAQuery {
 // First returns the first SchemaA entity from the query.
 // Returns a *NotFoundError when no SchemaA was found.
 func (sa *SchemaAQuery) First(ctx context.Context) (*SchemaA, error) {
-	nodes, err := sa.Limit(1).All(ctx)
+	nodes, err := sa.Limit(1).All(setContextOp(ctx, sa.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +201,7 @@ func (sa *SchemaAQuery) FirstX(ctx context.Context) *SchemaA {
 // Returns a *NotFoundError when no SchemaA ID was found.
 func (sa *SchemaAQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sa.Limit(1).IDs(ctx); err != nil {
+	if ids, err = sa.Limit(1).IDs(setContextOp(ctx, sa.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -226,7 +224,7 @@ func (sa *SchemaAQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one SchemaA entity is found.
 // Returns a *NotFoundError when no SchemaA entities are found.
 func (sa *SchemaAQuery) Only(ctx context.Context) (*SchemaA, error) {
-	nodes, err := sa.Limit(2).All(ctx)
+	nodes, err := sa.Limit(2).All(setContextOp(ctx, sa.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -254,7 +252,7 @@ func (sa *SchemaAQuery) OnlyX(ctx context.Context) *SchemaA {
 // Returns a *NotFoundError when no entities are found.
 func (sa *SchemaAQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sa.Limit(2).IDs(ctx); err != nil {
+	if ids, err = sa.Limit(2).IDs(setContextOp(ctx, sa.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -279,10 +277,12 @@ func (sa *SchemaAQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of SchemaAs.
 func (sa *SchemaAQuery) All(ctx context.Context) ([]*SchemaA, error) {
+	ctx = setContextOp(ctx, sa.ctx, "All")
 	if err := sa.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return sa.sqlAll(ctx)
+	qr := querierAll[[]*SchemaA, *SchemaAQuery]()
+	return withInterceptors[[]*SchemaA](ctx, sa, qr, sa.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -297,6 +297,7 @@ func (sa *SchemaAQuery) AllX(ctx context.Context) []*SchemaA {
 // IDs executes the query and returns a list of SchemaA IDs.
 func (sa *SchemaAQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
+	ctx = setContextOp(ctx, sa.ctx, "IDs")
 	if err := sa.Select(schemaa.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -314,10 +315,11 @@ func (sa *SchemaAQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (sa *SchemaAQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, sa.ctx, "Count")
 	if err := sa.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return sa.sqlCount(ctx)
+	return withInterceptors[int](ctx, sa, querierCount[*SchemaAQuery](), sa.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -331,10 +333,15 @@ func (sa *SchemaAQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sa *SchemaAQuery) Exist(ctx context.Context) (bool, error) {
-	if err := sa.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, sa.ctx, "Exist")
+	switch _, err := sa.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return sa.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -354,9 +361,9 @@ func (sa *SchemaAQuery) Clone() *SchemaAQuery {
 	}
 	return &SchemaAQuery{
 		config:                                sa.config,
-		limit:                                 sa.limit,
-		offset:                                sa.offset,
+		ctx:                                   sa.ctx.Clone(),
 		order:                                 append([]OrderFunc{}, sa.order...),
+		inters:                                append([]Interceptor{}, sa.inters...),
 		predicates:                            append([]predicate.SchemaA{}, sa.predicates...),
 		withEdgeSchemabUniqueRequired:         sa.withEdgeSchemabUniqueRequired.Clone(),
 		withEdgeSchemabUniqueRequiredBindtoBs: sa.withEdgeSchemabUniqueRequiredBindtoBs.Clone(),
@@ -364,16 +371,15 @@ func (sa *SchemaAQuery) Clone() *SchemaAQuery {
 		withEdgeSchemab:                       sa.withEdgeSchemab.Clone(),
 		withEdgeSchemaaRecursive:              sa.withEdgeSchemaaRecursive.Clone(),
 		// clone intermediate query.
-		sql:    sa.sql.Clone(),
-		path:   sa.path,
-		unique: sa.unique,
+		sql:  sa.sql.Clone(),
+		path: sa.path,
 	}
 }
 
 // WithEdgeSchemabUniqueRequired tells the query-builder to eager-load the nodes that are connected to
 // the "edge_schemab_unique_required" edge. The optional arguments are used to configure the query builder of the edge.
 func (sa *SchemaAQuery) WithEdgeSchemabUniqueRequired(opts ...func(*SchemaBQuery)) *SchemaAQuery {
-	query := &SchemaBQuery{config: sa.config}
+	query := (&SchemaBClient{config: sa.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -384,7 +390,7 @@ func (sa *SchemaAQuery) WithEdgeSchemabUniqueRequired(opts ...func(*SchemaBQuery
 // WithEdgeSchemabUniqueRequiredBindtoBs tells the query-builder to eager-load the nodes that are connected to
 // the "edge_schemab_unique_required_bindto_bs" edge. The optional arguments are used to configure the query builder of the edge.
 func (sa *SchemaAQuery) WithEdgeSchemabUniqueRequiredBindtoBs(opts ...func(*SchemaBQuery)) *SchemaAQuery {
-	query := &SchemaBQuery{config: sa.config}
+	query := (&SchemaBClient{config: sa.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -395,7 +401,7 @@ func (sa *SchemaAQuery) WithEdgeSchemabUniqueRequiredBindtoBs(opts ...func(*Sche
 // WithEdgeSchemabUniqueOptional tells the query-builder to eager-load the nodes that are connected to
 // the "edge_schemab_unique_optional" edge. The optional arguments are used to configure the query builder of the edge.
 func (sa *SchemaAQuery) WithEdgeSchemabUniqueOptional(opts ...func(*SchemaBQuery)) *SchemaAQuery {
-	query := &SchemaBQuery{config: sa.config}
+	query := (&SchemaBClient{config: sa.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -406,7 +412,7 @@ func (sa *SchemaAQuery) WithEdgeSchemabUniqueOptional(opts ...func(*SchemaBQuery
 // WithEdgeSchemab tells the query-builder to eager-load the nodes that are connected to
 // the "edge_schemab" edge. The optional arguments are used to configure the query builder of the edge.
 func (sa *SchemaAQuery) WithEdgeSchemab(opts ...func(*SchemaBQuery)) *SchemaAQuery {
-	query := &SchemaBQuery{config: sa.config}
+	query := (&SchemaBClient{config: sa.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -417,7 +423,7 @@ func (sa *SchemaAQuery) WithEdgeSchemab(opts ...func(*SchemaBQuery)) *SchemaAQue
 // WithEdgeSchemaaRecursive tells the query-builder to eager-load the nodes that are connected to
 // the "edge_schemaa_recursive" edge. The optional arguments are used to configure the query builder of the edge.
 func (sa *SchemaAQuery) WithEdgeSchemaaRecursive(opts ...func(*SchemaAQuery)) *SchemaAQuery {
-	query := &SchemaAQuery{config: sa.config}
+	query := (&SchemaAClient{config: sa.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -440,16 +446,11 @@ func (sa *SchemaAQuery) WithEdgeSchemaaRecursive(opts ...func(*SchemaAQuery)) *S
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (sa *SchemaAQuery) GroupBy(field string, fields ...string) *SchemaAGroupBy {
-	grbuild := &SchemaAGroupBy{config: sa.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := sa.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return sa.sqlQuery(ctx), nil
-	}
+	sa.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &SchemaAGroupBy{build: sa}
+	grbuild.flds = &sa.ctx.Fields
 	grbuild.label = schemaa.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -466,11 +467,11 @@ func (sa *SchemaAQuery) GroupBy(field string, fields ...string) *SchemaAGroupBy 
 //		Select(schemaa.FieldInt64).
 //		Scan(ctx, &v)
 func (sa *SchemaAQuery) Select(fields ...string) *SchemaASelect {
-	sa.fields = append(sa.fields, fields...)
-	selbuild := &SchemaASelect{SchemaAQuery: sa}
-	selbuild.label = schemaa.Label
-	selbuild.flds, selbuild.scan = &sa.fields, selbuild.Scan
-	return selbuild
+	sa.ctx.Fields = append(sa.ctx.Fields, fields...)
+	sbuild := &SchemaASelect{SchemaAQuery: sa}
+	sbuild.label = schemaa.Label
+	sbuild.flds, sbuild.scan = &sa.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a SchemaASelect configured with the given aggregations.
@@ -479,7 +480,17 @@ func (sa *SchemaAQuery) Aggregate(fns ...AggregateFunc) *SchemaASelect {
 }
 
 func (sa *SchemaAQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range sa.fields {
+	for _, inter := range sa.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, sa); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range sa.ctx.Fields {
 		if !schemaa.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -579,6 +590,9 @@ func (sa *SchemaAQuery) loadEdgeSchemabUniqueRequired(ctx context.Context, query
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(schemab.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -608,6 +622,9 @@ func (sa *SchemaAQuery) loadEdgeSchemabUniqueRequiredBindtoBs(ctx context.Contex
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(schemab.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -636,6 +653,9 @@ func (sa *SchemaAQuery) loadEdgeSchemabUniqueOptional(ctx context.Context, query
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
 	}
 	query.Where(schemab.IDIn(ids...))
 	neighbors, err := query.All(ctx)
@@ -745,22 +765,11 @@ func (sa *SchemaAQuery) loadEdgeSchemaaRecursive(ctx context.Context, query *Sch
 
 func (sa *SchemaAQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := sa.querySpec()
-	_spec.Node.Columns = sa.fields
-	if len(sa.fields) > 0 {
-		_spec.Unique = sa.unique != nil && *sa.unique
+	_spec.Node.Columns = sa.ctx.Fields
+	if len(sa.ctx.Fields) > 0 {
+		_spec.Unique = sa.ctx.Unique != nil && *sa.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, sa.driver, _spec)
-}
-
-func (sa *SchemaAQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := sa.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (sa *SchemaAQuery) querySpec() *sqlgraph.QuerySpec {
@@ -776,10 +785,10 @@ func (sa *SchemaAQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   sa.sql,
 		Unique: true,
 	}
-	if unique := sa.unique; unique != nil {
+	if unique := sa.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := sa.fields; len(fields) > 0 {
+	if fields := sa.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, schemaa.FieldID)
 		for i := range fields {
@@ -795,10 +804,10 @@ func (sa *SchemaAQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := sa.limit; limit != nil {
+	if limit := sa.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := sa.offset; offset != nil {
+	if offset := sa.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := sa.order; len(ps) > 0 {
@@ -814,7 +823,7 @@ func (sa *SchemaAQuery) querySpec() *sqlgraph.QuerySpec {
 func (sa *SchemaAQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(sa.driver.Dialect())
 	t1 := builder.Table(schemaa.Table)
-	columns := sa.fields
+	columns := sa.ctx.Fields
 	if len(columns) == 0 {
 		columns = schemaa.Columns
 	}
@@ -823,7 +832,7 @@ func (sa *SchemaAQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = sa.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if sa.unique != nil && *sa.unique {
+	if sa.ctx.Unique != nil && *sa.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range sa.predicates {
@@ -832,12 +841,12 @@ func (sa *SchemaAQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range sa.order {
 		p(selector)
 	}
-	if offset := sa.offset; offset != nil {
+	if offset := sa.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := sa.limit; limit != nil {
+	if limit := sa.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -845,13 +854,8 @@ func (sa *SchemaAQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // SchemaAGroupBy is the group-by builder for SchemaA entities.
 type SchemaAGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *SchemaAQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -860,58 +864,46 @@ func (sab *SchemaAGroupBy) Aggregate(fns ...AggregateFunc) *SchemaAGroupBy {
 	return sab
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (sab *SchemaAGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := sab.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, sab.build.ctx, "GroupBy")
+	if err := sab.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	sab.sql = query
-	return sab.sqlScan(ctx, v)
+	return scanWithInterceptors[*SchemaAQuery, *SchemaAGroupBy](ctx, sab.build, sab, sab.build.inters, v)
 }
 
-func (sab *SchemaAGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range sab.fields {
-		if !schemaa.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (sab *SchemaAGroupBy) sqlScan(ctx context.Context, root *SchemaAQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(sab.fns))
+	for _, fn := range sab.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := sab.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*sab.flds)+len(sab.fns))
+		for _, f := range *sab.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*sab.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := sab.driver.Query(ctx, query, args, rows); err != nil {
+	if err := sab.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (sab *SchemaAGroupBy) sqlQuery() *sql.Selector {
-	selector := sab.sql.Select()
-	aggregation := make([]string, 0, len(sab.fns))
-	for _, fn := range sab.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(sab.fields)+len(sab.fns))
-		for _, f := range sab.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(sab.fields...)...)
-}
-
 // SchemaASelect is the builder for selecting fields of SchemaA entities.
 type SchemaASelect struct {
 	*SchemaAQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -922,26 +914,27 @@ func (sa *SchemaASelect) Aggregate(fns ...AggregateFunc) *SchemaASelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (sa *SchemaASelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, sa.ctx, "Select")
 	if err := sa.prepareQuery(ctx); err != nil {
 		return err
 	}
-	sa.sql = sa.SchemaAQuery.sqlQuery(ctx)
-	return sa.sqlScan(ctx, v)
+	return scanWithInterceptors[*SchemaAQuery, *SchemaASelect](ctx, sa.SchemaAQuery, sa, sa.inters, v)
 }
 
-func (sa *SchemaASelect) sqlScan(ctx context.Context, v any) error {
+func (sa *SchemaASelect) sqlScan(ctx context.Context, root *SchemaAQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(sa.fns))
 	for _, fn := range sa.fns {
-		aggregation = append(aggregation, fn(sa.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*sa.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		sa.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		sa.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := sa.sql.Query()
+	query, args := selector.Query()
 	if err := sa.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

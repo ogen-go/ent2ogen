@@ -46,40 +46,7 @@ func (smu *SwitchModelUpdate) Mutation() *SwitchModelMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (smu *SwitchModelUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(smu.hooks) == 0 {
-		if err = smu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = smu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SwitchModelMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = smu.check(); err != nil {
-				return 0, err
-			}
-			smu.mutation = mutation
-			affected, err = smu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(smu.hooks) - 1; i >= 0; i-- {
-			if smu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = smu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, smu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, SwitchModelMutation](ctx, smu.sqlSave, smu.mutation, smu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -120,6 +87,9 @@ func (smu *SwitchModelUpdate) check() error {
 }
 
 func (smu *SwitchModelUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := smu.check(); err != nil {
+		return n, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   switchmodel.Table,
@@ -151,6 +121,7 @@ func (smu *SwitchModelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	smu.mutation.done = true
 	return n, nil
 }
 
@@ -188,46 +159,7 @@ func (smuo *SwitchModelUpdateOne) Select(field string, fields ...string) *Switch
 
 // Save executes the query and returns the updated SwitchModel entity.
 func (smuo *SwitchModelUpdateOne) Save(ctx context.Context) (*SwitchModel, error) {
-	var (
-		err  error
-		node *SwitchModel
-	)
-	if len(smuo.hooks) == 0 {
-		if err = smuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = smuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SwitchModelMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = smuo.check(); err != nil {
-				return nil, err
-			}
-			smuo.mutation = mutation
-			node, err = smuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(smuo.hooks) - 1; i >= 0; i-- {
-			if smuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = smuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, smuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*SwitchModel)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from SwitchModelMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*SwitchModel, SwitchModelMutation](ctx, smuo.sqlSave, smuo.mutation, smuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -268,6 +200,9 @@ func (smuo *SwitchModelUpdateOne) check() error {
 }
 
 func (smuo *SwitchModelUpdateOne) sqlSave(ctx context.Context) (_node *SwitchModel, err error) {
+	if err := smuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   switchmodel.Table,
@@ -319,5 +254,6 @@ func (smuo *SwitchModelUpdateOne) sqlSave(ctx context.Context) (_node *SwitchMod
 		}
 		return nil, err
 	}
+	smuo.mutation.done = true
 	return _node, nil
 }

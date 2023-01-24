@@ -116,40 +116,7 @@ func (ku *KeyboardUpdate) ClearKeycaps() *KeyboardUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ku *KeyboardUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ku.hooks) == 0 {
-		if err = ku.check(); err != nil {
-			return 0, err
-		}
-		affected, err = ku.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*KeyboardMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ku.check(); err != nil {
-				return 0, err
-			}
-			ku.mutation = mutation
-			affected, err = ku.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ku.hooks) - 1; i >= 0; i-- {
-			if ku.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ku.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ku.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, KeyboardMutation](ctx, ku.sqlSave, ku.mutation, ku.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -191,6 +158,9 @@ func (ku *KeyboardUpdate) check() error {
 }
 
 func (ku *KeyboardUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := ku.check(); err != nil {
+		return n, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   keyboard.Table,
@@ -304,6 +274,7 @@ func (ku *KeyboardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	ku.mutation.done = true
 	return n, nil
 }
 
@@ -409,46 +380,7 @@ func (kuo *KeyboardUpdateOne) Select(field string, fields ...string) *KeyboardUp
 
 // Save executes the query and returns the updated Keyboard entity.
 func (kuo *KeyboardUpdateOne) Save(ctx context.Context) (*Keyboard, error) {
-	var (
-		err  error
-		node *Keyboard
-	)
-	if len(kuo.hooks) == 0 {
-		if err = kuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = kuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*KeyboardMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = kuo.check(); err != nil {
-				return nil, err
-			}
-			kuo.mutation = mutation
-			node, err = kuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(kuo.hooks) - 1; i >= 0; i-- {
-			if kuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = kuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, kuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Keyboard)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from KeyboardMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Keyboard, KeyboardMutation](ctx, kuo.sqlSave, kuo.mutation, kuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -490,6 +422,9 @@ func (kuo *KeyboardUpdateOne) check() error {
 }
 
 func (kuo *KeyboardUpdateOne) sqlSave(ctx context.Context) (_node *Keyboard, err error) {
+	if err := kuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   keyboard.Table,
@@ -623,5 +558,6 @@ func (kuo *KeyboardUpdateOne) sqlSave(ctx context.Context) (_node *Keyboard, err
 		}
 		return nil, err
 	}
+	kuo.mutation.done = true
 	return _node, nil
 }

@@ -72,7 +72,7 @@ func (sm *SwitchModel) assignValues(columns []string, values []any) error {
 // Note that you need to call SwitchModel.Unwrap() before calling this method if this SwitchModel
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (sm *SwitchModel) Update() *SwitchModelUpdateOne {
-	return (&SwitchModelClient{config: sm.config}).UpdateOne(sm)
+	return NewSwitchModelClient(sm.config).UpdateOne(sm)
 }
 
 // Unwrap unwraps the SwitchModel entity that was returned from a transaction after it was closed,

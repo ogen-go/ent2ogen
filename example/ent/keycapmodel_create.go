@@ -50,49 +50,7 @@ func (kmc *KeycapModelCreate) Mutation() *KeycapModelMutation {
 
 // Save creates the KeycapModel in the database.
 func (kmc *KeycapModelCreate) Save(ctx context.Context) (*KeycapModel, error) {
-	var (
-		err  error
-		node *KeycapModel
-	)
-	if len(kmc.hooks) == 0 {
-		if err = kmc.check(); err != nil {
-			return nil, err
-		}
-		node, err = kmc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*KeycapModelMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = kmc.check(); err != nil {
-				return nil, err
-			}
-			kmc.mutation = mutation
-			if node, err = kmc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(kmc.hooks) - 1; i >= 0; i-- {
-			if kmc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = kmc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, kmc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*KeycapModel)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from KeycapModelMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*KeycapModel, KeycapModelMutation](ctx, kmc.sqlSave, kmc.mutation, kmc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -142,6 +100,9 @@ func (kmc *KeycapModelCreate) check() error {
 }
 
 func (kmc *KeycapModelCreate) sqlSave(ctx context.Context) (*KeycapModel, error) {
+	if err := kmc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := kmc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, kmc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -153,6 +114,8 @@ func (kmc *KeycapModelCreate) sqlSave(ctx context.Context) (*KeycapModel, error)
 		id := _spec.ID.Value.(int64)
 		_node.ID = int64(id)
 	}
+	kmc.mutation.id = &_node.ID
+	kmc.mutation.done = true
 	return _node, nil
 }
 

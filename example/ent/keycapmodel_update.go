@@ -52,40 +52,7 @@ func (kmu *KeycapModelUpdate) Mutation() *KeycapModelMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (kmu *KeycapModelUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(kmu.hooks) == 0 {
-		if err = kmu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = kmu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*KeycapModelMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = kmu.check(); err != nil {
-				return 0, err
-			}
-			kmu.mutation = mutation
-			affected, err = kmu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(kmu.hooks) - 1; i >= 0; i-- {
-			if kmu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = kmu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, kmu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, KeycapModelMutation](ctx, kmu.sqlSave, kmu.mutation, kmu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -126,6 +93,9 @@ func (kmu *KeycapModelUpdate) check() error {
 }
 
 func (kmu *KeycapModelUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := kmu.check(); err != nil {
+		return n, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   keycapmodel.Table,
@@ -160,6 +130,7 @@ func (kmu *KeycapModelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	kmu.mutation.done = true
 	return n, nil
 }
 
@@ -203,46 +174,7 @@ func (kmuo *KeycapModelUpdateOne) Select(field string, fields ...string) *Keycap
 
 // Save executes the query and returns the updated KeycapModel entity.
 func (kmuo *KeycapModelUpdateOne) Save(ctx context.Context) (*KeycapModel, error) {
-	var (
-		err  error
-		node *KeycapModel
-	)
-	if len(kmuo.hooks) == 0 {
-		if err = kmuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = kmuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*KeycapModelMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = kmuo.check(); err != nil {
-				return nil, err
-			}
-			kmuo.mutation = mutation
-			node, err = kmuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(kmuo.hooks) - 1; i >= 0; i-- {
-			if kmuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = kmuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, kmuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*KeycapModel)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from KeycapModelMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*KeycapModel, KeycapModelMutation](ctx, kmuo.sqlSave, kmuo.mutation, kmuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -283,6 +215,9 @@ func (kmuo *KeycapModelUpdateOne) check() error {
 }
 
 func (kmuo *KeycapModelUpdateOne) sqlSave(ctx context.Context) (_node *KeycapModel, err error) {
+	if err := kmuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   keycapmodel.Table,
@@ -337,5 +272,6 @@ func (kmuo *KeycapModelUpdateOne) sqlSave(ctx context.Context) (_node *KeycapMod
 		}
 		return nil, err
 	}
+	kmuo.mutation.done = true
 	return _node, nil
 }

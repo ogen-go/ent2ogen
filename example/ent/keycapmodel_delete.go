@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,34 +27,7 @@ func (kmd *KeycapModelDelete) Where(ps ...predicate.KeycapModel) *KeycapModelDel
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (kmd *KeycapModelDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(kmd.hooks) == 0 {
-		affected, err = kmd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*KeycapModelMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			kmd.mutation = mutation
-			affected, err = kmd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(kmd.hooks) - 1; i >= 0; i-- {
-			if kmd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = kmd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, kmd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, KeycapModelMutation](ctx, kmd.sqlExec, kmd.mutation, kmd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -88,6 +60,7 @@ func (kmd *KeycapModelDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	kmd.mutation.done = true
 	return affected, err
 }
 

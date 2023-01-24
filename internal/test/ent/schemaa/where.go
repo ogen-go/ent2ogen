@@ -10,590 +10,382 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.SchemaA(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.SchemaA(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.SchemaA(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.SchemaA(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.SchemaA(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.SchemaA(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.SchemaA(sql.FieldLTE(FieldID, id))
 }
 
 // Int64 applies equality check predicate on the "int64" field. It's identical to Int64EQ.
 func Int64(v int64) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldInt64), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldInt64, v))
 }
 
 // StringBindtoFoobar applies equality check predicate on the "string_bindto_foobar" field. It's identical to StringBindtoFoobarEQ.
 func StringBindtoFoobar(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldStringBindtoFoobar, v))
 }
 
 // StringOptionalNullable applies equality check predicate on the "string_optional_nullable" field. It's identical to StringOptionalNullableEQ.
 func StringOptionalNullable(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldStringOptionalNullable, v))
 }
 
 // OptionalNullableBool applies equality check predicate on the "optional_nullable_bool" field. It's identical to OptionalNullableBoolEQ.
 func OptionalNullableBool(v bool) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOptionalNullableBool), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldOptionalNullableBool, v))
 }
 
 // Bytes applies equality check predicate on the "bytes" field. It's identical to BytesEQ.
 func Bytes(v []byte) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBytes), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldBytes, v))
 }
 
 // Int64EQ applies the EQ predicate on the "int64" field.
 func Int64EQ(v int64) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldInt64), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldInt64, v))
 }
 
 // Int64NEQ applies the NEQ predicate on the "int64" field.
 func Int64NEQ(v int64) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldInt64), v))
-	})
+	return predicate.SchemaA(sql.FieldNEQ(FieldInt64, v))
 }
 
 // Int64In applies the In predicate on the "int64" field.
 func Int64In(vs ...int64) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldInt64), v...))
-	})
+	return predicate.SchemaA(sql.FieldIn(FieldInt64, vs...))
 }
 
 // Int64NotIn applies the NotIn predicate on the "int64" field.
 func Int64NotIn(vs ...int64) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldInt64), v...))
-	})
+	return predicate.SchemaA(sql.FieldNotIn(FieldInt64, vs...))
 }
 
 // Int64GT applies the GT predicate on the "int64" field.
 func Int64GT(v int64) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldInt64), v))
-	})
+	return predicate.SchemaA(sql.FieldGT(FieldInt64, v))
 }
 
 // Int64GTE applies the GTE predicate on the "int64" field.
 func Int64GTE(v int64) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldInt64), v))
-	})
+	return predicate.SchemaA(sql.FieldGTE(FieldInt64, v))
 }
 
 // Int64LT applies the LT predicate on the "int64" field.
 func Int64LT(v int64) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldInt64), v))
-	})
+	return predicate.SchemaA(sql.FieldLT(FieldInt64, v))
 }
 
 // Int64LTE applies the LTE predicate on the "int64" field.
 func Int64LTE(v int64) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldInt64), v))
-	})
+	return predicate.SchemaA(sql.FieldLTE(FieldInt64, v))
 }
 
 // StringBindtoFoobarEQ applies the EQ predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarEQ(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldStringBindtoFoobar, v))
 }
 
 // StringBindtoFoobarNEQ applies the NEQ predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarNEQ(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldNEQ(FieldStringBindtoFoobar, v))
 }
 
 // StringBindtoFoobarIn applies the In predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarIn(vs ...string) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldStringBindtoFoobar), v...))
-	})
+	return predicate.SchemaA(sql.FieldIn(FieldStringBindtoFoobar, vs...))
 }
 
 // StringBindtoFoobarNotIn applies the NotIn predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarNotIn(vs ...string) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldStringBindtoFoobar), v...))
-	})
+	return predicate.SchemaA(sql.FieldNotIn(FieldStringBindtoFoobar, vs...))
 }
 
 // StringBindtoFoobarGT applies the GT predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarGT(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldGT(FieldStringBindtoFoobar, v))
 }
 
 // StringBindtoFoobarGTE applies the GTE predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarGTE(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldGTE(FieldStringBindtoFoobar, v))
 }
 
 // StringBindtoFoobarLT applies the LT predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarLT(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldLT(FieldStringBindtoFoobar, v))
 }
 
 // StringBindtoFoobarLTE applies the LTE predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarLTE(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldLTE(FieldStringBindtoFoobar, v))
 }
 
 // StringBindtoFoobarContains applies the Contains predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarContains(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldContains(FieldStringBindtoFoobar, v))
 }
 
 // StringBindtoFoobarHasPrefix applies the HasPrefix predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarHasPrefix(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldHasPrefix(FieldStringBindtoFoobar, v))
 }
 
 // StringBindtoFoobarHasSuffix applies the HasSuffix predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarHasSuffix(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldHasSuffix(FieldStringBindtoFoobar, v))
 }
 
 // StringBindtoFoobarEqualFold applies the EqualFold predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarEqualFold(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldEqualFold(FieldStringBindtoFoobar, v))
 }
 
 // StringBindtoFoobarContainsFold applies the ContainsFold predicate on the "string_bindto_foobar" field.
 func StringBindtoFoobarContainsFold(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldStringBindtoFoobar), v))
-	})
+	return predicate.SchemaA(sql.FieldContainsFold(FieldStringBindtoFoobar, v))
 }
 
 // StringOptionalNullableEQ applies the EQ predicate on the "string_optional_nullable" field.
 func StringOptionalNullableEQ(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldStringOptionalNullable, v))
 }
 
 // StringOptionalNullableNEQ applies the NEQ predicate on the "string_optional_nullable" field.
 func StringOptionalNullableNEQ(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldNEQ(FieldStringOptionalNullable, v))
 }
 
 // StringOptionalNullableIn applies the In predicate on the "string_optional_nullable" field.
 func StringOptionalNullableIn(vs ...string) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldStringOptionalNullable), v...))
-	})
+	return predicate.SchemaA(sql.FieldIn(FieldStringOptionalNullable, vs...))
 }
 
 // StringOptionalNullableNotIn applies the NotIn predicate on the "string_optional_nullable" field.
 func StringOptionalNullableNotIn(vs ...string) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldStringOptionalNullable), v...))
-	})
+	return predicate.SchemaA(sql.FieldNotIn(FieldStringOptionalNullable, vs...))
 }
 
 // StringOptionalNullableGT applies the GT predicate on the "string_optional_nullable" field.
 func StringOptionalNullableGT(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldGT(FieldStringOptionalNullable, v))
 }
 
 // StringOptionalNullableGTE applies the GTE predicate on the "string_optional_nullable" field.
 func StringOptionalNullableGTE(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldGTE(FieldStringOptionalNullable, v))
 }
 
 // StringOptionalNullableLT applies the LT predicate on the "string_optional_nullable" field.
 func StringOptionalNullableLT(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldLT(FieldStringOptionalNullable, v))
 }
 
 // StringOptionalNullableLTE applies the LTE predicate on the "string_optional_nullable" field.
 func StringOptionalNullableLTE(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldLTE(FieldStringOptionalNullable, v))
 }
 
 // StringOptionalNullableContains applies the Contains predicate on the "string_optional_nullable" field.
 func StringOptionalNullableContains(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldContains(FieldStringOptionalNullable, v))
 }
 
 // StringOptionalNullableHasPrefix applies the HasPrefix predicate on the "string_optional_nullable" field.
 func StringOptionalNullableHasPrefix(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldHasPrefix(FieldStringOptionalNullable, v))
 }
 
 // StringOptionalNullableHasSuffix applies the HasSuffix predicate on the "string_optional_nullable" field.
 func StringOptionalNullableHasSuffix(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldHasSuffix(FieldStringOptionalNullable, v))
 }
 
 // StringOptionalNullableIsNil applies the IsNil predicate on the "string_optional_nullable" field.
 func StringOptionalNullableIsNil() predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldStringOptionalNullable)))
-	})
+	return predicate.SchemaA(sql.FieldIsNull(FieldStringOptionalNullable))
 }
 
 // StringOptionalNullableNotNil applies the NotNil predicate on the "string_optional_nullable" field.
 func StringOptionalNullableNotNil() predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldStringOptionalNullable)))
-	})
+	return predicate.SchemaA(sql.FieldNotNull(FieldStringOptionalNullable))
 }
 
 // StringOptionalNullableEqualFold applies the EqualFold predicate on the "string_optional_nullable" field.
 func StringOptionalNullableEqualFold(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldEqualFold(FieldStringOptionalNullable, v))
 }
 
 // StringOptionalNullableContainsFold applies the ContainsFold predicate on the "string_optional_nullable" field.
 func StringOptionalNullableContainsFold(v string) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldStringOptionalNullable), v))
-	})
+	return predicate.SchemaA(sql.FieldContainsFold(FieldStringOptionalNullable, v))
 }
 
 // OptionalNullableBoolEQ applies the EQ predicate on the "optional_nullable_bool" field.
 func OptionalNullableBoolEQ(v bool) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOptionalNullableBool), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldOptionalNullableBool, v))
 }
 
 // OptionalNullableBoolNEQ applies the NEQ predicate on the "optional_nullable_bool" field.
 func OptionalNullableBoolNEQ(v bool) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldOptionalNullableBool), v))
-	})
+	return predicate.SchemaA(sql.FieldNEQ(FieldOptionalNullableBool, v))
 }
 
 // OptionalNullableBoolIsNil applies the IsNil predicate on the "optional_nullable_bool" field.
 func OptionalNullableBoolIsNil() predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldOptionalNullableBool)))
-	})
+	return predicate.SchemaA(sql.FieldIsNull(FieldOptionalNullableBool))
 }
 
 // OptionalNullableBoolNotNil applies the NotNil predicate on the "optional_nullable_bool" field.
 func OptionalNullableBoolNotNil() predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldOptionalNullableBool)))
-	})
+	return predicate.SchemaA(sql.FieldNotNull(FieldOptionalNullableBool))
 }
 
 // JsontypeStringsOptionalIsNil applies the IsNil predicate on the "jsontype_strings_optional" field.
 func JsontypeStringsOptionalIsNil() predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldJsontypeStringsOptional)))
-	})
+	return predicate.SchemaA(sql.FieldIsNull(FieldJsontypeStringsOptional))
 }
 
 // JsontypeStringsOptionalNotNil applies the NotNil predicate on the "jsontype_strings_optional" field.
 func JsontypeStringsOptionalNotNil() predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldJsontypeStringsOptional)))
-	})
+	return predicate.SchemaA(sql.FieldNotNull(FieldJsontypeStringsOptional))
 }
 
 // JsontypeIntsOptionalIsNil applies the IsNil predicate on the "jsontype_ints_optional" field.
 func JsontypeIntsOptionalIsNil() predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldJsontypeIntsOptional)))
-	})
+	return predicate.SchemaA(sql.FieldIsNull(FieldJsontypeIntsOptional))
 }
 
 // JsontypeIntsOptionalNotNil applies the NotNil predicate on the "jsontype_ints_optional" field.
 func JsontypeIntsOptionalNotNil() predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldJsontypeIntsOptional)))
-	})
+	return predicate.SchemaA(sql.FieldNotNull(FieldJsontypeIntsOptional))
 }
 
 // RequiredEnumEQ applies the EQ predicate on the "required_enum" field.
 func RequiredEnumEQ(v RequiredEnum) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRequiredEnum), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldRequiredEnum, v))
 }
 
 // RequiredEnumNEQ applies the NEQ predicate on the "required_enum" field.
 func RequiredEnumNEQ(v RequiredEnum) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRequiredEnum), v))
-	})
+	return predicate.SchemaA(sql.FieldNEQ(FieldRequiredEnum, v))
 }
 
 // RequiredEnumIn applies the In predicate on the "required_enum" field.
 func RequiredEnumIn(vs ...RequiredEnum) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldRequiredEnum), v...))
-	})
+	return predicate.SchemaA(sql.FieldIn(FieldRequiredEnum, vs...))
 }
 
 // RequiredEnumNotIn applies the NotIn predicate on the "required_enum" field.
 func RequiredEnumNotIn(vs ...RequiredEnum) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldRequiredEnum), v...))
-	})
+	return predicate.SchemaA(sql.FieldNotIn(FieldRequiredEnum, vs...))
 }
 
 // OptionalNullableEnumEQ applies the EQ predicate on the "optional_nullable_enum" field.
 func OptionalNullableEnumEQ(v OptionalNullableEnum) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOptionalNullableEnum), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldOptionalNullableEnum, v))
 }
 
 // OptionalNullableEnumNEQ applies the NEQ predicate on the "optional_nullable_enum" field.
 func OptionalNullableEnumNEQ(v OptionalNullableEnum) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldOptionalNullableEnum), v))
-	})
+	return predicate.SchemaA(sql.FieldNEQ(FieldOptionalNullableEnum, v))
 }
 
 // OptionalNullableEnumIn applies the In predicate on the "optional_nullable_enum" field.
 func OptionalNullableEnumIn(vs ...OptionalNullableEnum) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldOptionalNullableEnum), v...))
-	})
+	return predicate.SchemaA(sql.FieldIn(FieldOptionalNullableEnum, vs...))
 }
 
 // OptionalNullableEnumNotIn applies the NotIn predicate on the "optional_nullable_enum" field.
 func OptionalNullableEnumNotIn(vs ...OptionalNullableEnum) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldOptionalNullableEnum), v...))
-	})
+	return predicate.SchemaA(sql.FieldNotIn(FieldOptionalNullableEnum, vs...))
 }
 
 // OptionalNullableEnumIsNil applies the IsNil predicate on the "optional_nullable_enum" field.
 func OptionalNullableEnumIsNil() predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldOptionalNullableEnum)))
-	})
+	return predicate.SchemaA(sql.FieldIsNull(FieldOptionalNullableEnum))
 }
 
 // OptionalNullableEnumNotNil applies the NotNil predicate on the "optional_nullable_enum" field.
 func OptionalNullableEnumNotNil() predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldOptionalNullableEnum)))
-	})
+	return predicate.SchemaA(sql.FieldNotNull(FieldOptionalNullableEnum))
 }
 
 // BytesEQ applies the EQ predicate on the "bytes" field.
 func BytesEQ(v []byte) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBytes), v))
-	})
+	return predicate.SchemaA(sql.FieldEQ(FieldBytes, v))
 }
 
 // BytesNEQ applies the NEQ predicate on the "bytes" field.
 func BytesNEQ(v []byte) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldBytes), v))
-	})
+	return predicate.SchemaA(sql.FieldNEQ(FieldBytes, v))
 }
 
 // BytesIn applies the In predicate on the "bytes" field.
 func BytesIn(vs ...[]byte) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldBytes), v...))
-	})
+	return predicate.SchemaA(sql.FieldIn(FieldBytes, vs...))
 }
 
 // BytesNotIn applies the NotIn predicate on the "bytes" field.
 func BytesNotIn(vs ...[]byte) predicate.SchemaA {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldBytes), v...))
-	})
+	return predicate.SchemaA(sql.FieldNotIn(FieldBytes, vs...))
 }
 
 // BytesGT applies the GT predicate on the "bytes" field.
 func BytesGT(v []byte) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldBytes), v))
-	})
+	return predicate.SchemaA(sql.FieldGT(FieldBytes, v))
 }
 
 // BytesGTE applies the GTE predicate on the "bytes" field.
 func BytesGTE(v []byte) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldBytes), v))
-	})
+	return predicate.SchemaA(sql.FieldGTE(FieldBytes, v))
 }
 
 // BytesLT applies the LT predicate on the "bytes" field.
 func BytesLT(v []byte) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldBytes), v))
-	})
+	return predicate.SchemaA(sql.FieldLT(FieldBytes, v))
 }
 
 // BytesLTE applies the LTE predicate on the "bytes" field.
 func BytesLTE(v []byte) predicate.SchemaA {
-	return predicate.SchemaA(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldBytes), v))
-	})
+	return predicate.SchemaA(sql.FieldLTE(FieldBytes, v))
 }
 
 // HasEdgeSchemabUniqueRequired applies the HasEdge predicate on the "edge_schemab_unique_required" edge.
@@ -601,7 +393,6 @@ func HasEdgeSchemabUniqueRequired() predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EdgeSchemabUniqueRequiredTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, EdgeSchemabUniqueRequiredTable, EdgeSchemabUniqueRequiredColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -629,7 +420,6 @@ func HasEdgeSchemabUniqueRequiredBindtoBs() predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EdgeSchemabUniqueRequiredBindtoBsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, EdgeSchemabUniqueRequiredBindtoBsTable, EdgeSchemabUniqueRequiredBindtoBsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -657,7 +447,6 @@ func HasEdgeSchemabUniqueOptional() predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EdgeSchemabUniqueOptionalTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, EdgeSchemabUniqueOptionalTable, EdgeSchemabUniqueOptionalColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -685,7 +474,6 @@ func HasEdgeSchemab() predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EdgeSchemabTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, EdgeSchemabTable, EdgeSchemabColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -713,7 +501,6 @@ func HasEdgeSchemaaRecursive() predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EdgeSchemaaRecursiveTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, EdgeSchemaaRecursiveTable, EdgeSchemaaRecursivePrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)

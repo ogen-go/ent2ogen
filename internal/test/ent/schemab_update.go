@@ -34,34 +34,7 @@ func (sb *SchemaBUpdate) Mutation() *SchemaBMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (sb *SchemaBUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(sb.hooks) == 0 {
-		affected, err = sb.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SchemaBMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			sb.mutation = mutation
-			affected, err = sb.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(sb.hooks) - 1; i >= 0; i-- {
-			if sb.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = sb.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, sb.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, SchemaBMutation](ctx, sb.sqlSave, sb.mutation, sb.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -112,6 +85,7 @@ func (sb *SchemaBUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	sb.mutation.done = true
 	return n, nil
 }
 
@@ -137,40 +111,7 @@ func (sbo *SchemaBUpdateOne) Select(field string, fields ...string) *SchemaBUpda
 
 // Save executes the query and returns the updated SchemaB entity.
 func (sbo *SchemaBUpdateOne) Save(ctx context.Context) (*SchemaB, error) {
-	var (
-		err  error
-		node *SchemaB
-	)
-	if len(sbo.hooks) == 0 {
-		node, err = sbo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SchemaBMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			sbo.mutation = mutation
-			node, err = sbo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(sbo.hooks) - 1; i >= 0; i-- {
-			if sbo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = sbo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, sbo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*SchemaB)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from SchemaBMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*SchemaB, SchemaBMutation](ctx, sbo.sqlSave, sbo.mutation, sbo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -241,5 +182,6 @@ func (sbo *SchemaBUpdateOne) sqlSave(ctx context.Context) (_node *SchemaB, err e
 		}
 		return nil, err
 	}
+	sbo.mutation.done = true
 	return _node, nil
 }

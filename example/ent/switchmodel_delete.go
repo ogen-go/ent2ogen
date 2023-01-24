@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,34 +27,7 @@ func (smd *SwitchModelDelete) Where(ps ...predicate.SwitchModel) *SwitchModelDel
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (smd *SwitchModelDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(smd.hooks) == 0 {
-		affected, err = smd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SwitchModelMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			smd.mutation = mutation
-			affected, err = smd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(smd.hooks) - 1; i >= 0; i-- {
-			if smd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = smd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, smd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, SwitchModelMutation](ctx, smd.sqlExec, smd.mutation, smd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -88,6 +60,7 @@ func (smd *SwitchModelDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	smd.mutation.done = true
 	return affected, err
 }
 

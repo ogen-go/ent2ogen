@@ -31,7 +31,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -130,6 +130,25 @@ func (c *Client) Use(hooks ...Hook) {
 	c.SchemaB.Use(hooks...)
 }
 
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.SchemaA.Intercept(interceptors...)
+	c.SchemaB.Intercept(interceptors...)
+}
+
+// Mutate implements the ent.Mutator interface.
+func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
+	switch m := m.(type) {
+	case *SchemaAMutation:
+		return c.SchemaA.mutate(ctx, m)
+	case *SchemaBMutation:
+		return c.SchemaB.mutate(ctx, m)
+	default:
+		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
 // SchemaAClient is a client for the SchemaA schema.
 type SchemaAClient struct {
 	config
@@ -144,6 +163,12 @@ func NewSchemaAClient(c config) *SchemaAClient {
 // A call to `Use(f, g, h)` equals to `schemaa.Hooks(f(g(h())))`.
 func (c *SchemaAClient) Use(hooks ...Hook) {
 	c.hooks.SchemaA = append(c.hooks.SchemaA, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `schemaa.Intercept(f(g(h())))`.
+func (c *SchemaAClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SchemaA = append(c.inters.SchemaA, interceptors...)
 }
 
 // Create returns a builder for creating a SchemaA entity.
@@ -198,6 +223,8 @@ func (c *SchemaAClient) DeleteOneID(id int) *SchemaADeleteOne {
 func (c *SchemaAClient) Query() *SchemaAQuery {
 	return &SchemaAQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeSchemaA},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -217,7 +244,7 @@ func (c *SchemaAClient) GetX(ctx context.Context, id int) *SchemaA {
 
 // QueryEdgeSchemabUniqueRequired queries the edge_schemab_unique_required edge of a SchemaA.
 func (c *SchemaAClient) QueryEdgeSchemabUniqueRequired(s *SchemaA) *SchemaBQuery {
-	query := &SchemaBQuery{config: c.config}
+	query := (&SchemaBClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := s.ID
 		step := sqlgraph.NewStep(
@@ -233,7 +260,7 @@ func (c *SchemaAClient) QueryEdgeSchemabUniqueRequired(s *SchemaA) *SchemaBQuery
 
 // QueryEdgeSchemabUniqueRequiredBindtoBs queries the edge_schemab_unique_required_bindto_bs edge of a SchemaA.
 func (c *SchemaAClient) QueryEdgeSchemabUniqueRequiredBindtoBs(s *SchemaA) *SchemaBQuery {
-	query := &SchemaBQuery{config: c.config}
+	query := (&SchemaBClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := s.ID
 		step := sqlgraph.NewStep(
@@ -249,7 +276,7 @@ func (c *SchemaAClient) QueryEdgeSchemabUniqueRequiredBindtoBs(s *SchemaA) *Sche
 
 // QueryEdgeSchemabUniqueOptional queries the edge_schemab_unique_optional edge of a SchemaA.
 func (c *SchemaAClient) QueryEdgeSchemabUniqueOptional(s *SchemaA) *SchemaBQuery {
-	query := &SchemaBQuery{config: c.config}
+	query := (&SchemaBClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := s.ID
 		step := sqlgraph.NewStep(
@@ -265,7 +292,7 @@ func (c *SchemaAClient) QueryEdgeSchemabUniqueOptional(s *SchemaA) *SchemaBQuery
 
 // QueryEdgeSchemab queries the edge_schemab edge of a SchemaA.
 func (c *SchemaAClient) QueryEdgeSchemab(s *SchemaA) *SchemaBQuery {
-	query := &SchemaBQuery{config: c.config}
+	query := (&SchemaBClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := s.ID
 		step := sqlgraph.NewStep(
@@ -281,7 +308,7 @@ func (c *SchemaAClient) QueryEdgeSchemab(s *SchemaA) *SchemaBQuery {
 
 // QueryEdgeSchemaaRecursive queries the edge_schemaa_recursive edge of a SchemaA.
 func (c *SchemaAClient) QueryEdgeSchemaaRecursive(s *SchemaA) *SchemaAQuery {
-	query := &SchemaAQuery{config: c.config}
+	query := (&SchemaAClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := s.ID
 		step := sqlgraph.NewStep(
@@ -300,6 +327,26 @@ func (c *SchemaAClient) Hooks() []Hook {
 	return c.hooks.SchemaA
 }
 
+// Interceptors returns the client interceptors.
+func (c *SchemaAClient) Interceptors() []Interceptor {
+	return c.inters.SchemaA
+}
+
+func (c *SchemaAClient) mutate(ctx context.Context, m *SchemaAMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SchemaACreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SchemaAUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SchemaAUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SchemaADelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SchemaA mutation op: %q", m.Op())
+	}
+}
+
 // SchemaBClient is a client for the SchemaB schema.
 type SchemaBClient struct {
 	config
@@ -314,6 +361,12 @@ func NewSchemaBClient(c config) *SchemaBClient {
 // A call to `Use(f, g, h)` equals to `schemab.Hooks(f(g(h())))`.
 func (c *SchemaBClient) Use(hooks ...Hook) {
 	c.hooks.SchemaB = append(c.hooks.SchemaB, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `schemab.Intercept(f(g(h())))`.
+func (c *SchemaBClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SchemaB = append(c.inters.SchemaB, interceptors...)
 }
 
 // Create returns a builder for creating a SchemaB entity.
@@ -368,6 +421,8 @@ func (c *SchemaBClient) DeleteOneID(id int64) *SchemaBDeleteOne {
 func (c *SchemaBClient) Query() *SchemaBQuery {
 	return &SchemaBQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeSchemaB},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -388,4 +443,24 @@ func (c *SchemaBClient) GetX(ctx context.Context, id int64) *SchemaB {
 // Hooks returns the client hooks.
 func (c *SchemaBClient) Hooks() []Hook {
 	return c.hooks.SchemaB
+}
+
+// Interceptors returns the client interceptors.
+func (c *SchemaBClient) Interceptors() []Interceptor {
+	return c.inters.SchemaB
+}
+
+func (c *SchemaBClient) mutate(ctx context.Context, m *SchemaBMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SchemaBCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SchemaBUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SchemaBUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SchemaBDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SchemaB mutation op: %q", m.Op())
+	}
 }

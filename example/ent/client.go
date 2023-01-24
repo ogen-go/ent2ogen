@@ -34,7 +34,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -137,6 +137,28 @@ func (c *Client) Use(hooks ...Hook) {
 	c.SwitchModel.Use(hooks...)
 }
 
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Keyboard.Intercept(interceptors...)
+	c.KeycapModel.Intercept(interceptors...)
+	c.SwitchModel.Intercept(interceptors...)
+}
+
+// Mutate implements the ent.Mutator interface.
+func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
+	switch m := m.(type) {
+	case *KeyboardMutation:
+		return c.Keyboard.mutate(ctx, m)
+	case *KeycapModelMutation:
+		return c.KeycapModel.mutate(ctx, m)
+	case *SwitchModelMutation:
+		return c.SwitchModel.mutate(ctx, m)
+	default:
+		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
 // KeyboardClient is a client for the Keyboard schema.
 type KeyboardClient struct {
 	config
@@ -151,6 +173,12 @@ func NewKeyboardClient(c config) *KeyboardClient {
 // A call to `Use(f, g, h)` equals to `keyboard.Hooks(f(g(h())))`.
 func (c *KeyboardClient) Use(hooks ...Hook) {
 	c.hooks.Keyboard = append(c.hooks.Keyboard, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `keyboard.Intercept(f(g(h())))`.
+func (c *KeyboardClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Keyboard = append(c.inters.Keyboard, interceptors...)
 }
 
 // Create returns a builder for creating a Keyboard entity.
@@ -205,6 +233,8 @@ func (c *KeyboardClient) DeleteOneID(id int64) *KeyboardDeleteOne {
 func (c *KeyboardClient) Query() *KeyboardQuery {
 	return &KeyboardQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeKeyboard},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -224,7 +254,7 @@ func (c *KeyboardClient) GetX(ctx context.Context, id int64) *Keyboard {
 
 // QuerySwitches queries the switches edge of a Keyboard.
 func (c *KeyboardClient) QuerySwitches(k *Keyboard) *SwitchModelQuery {
-	query := &SwitchModelQuery{config: c.config}
+	query := (&SwitchModelClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := k.ID
 		step := sqlgraph.NewStep(
@@ -240,7 +270,7 @@ func (c *KeyboardClient) QuerySwitches(k *Keyboard) *SwitchModelQuery {
 
 // QueryKeycaps queries the keycaps edge of a Keyboard.
 func (c *KeyboardClient) QueryKeycaps(k *Keyboard) *KeycapModelQuery {
-	query := &KeycapModelQuery{config: c.config}
+	query := (&KeycapModelClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := k.ID
 		step := sqlgraph.NewStep(
@@ -259,6 +289,26 @@ func (c *KeyboardClient) Hooks() []Hook {
 	return c.hooks.Keyboard
 }
 
+// Interceptors returns the client interceptors.
+func (c *KeyboardClient) Interceptors() []Interceptor {
+	return c.inters.Keyboard
+}
+
+func (c *KeyboardClient) mutate(ctx context.Context, m *KeyboardMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&KeyboardCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&KeyboardUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&KeyboardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&KeyboardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Keyboard mutation op: %q", m.Op())
+	}
+}
+
 // KeycapModelClient is a client for the KeycapModel schema.
 type KeycapModelClient struct {
 	config
@@ -273,6 +323,12 @@ func NewKeycapModelClient(c config) *KeycapModelClient {
 // A call to `Use(f, g, h)` equals to `keycapmodel.Hooks(f(g(h())))`.
 func (c *KeycapModelClient) Use(hooks ...Hook) {
 	c.hooks.KeycapModel = append(c.hooks.KeycapModel, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `keycapmodel.Intercept(f(g(h())))`.
+func (c *KeycapModelClient) Intercept(interceptors ...Interceptor) {
+	c.inters.KeycapModel = append(c.inters.KeycapModel, interceptors...)
 }
 
 // Create returns a builder for creating a KeycapModel entity.
@@ -327,6 +383,8 @@ func (c *KeycapModelClient) DeleteOneID(id int64) *KeycapModelDeleteOne {
 func (c *KeycapModelClient) Query() *KeycapModelQuery {
 	return &KeycapModelQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeKeycapModel},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -349,6 +407,26 @@ func (c *KeycapModelClient) Hooks() []Hook {
 	return c.hooks.KeycapModel
 }
 
+// Interceptors returns the client interceptors.
+func (c *KeycapModelClient) Interceptors() []Interceptor {
+	return c.inters.KeycapModel
+}
+
+func (c *KeycapModelClient) mutate(ctx context.Context, m *KeycapModelMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&KeycapModelCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&KeycapModelUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&KeycapModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&KeycapModelDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown KeycapModel mutation op: %q", m.Op())
+	}
+}
+
 // SwitchModelClient is a client for the SwitchModel schema.
 type SwitchModelClient struct {
 	config
@@ -363,6 +441,12 @@ func NewSwitchModelClient(c config) *SwitchModelClient {
 // A call to `Use(f, g, h)` equals to `switchmodel.Hooks(f(g(h())))`.
 func (c *SwitchModelClient) Use(hooks ...Hook) {
 	c.hooks.SwitchModel = append(c.hooks.SwitchModel, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `switchmodel.Intercept(f(g(h())))`.
+func (c *SwitchModelClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SwitchModel = append(c.inters.SwitchModel, interceptors...)
 }
 
 // Create returns a builder for creating a SwitchModel entity.
@@ -417,6 +501,8 @@ func (c *SwitchModelClient) DeleteOneID(id int64) *SwitchModelDeleteOne {
 func (c *SwitchModelClient) Query() *SwitchModelQuery {
 	return &SwitchModelQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeSwitchModel},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -437,4 +523,24 @@ func (c *SwitchModelClient) GetX(ctx context.Context, id int64) *SwitchModel {
 // Hooks returns the client hooks.
 func (c *SwitchModelClient) Hooks() []Hook {
 	return c.hooks.SwitchModel
+}
+
+// Interceptors returns the client interceptors.
+func (c *SwitchModelClient) Interceptors() []Interceptor {
+	return c.inters.SwitchModel
+}
+
+func (c *SwitchModelClient) mutate(ctx context.Context, m *SwitchModelMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SwitchModelCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SwitchModelUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SwitchModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SwitchModelDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SwitchModel mutation op: %q", m.Op())
+	}
 }

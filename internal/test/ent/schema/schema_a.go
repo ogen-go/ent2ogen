@@ -24,6 +24,7 @@ func (SchemaA) Fields() []ent.Field {
 		field.Ints("jsontype_ints_optional").Optional(),
 		field.Enum("required_enum").Values("a", "b"),
 		field.Enum("optional_nullable_enum").Values("c", "d").Optional().Nillable(),
+		field.Bytes("bytes"),
 	}
 }
 

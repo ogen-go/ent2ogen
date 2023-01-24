@@ -24,6 +24,7 @@ components:
         - jsontype_strings
         - jsontype_ints
         - required_enum
+        - bytes
         - edge_schemab_unique_required
         - edge_schemab_unique_required_bs_bind
       properties:
@@ -65,6 +66,9 @@ components:
           enum:
             - c
             - d
+        bytes:
+          type: string
+          format: byte
         edge_schemab_unique_required:
           $ref: '#/components/schemas/SchemaB'
         edge_schemab_unique_required_bs_bind:

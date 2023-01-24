@@ -37,6 +37,8 @@ type SchemaA struct {
 	RequiredEnum schemaa.RequiredEnum `json:"required_enum,omitempty"`
 	// OptionalNullableEnum holds the value of the "optional_nullable_enum" field.
 	OptionalNullableEnum *schemaa.OptionalNullableEnum `json:"optional_nullable_enum,omitempty"`
+	// Bytes holds the value of the "bytes" field.
+	Bytes []byte `json:"bytes,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SchemaAQuery when eager-loading is set.
 	Edges                                          SchemaAEdges `json:"edges"`
@@ -124,7 +126,7 @@ func (*SchemaA) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case schemaa.FieldJsontypeStrings, schemaa.FieldJsontypeStringsOptional, schemaa.FieldJsontypeInts, schemaa.FieldJsontypeIntsOptional:
+		case schemaa.FieldJsontypeStrings, schemaa.FieldJsontypeStringsOptional, schemaa.FieldJsontypeInts, schemaa.FieldJsontypeIntsOptional, schemaa.FieldBytes:
 			values[i] = new([]byte)
 		case schemaa.FieldOptionalNullableBool:
 			values[i] = new(sql.NullBool)
@@ -229,6 +231,12 @@ func (s *SchemaA) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				s.OptionalNullableEnum = new(schemaa.OptionalNullableEnum)
 				*s.OptionalNullableEnum = schemaa.OptionalNullableEnum(value.String)
+			}
+		case schemaa.FieldBytes:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field bytes", values[i])
+			} else if value != nil {
+				s.Bytes = *value
 			}
 		case schemaa.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -339,6 +347,9 @@ func (s *SchemaA) String() string {
 		builder.WriteString("optional_nullable_enum=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("bytes=")
+	builder.WriteString(fmt.Sprintf("%v", s.Bytes))
 	builder.WriteByte(')')
 	return builder.String()
 }

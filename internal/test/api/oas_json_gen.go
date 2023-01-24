@@ -272,6 +272,11 @@ func (s *SchemaA) encodeFields(e *jx.Encoder) {
 	}
 	{
 
+		e.FieldStart("bytes")
+		e.Base64(s.Bytes)
+	}
+	{
+
 		e.FieldStart("edge_schemab_unique_required")
 		s.EdgeSchemabUniqueRequired.Encode(e)
 	}
@@ -308,7 +313,7 @@ func (s *SchemaA) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSchemaA = [15]string{
+var jsonFieldsNameOfSchemaA = [16]string{
 	0:  "int64",
 	1:  "string_foobar_bind",
 	2:  "string_optional_nullable",
@@ -319,11 +324,12 @@ var jsonFieldsNameOfSchemaA = [15]string{
 	7:  "jsontype_ints_optional",
 	8:  "required_enum",
 	9:  "optional_nullable_enum",
-	10: "edge_schemab_unique_required",
-	11: "edge_schemab_unique_required_bs_bind",
-	12: "edge_schemab_unique_optional",
-	13: "edge_schemab",
-	14: "edge_schemaa_recursive",
+	10: "bytes",
+	11: "edge_schemab_unique_required",
+	12: "edge_schemab_unique_required_bs_bind",
+	13: "edge_schemab_unique_optional",
+	14: "edge_schemab",
+	15: "edge_schemaa_recursive",
 }
 
 // Decode decodes SchemaA from json.
@@ -477,8 +483,20 @@ func (s *SchemaA) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"optional_nullable_enum\"")
 			}
-		case "edge_schemab_unique_required":
+		case "bytes":
 			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				v, err := d.Base64()
+				s.Bytes = []byte(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"bytes\"")
+			}
+		case "edge_schemab_unique_required":
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				if err := s.EdgeSchemabUniqueRequired.Decode(d); err != nil {
 					return err
@@ -488,7 +506,7 @@ func (s *SchemaA) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"edge_schemab_unique_required\"")
 			}
 		case "edge_schemab_unique_required_bs_bind":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				if err := s.EdgeSchemabUniqueRequiredBsBind.Decode(d); err != nil {
 					return err
@@ -552,7 +570,7 @@ func (s *SchemaA) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b01010111,
-		0b00001101,
+		0b00011101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

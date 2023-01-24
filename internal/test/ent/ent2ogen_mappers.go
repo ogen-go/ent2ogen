@@ -76,6 +76,7 @@ func (e *SchemaA) toOpenAPI() (t openapi.SchemaA, err error) {
 	} else {
 		t.OptionalNullableEnum.Set, t.OptionalNullableEnum.Null = false, true
 	}
+	t.Bytes = e.Bytes
 	// Edge 'edge_schemab_unique_required'.
 	if err := func() error {
 		v, err := e.Edges.EdgeSchemabUniqueRequiredOrErr()

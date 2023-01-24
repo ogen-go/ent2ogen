@@ -31,6 +31,8 @@ const (
 	FieldRequiredEnum = "required_enum"
 	// FieldOptionalNullableEnum holds the string denoting the optional_nullable_enum field in the database.
 	FieldOptionalNullableEnum = "optional_nullable_enum"
+	// FieldBytes holds the string denoting the bytes field in the database.
+	FieldBytes = "bytes"
 	// EdgeEdgeSchemabUniqueRequired holds the string denoting the edge_schemab_unique_required edge name in mutations.
 	EdgeEdgeSchemabUniqueRequired = "edge_schemab_unique_required"
 	// EdgeEdgeSchemabUniqueRequiredBindtoBs holds the string denoting the edge_schemab_unique_required_bindto_bs edge name in mutations.
@@ -88,6 +90,7 @@ var Columns = []string{
 	FieldJsontypeIntsOptional,
 	FieldRequiredEnum,
 	FieldOptionalNullableEnum,
+	FieldBytes,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "schema_as"

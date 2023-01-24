@@ -19,6 +19,7 @@ func _() {
 		JsontypeIntsOptional            []int
 		RequiredEnum                    openapi.SchemaARequiredEnum
 		OptionalNullableEnum            openapi.OptNilSchemaAOptionalNullableEnum
+		Bytes                           []byte
 		EdgeSchemabUniqueRequired       openapi.SchemaB
 		EdgeSchemabUniqueRequiredBsBind openapi.SchemaB
 		EdgeSchemabUniqueOptional       openapi.OptSchemaB

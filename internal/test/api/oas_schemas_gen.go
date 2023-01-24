@@ -212,6 +212,7 @@ type SchemaA struct {
 	JsontypeIntsOptional            []int                             `json:"jsontype_ints_optional"`
 	RequiredEnum                    SchemaARequiredEnum               `json:"required_enum"`
 	OptionalNullableEnum            OptNilSchemaAOptionalNullableEnum `json:"optional_nullable_enum"`
+	Bytes                           []byte                            `json:"bytes"`
 	EdgeSchemabUniqueRequired       SchemaB                           `json:"edge_schemab_unique_required"`
 	EdgeSchemabUniqueRequiredBsBind SchemaB                           `json:"edge_schemab_unique_required_bs_bind"`
 	EdgeSchemabUniqueOptional       OptSchemaB                        `json:"edge_schemab_unique_optional"`
@@ -267,6 +268,11 @@ func (s *SchemaA) GetRequiredEnum() SchemaARequiredEnum {
 // GetOptionalNullableEnum returns the value of OptionalNullableEnum.
 func (s *SchemaA) GetOptionalNullableEnum() OptNilSchemaAOptionalNullableEnum {
 	return s.OptionalNullableEnum
+}
+
+// GetBytes returns the value of Bytes.
+func (s *SchemaA) GetBytes() []byte {
+	return s.Bytes
 }
 
 // GetEdgeSchemabUniqueRequired returns the value of EdgeSchemabUniqueRequired.
@@ -342,6 +348,11 @@ func (s *SchemaA) SetRequiredEnum(val SchemaARequiredEnum) {
 // SetOptionalNullableEnum sets the value of OptionalNullableEnum.
 func (s *SchemaA) SetOptionalNullableEnum(val OptNilSchemaAOptionalNullableEnum) {
 	s.OptionalNullableEnum = val
+}
+
+// SetBytes sets the value of Bytes.
+func (s *SchemaA) SetBytes(val []byte) {
+	s.Bytes = val
 }
 
 // SetEdgeSchemabUniqueRequired sets the value of EdgeSchemabUniqueRequired.

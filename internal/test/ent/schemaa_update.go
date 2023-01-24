@@ -174,6 +174,12 @@ func (sa *SchemaAUpdate) ClearOptionalNullableEnum() *SchemaAUpdate {
 	return sa
 }
 
+// SetBytes sets the "bytes" field.
+func (sa *SchemaAUpdate) SetBytes(b []byte) *SchemaAUpdate {
+	sa.mutation.SetBytes(b)
+	return sa
+}
+
 // SetEdgeSchemabUniqueRequiredID sets the "edge_schemab_unique_required" edge to the SchemaB entity by ID.
 func (sa *SchemaAUpdate) SetEdgeSchemabUniqueRequiredID(id int64) *SchemaAUpdate {
 	sa.mutation.SetEdgeSchemabUniqueRequiredID(id)
@@ -476,6 +482,9 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if sa.mutation.OptionalNullableEnumCleared() {
 		_spec.ClearField(schemaa.FieldOptionalNullableEnum, field.TypeEnum)
+	}
+	if value, ok := sa.mutation.Bytes(); ok {
+		_spec.SetField(schemaa.FieldBytes, field.TypeBytes, value)
 	}
 	if sa.mutation.EdgeSchemabUniqueRequiredCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -854,6 +863,12 @@ func (sao *SchemaAUpdateOne) ClearOptionalNullableEnum() *SchemaAUpdateOne {
 	return sao
 }
 
+// SetBytes sets the "bytes" field.
+func (sao *SchemaAUpdateOne) SetBytes(b []byte) *SchemaAUpdateOne {
+	sao.mutation.SetBytes(b)
+	return sao
+}
+
 // SetEdgeSchemabUniqueRequiredID sets the "edge_schemab_unique_required" edge to the SchemaB entity by ID.
 func (sao *SchemaAUpdateOne) SetEdgeSchemabUniqueRequiredID(id int64) *SchemaAUpdateOne {
 	sao.mutation.SetEdgeSchemabUniqueRequiredID(id)
@@ -1186,6 +1201,9 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 	}
 	if sao.mutation.OptionalNullableEnumCleared() {
 		_spec.ClearField(schemaa.FieldOptionalNullableEnum, field.TypeEnum)
+	}
+	if value, ok := sao.mutation.Bytes(); ok {
+		_spec.SetField(schemaa.FieldBytes, field.TypeBytes, value)
 	}
 	if sao.mutation.EdgeSchemabUniqueRequiredCleared() {
 		edge := &sqlgraph.EdgeSpec{

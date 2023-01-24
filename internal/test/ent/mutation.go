@@ -48,6 +48,7 @@ type SchemaAMutation struct {
 	appendjsontype_ints_optional                  []int
 	required_enum                                 *schemaa.RequiredEnum
 	optional_nullable_enum                        *schemaa.OptionalNullableEnum
+	bytes                                         *[]byte
 	clearedFields                                 map[string]struct{}
 	edge_schemab_unique_required                  *int64
 	clearededge_schemab_unique_required           bool
@@ -671,6 +672,42 @@ func (m *SchemaAMutation) ResetOptionalNullableEnum() {
 	delete(m.clearedFields, schemaa.FieldOptionalNullableEnum)
 }
 
+// SetBytes sets the "bytes" field.
+func (m *SchemaAMutation) SetBytes(b []byte) {
+	m.bytes = &b
+}
+
+// Bytes returns the value of the "bytes" field in the mutation.
+func (m *SchemaAMutation) Bytes() (r []byte, exists bool) {
+	v := m.bytes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBytes returns the old "bytes" field's value of the SchemaA entity.
+// If the SchemaA object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SchemaAMutation) OldBytes(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBytes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBytes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBytes: %w", err)
+	}
+	return oldValue.Bytes, nil
+}
+
+// ResetBytes resets all changes to the "bytes" field.
+func (m *SchemaAMutation) ResetBytes() {
+	m.bytes = nil
+}
+
 // SetEdgeSchemabUniqueRequiredID sets the "edge_schemab_unique_required" edge to the SchemaB entity by id.
 func (m *SchemaAMutation) SetEdgeSchemabUniqueRequiredID(id int64) {
 	m.edge_schemab_unique_required = &id
@@ -915,7 +952,7 @@ func (m *SchemaAMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SchemaAMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.int64 != nil {
 		fields = append(fields, schemaa.FieldInt64)
 	}
@@ -946,6 +983,9 @@ func (m *SchemaAMutation) Fields() []string {
 	if m.optional_nullable_enum != nil {
 		fields = append(fields, schemaa.FieldOptionalNullableEnum)
 	}
+	if m.bytes != nil {
+		fields = append(fields, schemaa.FieldBytes)
+	}
 	return fields
 }
 
@@ -974,6 +1014,8 @@ func (m *SchemaAMutation) Field(name string) (ent.Value, bool) {
 		return m.RequiredEnum()
 	case schemaa.FieldOptionalNullableEnum:
 		return m.OptionalNullableEnum()
+	case schemaa.FieldBytes:
+		return m.Bytes()
 	}
 	return nil, false
 }
@@ -1003,6 +1045,8 @@ func (m *SchemaAMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldRequiredEnum(ctx)
 	case schemaa.FieldOptionalNullableEnum:
 		return m.OldOptionalNullableEnum(ctx)
+	case schemaa.FieldBytes:
+		return m.OldBytes(ctx)
 	}
 	return nil, fmt.Errorf("unknown SchemaA field %s", name)
 }
@@ -1081,6 +1125,13 @@ func (m *SchemaAMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOptionalNullableEnum(v)
+		return nil
+	case schemaa.FieldBytes:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBytes(v)
 		return nil
 	}
 	return fmt.Errorf("unknown SchemaA field %s", name)
@@ -1208,6 +1259,9 @@ func (m *SchemaAMutation) ResetField(name string) error {
 		return nil
 	case schemaa.FieldOptionalNullableEnum:
 		m.ResetOptionalNullableEnum()
+		return nil
+	case schemaa.FieldBytes:
+		m.ResetBytes()
 		return nil
 	}
 	return fmt.Errorf("unknown SchemaA field %s", name)

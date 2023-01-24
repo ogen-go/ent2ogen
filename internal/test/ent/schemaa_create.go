@@ -104,6 +104,12 @@ func (sa *SchemaACreate) SetNillableOptionalNullableEnum(sne *schemaa.OptionalNu
 	return sa
 }
 
+// SetBytes sets the "bytes" field.
+func (sa *SchemaACreate) SetBytes(b []byte) *SchemaACreate {
+	sa.mutation.SetBytes(b)
+	return sa
+}
+
 // SetEdgeSchemabUniqueRequiredID sets the "edge_schemab_unique_required" edge to the SchemaB entity by ID.
 func (sa *SchemaACreate) SetEdgeSchemabUniqueRequiredID(id int64) *SchemaACreate {
 	sa.mutation.SetEdgeSchemabUniqueRequiredID(id)
@@ -276,6 +282,9 @@ func (sa *SchemaACreate) check() error {
 			return &ValidationError{Name: "optional_nullable_enum", err: fmt.Errorf(`ent: validator failed for field "SchemaA.optional_nullable_enum": %w`, err)}
 		}
 	}
+	if _, ok := sa.mutation.Bytes(); !ok {
+		return &ValidationError{Name: "bytes", err: errors.New(`ent: missing required field "SchemaA.bytes"`)}
+	}
 	if _, ok := sa.mutation.EdgeSchemabUniqueRequiredID(); !ok {
 		return &ValidationError{Name: "edge_schemab_unique_required", err: errors.New(`ent: missing required edge "SchemaA.edge_schemab_unique_required"`)}
 	}
@@ -348,6 +357,10 @@ func (sa *SchemaACreate) createSpec() (*SchemaA, *sqlgraph.CreateSpec) {
 	if value, ok := sa.mutation.OptionalNullableEnum(); ok {
 		_spec.SetField(schemaa.FieldOptionalNullableEnum, field.TypeEnum, value)
 		_node.OptionalNullableEnum = &value
+	}
+	if value, ok := sa.mutation.Bytes(); ok {
+		_spec.SetField(schemaa.FieldBytes, field.TypeBytes, value)
+		_node.Bytes = value
 	}
 	if nodes := sa.mutation.EdgeSchemabUniqueRequiredIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

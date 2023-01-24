@@ -107,6 +107,13 @@ func OptionalNullableBool(v bool) predicate.SchemaA {
 	})
 }
 
+// Bytes applies equality check predicate on the "bytes" field. It's identical to BytesEQ.
+func Bytes(v []byte) predicate.SchemaA {
+	return predicate.SchemaA(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBytes), v))
+	})
+}
+
 // Int64EQ applies the EQ predicate on the "int64" field.
 func Int64EQ(v int64) predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
@@ -522,6 +529,70 @@ func OptionalNullableEnumIsNil() predicate.SchemaA {
 func OptionalNullableEnumNotNil() predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldOptionalNullableEnum)))
+	})
+}
+
+// BytesEQ applies the EQ predicate on the "bytes" field.
+func BytesEQ(v []byte) predicate.SchemaA {
+	return predicate.SchemaA(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBytes), v))
+	})
+}
+
+// BytesNEQ applies the NEQ predicate on the "bytes" field.
+func BytesNEQ(v []byte) predicate.SchemaA {
+	return predicate.SchemaA(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldBytes), v))
+	})
+}
+
+// BytesIn applies the In predicate on the "bytes" field.
+func BytesIn(vs ...[]byte) predicate.SchemaA {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SchemaA(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldBytes), v...))
+	})
+}
+
+// BytesNotIn applies the NotIn predicate on the "bytes" field.
+func BytesNotIn(vs ...[]byte) predicate.SchemaA {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SchemaA(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldBytes), v...))
+	})
+}
+
+// BytesGT applies the GT predicate on the "bytes" field.
+func BytesGT(v []byte) predicate.SchemaA {
+	return predicate.SchemaA(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldBytes), v))
+	})
+}
+
+// BytesGTE applies the GTE predicate on the "bytes" field.
+func BytesGTE(v []byte) predicate.SchemaA {
+	return predicate.SchemaA(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldBytes), v))
+	})
+}
+
+// BytesLT applies the LT predicate on the "bytes" field.
+func BytesLT(v []byte) predicate.SchemaA {
+	return predicate.SchemaA(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldBytes), v))
+	})
+}
+
+// BytesLTE applies the LTE predicate on the "bytes" field.
+func BytesLTE(v []byte) predicate.SchemaA {
+	return predicate.SchemaA(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldBytes), v))
 	})
 }
 

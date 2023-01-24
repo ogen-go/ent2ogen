@@ -187,6 +187,7 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 		field.TypeTime:   func() error { return assertJS(js, jsonschema.String, "date-time") },
 		field.TypeUUID:   func() error { return assertJS(js, jsonschema.String, "uuid") },
 		field.TypeEnum:   func() error { return assertJS(js, jsonschema.String, "") },
+		field.TypeBytes:  func() error { return assertJS(js, jsonschema.String, "byte") },
 
 		field.TypeInt:    func() error { return assertJS(js, jsonschema.Integer, "") },
 		field.TypeInt16:  func() error { return assertJS(js, jsonschema.Integer, "int16") },

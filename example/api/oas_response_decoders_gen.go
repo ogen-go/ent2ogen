@@ -28,8 +28,8 @@ func decodeGetKeyboardResponse(resp *http.Response) (res *Keyboard, err error) {
 			if err != nil {
 				return res, err
 			}
-
 			d := jx.DecodeBytes(buf)
+
 			var response Keyboard
 			if err := func() error {
 				if err := response.Decode(d); err != nil {

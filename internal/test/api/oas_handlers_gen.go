@@ -9,6 +9,7 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ogen-go/ogen/middleware"
@@ -18,9 +19,11 @@ import (
 // handleTestRequest handles test operation.
 //
 // GET /test
-func (s *Server) handleTestRequest(args [0]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleTestRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("test"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/test"),
 	}
 
 	// Start a span for this request.

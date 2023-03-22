@@ -28,8 +28,8 @@ func decodeTestResponse(resp *http.Response) (res *SchemaA, err error) {
 			if err != nil {
 				return res, err
 			}
-
 			d := jx.DecodeBytes(buf)
+
 			var response SchemaA
 			if err := func() error {
 				if err := response.Decode(d); err != nil {

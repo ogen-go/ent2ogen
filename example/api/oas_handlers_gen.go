@@ -9,6 +9,7 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ogen-go/ogen/middleware"
@@ -19,9 +20,11 @@ import (
 // handleGetKeyboardRequest handles getKeyboard operation.
 //
 // GET /keyboard/{id}
-func (s *Server) handleGetKeyboardRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetKeyboardRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getKeyboard"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/keyboard/{id}"),
 	}
 
 	// Start a span for this request.
@@ -53,7 +56,7 @@ func (s *Server) handleGetKeyboardRequest(args [1]string, w http.ResponseWriter,
 			ID:   "getKeyboard",
 		}
 	)
-	params, err := decodeGetKeyboardParams(args, r)
+	params, err := decodeGetKeyboardParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,

@@ -122,13 +122,7 @@ func (kmc *KeycapModelCreate) sqlSave(ctx context.Context) (*KeycapModel, error)
 func (kmc *KeycapModelCreate) createSpec() (*KeycapModel, *sqlgraph.CreateSpec) {
 	var (
 		_node = &KeycapModel{config: kmc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: keycapmodel.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: keycapmodel.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(keycapmodel.Table, sqlgraph.NewFieldSpec(keycapmodel.FieldID, field.TypeInt64))
 	)
 	if id, ok := kmc.mutation.ID(); ok {
 		_node.ID = id

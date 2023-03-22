@@ -89,9 +89,3 @@ func (s *SchemaB) String() string {
 
 // SchemaBs is a parsable slice of SchemaB.
 type SchemaBs []*SchemaB
-
-func (s SchemaBs) config(cfg config) {
-	for _i := range s {
-		s[_i].config = cfg
-	}
-}

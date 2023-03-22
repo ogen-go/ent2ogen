@@ -40,15 +40,7 @@ func (kd *KeyboardDelete) ExecX(ctx context.Context) int {
 }
 
 func (kd *KeyboardDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: keyboard.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: keyboard.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(keyboard.Table, sqlgraph.NewFieldSpec(keyboard.FieldID, field.TypeInt64))
 	if ps := kd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -69,6 +61,12 @@ type KeyboardDeleteOne struct {
 	kd *KeyboardDelete
 }
 
+// Where appends a list predicates to the KeyboardDelete builder.
+func (kdo *KeyboardDeleteOne) Where(ps ...predicate.Keyboard) *KeyboardDeleteOne {
+	kdo.kd.mutation.Where(ps...)
+	return kdo
+}
+
 // Exec executes the deletion query.
 func (kdo *KeyboardDeleteOne) Exec(ctx context.Context) error {
 	n, err := kdo.kd.Exec(ctx)
@@ -84,5 +82,7 @@ func (kdo *KeyboardDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (kdo *KeyboardDeleteOne) ExecX(ctx context.Context) {
-	kdo.kd.ExecX(ctx)
+	if err := kdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

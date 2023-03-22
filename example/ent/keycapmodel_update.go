@@ -96,16 +96,7 @@ func (kmu *KeycapModelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := kmu.check(); err != nil {
 		return n, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   keycapmodel.Table,
-			Columns: keycapmodel.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: keycapmodel.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(keycapmodel.Table, keycapmodel.Columns, sqlgraph.NewFieldSpec(keycapmodel.FieldID, field.TypeInt64))
 	if ps := kmu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -165,6 +156,12 @@ func (kmuo *KeycapModelUpdateOne) Mutation() *KeycapModelMutation {
 	return kmuo.mutation
 }
 
+// Where appends a list predicates to the KeycapModelUpdate builder.
+func (kmuo *KeycapModelUpdateOne) Where(ps ...predicate.KeycapModel) *KeycapModelUpdateOne {
+	kmuo.mutation.Where(ps...)
+	return kmuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (kmuo *KeycapModelUpdateOne) Select(field string, fields ...string) *KeycapModelUpdateOne {
@@ -218,16 +215,7 @@ func (kmuo *KeycapModelUpdateOne) sqlSave(ctx context.Context) (_node *KeycapMod
 	if err := kmuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   keycapmodel.Table,
-			Columns: keycapmodel.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: keycapmodel.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(keycapmodel.Table, keycapmodel.Columns, sqlgraph.NewFieldSpec(keycapmodel.FieldID, field.TypeInt64))
 	id, ok := kmuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "KeycapModel.id" for update`)}

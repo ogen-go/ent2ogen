@@ -90,16 +90,7 @@ func (smu *SwitchModelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := smu.check(); err != nil {
 		return n, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   switchmodel.Table,
-			Columns: switchmodel.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: switchmodel.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(switchmodel.Table, switchmodel.Columns, sqlgraph.NewFieldSpec(switchmodel.FieldID, field.TypeInt64))
 	if ps := smu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -148,6 +139,12 @@ func (smuo *SwitchModelUpdateOne) SetSwitchType(st switchmodel.SwitchType) *Swit
 // Mutation returns the SwitchModelMutation object of the builder.
 func (smuo *SwitchModelUpdateOne) Mutation() *SwitchModelMutation {
 	return smuo.mutation
+}
+
+// Where appends a list predicates to the SwitchModelUpdate builder.
+func (smuo *SwitchModelUpdateOne) Where(ps ...predicate.SwitchModel) *SwitchModelUpdateOne {
+	smuo.mutation.Where(ps...)
+	return smuo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -203,16 +200,7 @@ func (smuo *SwitchModelUpdateOne) sqlSave(ctx context.Context) (_node *SwitchMod
 	if err := smuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   switchmodel.Table,
-			Columns: switchmodel.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: switchmodel.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(switchmodel.Table, switchmodel.Columns, sqlgraph.NewFieldSpec(switchmodel.FieldID, field.TypeInt64))
 	id, ok := smuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SwitchModel.id" for update`)}

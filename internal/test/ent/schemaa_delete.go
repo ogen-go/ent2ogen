@@ -40,15 +40,7 @@ func (sa *SchemaADelete) ExecX(ctx context.Context) int {
 }
 
 func (sa *SchemaADelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: schemaa.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: schemaa.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(schemaa.Table, sqlgraph.NewFieldSpec(schemaa.FieldID, field.TypeInt))
 	if ps := sa.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -69,6 +61,12 @@ type SchemaADeleteOne struct {
 	sa *SchemaADelete
 }
 
+// Where appends a list predicates to the SchemaADelete builder.
+func (sao *SchemaADeleteOne) Where(ps ...predicate.SchemaA) *SchemaADeleteOne {
+	sao.sa.mutation.Where(ps...)
+	return sao
+}
+
 // Exec executes the deletion query.
 func (sao *SchemaADeleteOne) Exec(ctx context.Context) error {
 	n, err := sao.sa.Exec(ctx)
@@ -84,5 +82,7 @@ func (sao *SchemaADeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (sao *SchemaADeleteOne) ExecX(ctx context.Context) {
-	sao.sa.ExecX(ctx)
+	if err := sao.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

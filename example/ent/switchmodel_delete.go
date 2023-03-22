@@ -40,15 +40,7 @@ func (smd *SwitchModelDelete) ExecX(ctx context.Context) int {
 }
 
 func (smd *SwitchModelDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: switchmodel.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: switchmodel.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(switchmodel.Table, sqlgraph.NewFieldSpec(switchmodel.FieldID, field.TypeInt64))
 	if ps := smd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -69,6 +61,12 @@ type SwitchModelDeleteOne struct {
 	smd *SwitchModelDelete
 }
 
+// Where appends a list predicates to the SwitchModelDelete builder.
+func (smdo *SwitchModelDeleteOne) Where(ps ...predicate.SwitchModel) *SwitchModelDeleteOne {
+	smdo.smd.mutation.Where(ps...)
+	return smdo
+}
+
 // Exec executes the deletion query.
 func (smdo *SwitchModelDeleteOne) Exec(ctx context.Context) error {
 	n, err := smdo.smd.Exec(ctx)
@@ -84,5 +82,7 @@ func (smdo *SwitchModelDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (smdo *SwitchModelDeleteOne) ExecX(ctx context.Context) {
-	smdo.smd.ExecX(ctx)
+	if err := smdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

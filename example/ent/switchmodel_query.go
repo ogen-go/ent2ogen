@@ -177,10 +177,12 @@ func (smq *SwitchModelQuery) AllX(ctx context.Context) []*SwitchModel {
 }
 
 // IDs executes the query and returns a list of SwitchModel IDs.
-func (smq *SwitchModelQuery) IDs(ctx context.Context) ([]int64, error) {
-	var ids []int64
+func (smq *SwitchModelQuery) IDs(ctx context.Context) (ids []int64, err error) {
+	if smq.ctx.Unique == nil && smq.path != nil {
+		smq.Unique(true)
+	}
 	ctx = setContextOp(ctx, smq.ctx, "IDs")
-	if err := smq.Select(switchmodel.FieldID).Scan(ctx, &ids); err != nil {
+	if err = smq.Select(switchmodel.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -362,20 +364,12 @@ func (smq *SwitchModelQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (smq *SwitchModelQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   switchmodel.Table,
-			Columns: switchmodel.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: switchmodel.FieldID,
-			},
-		},
-		From:   smq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(switchmodel.Table, switchmodel.Columns, sqlgraph.NewFieldSpec(switchmodel.FieldID, field.TypeInt64))
+	_spec.From = smq.sql
 	if unique := smq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if smq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := smq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

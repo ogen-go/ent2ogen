@@ -10,13 +10,13 @@ import (
 
 	"github.com/ogen-go/ent2ogen/example/ent/migrate"
 
-	"github.com/ogen-go/ent2ogen/example/ent/keyboard"
-	"github.com/ogen-go/ent2ogen/example/ent/keycapmodel"
-	"github.com/ogen-go/ent2ogen/example/ent/switchmodel"
-
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/ogen-go/ent2ogen/example/ent/keyboard"
+	"github.com/ogen-go/ent2ogen/example/ent/keycapmodel"
+	"github.com/ogen-go/ent2ogen/example/ent/switchmodel"
 )
 
 // Client is the client that holds all ent builders.
@@ -46,6 +46,55 @@ func (c *Client) init() {
 	c.Keyboard = NewKeyboardClient(c.config)
 	c.KeycapModel = NewKeycapModelClient(c.config)
 	c.SwitchModel = NewSwitchModelClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -175,7 +224,7 @@ func (c *KeyboardClient) Use(hooks ...Hook) {
 	c.hooks.Keyboard = append(c.hooks.Keyboard, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `keyboard.Intercept(f(g(h())))`.
 func (c *KeyboardClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Keyboard = append(c.inters.Keyboard, interceptors...)
@@ -325,7 +374,7 @@ func (c *KeycapModelClient) Use(hooks ...Hook) {
 	c.hooks.KeycapModel = append(c.hooks.KeycapModel, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `keycapmodel.Intercept(f(g(h())))`.
 func (c *KeycapModelClient) Intercept(interceptors ...Interceptor) {
 	c.inters.KeycapModel = append(c.inters.KeycapModel, interceptors...)
@@ -443,7 +492,7 @@ func (c *SwitchModelClient) Use(hooks ...Hook) {
 	c.hooks.SwitchModel = append(c.hooks.SwitchModel, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `switchmodel.Intercept(f(g(h())))`.
 func (c *SwitchModelClient) Intercept(interceptors ...Interceptor) {
 	c.inters.SwitchModel = append(c.inters.SwitchModel, interceptors...)
@@ -544,3 +593,13 @@ func (c *SwitchModelClient) mutate(ctx context.Context, m *SwitchModelMutation) 
 		return nil, fmt.Errorf("ent: unknown SwitchModel mutation op: %q", m.Op())
 	}
 }
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Keyboard, KeycapModel, SwitchModel []ent.Hook
+	}
+	inters struct {
+		Keyboard, KeycapModel, SwitchModel []ent.Interceptor
+	}
+)

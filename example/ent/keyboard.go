@@ -188,9 +188,3 @@ func (k *Keyboard) String() string {
 
 // Keyboards is a parsable slice of Keyboard.
 type Keyboards []*Keyboard
-
-func (k Keyboards) config(cfg config) {
-	for _i := range k {
-		k[_i].config = cfg
-	}
-}

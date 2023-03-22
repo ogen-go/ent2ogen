@@ -8,11 +8,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ogen-go/ent2ogen/internal/test/ent/predicate"
-	"github.com/ogen-go/ent2ogen/internal/test/ent/schemaa"
-
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/ogen-go/ent2ogen/internal/test/ent/predicate"
+	"github.com/ogen-go/ent2ogen/internal/test/ent/schemaa"
 )
 
 const (

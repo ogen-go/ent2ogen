@@ -113,9 +113,3 @@ func (km *KeycapModel) String() string {
 
 // KeycapModels is a parsable slice of KeycapModel.
 type KeycapModels []*KeycapModel
-
-func (km KeycapModels) config(cfg config) {
-	for _i := range km {
-		km[_i].config = cfg
-	}
-}

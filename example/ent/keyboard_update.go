@@ -161,16 +161,7 @@ func (ku *KeyboardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := ku.check(); err != nil {
 		return n, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   keyboard.Table,
-			Columns: keyboard.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: keyboard.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(keyboard.Table, keyboard.Columns, sqlgraph.NewFieldSpec(keyboard.FieldID, field.TypeInt64))
 	if ps := ku.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -204,10 +195,7 @@ func (ku *KeyboardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{keyboard.SwitchesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: switchmodel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(switchmodel.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -220,10 +208,7 @@ func (ku *KeyboardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{keyboard.SwitchesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: switchmodel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(switchmodel.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -239,10 +224,7 @@ func (ku *KeyboardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{keyboard.KeycapsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: keycapmodel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(keycapmodel.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -255,10 +237,7 @@ func (ku *KeyboardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{keyboard.KeycapsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: keycapmodel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(keycapmodel.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -371,6 +350,12 @@ func (kuo *KeyboardUpdateOne) ClearKeycaps() *KeyboardUpdateOne {
 	return kuo
 }
 
+// Where appends a list predicates to the KeyboardUpdate builder.
+func (kuo *KeyboardUpdateOne) Where(ps ...predicate.Keyboard) *KeyboardUpdateOne {
+	kuo.mutation.Where(ps...)
+	return kuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (kuo *KeyboardUpdateOne) Select(field string, fields ...string) *KeyboardUpdateOne {
@@ -425,16 +410,7 @@ func (kuo *KeyboardUpdateOne) sqlSave(ctx context.Context) (_node *Keyboard, err
 	if err := kuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   keyboard.Table,
-			Columns: keyboard.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: keyboard.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(keyboard.Table, keyboard.Columns, sqlgraph.NewFieldSpec(keyboard.FieldID, field.TypeInt64))
 	id, ok := kuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Keyboard.id" for update`)}
@@ -485,10 +461,7 @@ func (kuo *KeyboardUpdateOne) sqlSave(ctx context.Context) (_node *Keyboard, err
 			Columns: []string{keyboard.SwitchesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: switchmodel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(switchmodel.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -501,10 +474,7 @@ func (kuo *KeyboardUpdateOne) sqlSave(ctx context.Context) (_node *Keyboard, err
 			Columns: []string{keyboard.SwitchesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: switchmodel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(switchmodel.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -520,10 +490,7 @@ func (kuo *KeyboardUpdateOne) sqlSave(ctx context.Context) (_node *Keyboard, err
 			Columns: []string{keyboard.KeycapsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: keycapmodel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(keycapmodel.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -536,10 +503,7 @@ func (kuo *KeyboardUpdateOne) sqlSave(ctx context.Context) (_node *Keyboard, err
 			Columns: []string{keyboard.KeycapsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: keycapmodel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(keycapmodel.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

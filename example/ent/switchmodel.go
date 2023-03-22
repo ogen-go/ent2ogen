@@ -102,9 +102,3 @@ func (sm *SwitchModel) String() string {
 
 // SwitchModels is a parsable slice of SwitchModel.
 type SwitchModels []*SwitchModel
-
-func (sm SwitchModels) config(cfg config) {
-	for _i := range sm {
-		sm[_i].config = cfg
-	}
-}

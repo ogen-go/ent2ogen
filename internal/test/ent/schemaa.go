@@ -356,9 +356,3 @@ func (s *SchemaA) String() string {
 
 // SchemaAs is a parsable slice of SchemaA.
 type SchemaAs []*SchemaA
-
-func (s SchemaAs) config(cfg config) {
-	for _i := range s {
-		s[_i].config = cfg
-	}
-}

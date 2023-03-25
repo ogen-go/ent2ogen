@@ -40,15 +40,7 @@ func (kmd *KeycapModelDelete) ExecX(ctx context.Context) int {
 }
 
 func (kmd *KeycapModelDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: keycapmodel.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: keycapmodel.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(keycapmodel.Table, sqlgraph.NewFieldSpec(keycapmodel.FieldID, field.TypeInt64))
 	if ps := kmd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -69,6 +61,12 @@ type KeycapModelDeleteOne struct {
 	kmd *KeycapModelDelete
 }
 
+// Where appends a list predicates to the KeycapModelDelete builder.
+func (kmdo *KeycapModelDeleteOne) Where(ps ...predicate.KeycapModel) *KeycapModelDeleteOne {
+	kmdo.kmd.mutation.Where(ps...)
+	return kmdo
+}
+
 // Exec executes the deletion query.
 func (kmdo *KeycapModelDeleteOne) Exec(ctx context.Context) error {
 	n, err := kmdo.kmd.Exec(ctx)
@@ -84,5 +82,7 @@ func (kmdo *KeycapModelDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (kmdo *KeycapModelDeleteOne) ExecX(ctx context.Context) {
-	kmdo.kmd.ExecX(ctx)
+	if err := kmdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -8,13 +8,12 @@ import (
 	"fmt"
 	"sync"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 	"github.com/ogen-go/ent2ogen/example/ent/keyboard"
 	"github.com/ogen-go/ent2ogen/example/ent/keycapmodel"
 	"github.com/ogen-go/ent2ogen/example/ent/predicate"
 	"github.com/ogen-go/ent2ogen/example/ent/switchmodel"
-
-	"entgo.io/ent"
-	"entgo.io/ent/dialect/sql"
 )
 
 const (

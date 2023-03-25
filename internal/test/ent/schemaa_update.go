@@ -368,16 +368,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := sa.check(); err != nil {
 		return n, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   schemaa.Table,
-			Columns: schemaa.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: schemaa.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(schemaa.Table, schemaa.Columns, sqlgraph.NewFieldSpec(schemaa.FieldID, field.TypeInt))
 	if ps := sa.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -464,10 +455,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{schemaa.EdgeSchemabUniqueRequiredColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -480,10 +468,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{schemaa.EdgeSchemabUniqueRequiredColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -499,10 +484,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{schemaa.EdgeSchemabUniqueRequiredBindtoBsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -515,10 +497,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{schemaa.EdgeSchemabUniqueRequiredBindtoBsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -534,10 +513,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{schemaa.EdgeSchemabUniqueOptionalColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -550,10 +526,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{schemaa.EdgeSchemabUniqueOptionalColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -569,10 +542,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{schemaa.EdgeSchemabColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -585,10 +555,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{schemaa.EdgeSchemabColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -604,10 +571,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{schemaa.EdgeSchemabColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -623,10 +587,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: schemaa.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemaa.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -639,10 +600,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: schemaa.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemaa.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -658,10 +616,7 @@ func (sa *SchemaAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: schemaa.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemaa.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -976,6 +931,12 @@ func (sao *SchemaAUpdateOne) RemoveEdgeSchemaaRecursive(s ...*SchemaA) *SchemaAU
 	return sao.RemoveEdgeSchemaaRecursiveIDs(ids...)
 }
 
+// Where appends a list predicates to the SchemaAUpdate builder.
+func (sao *SchemaAUpdateOne) Where(ps ...predicate.SchemaA) *SchemaAUpdateOne {
+	sao.mutation.Where(ps...)
+	return sao
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (sao *SchemaAUpdateOne) Select(field string, fields ...string) *SchemaAUpdateOne {
@@ -1035,16 +996,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 	if err := sao.check(); err != nil {
 		return _node, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   schemaa.Table,
-			Columns: schemaa.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: schemaa.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(schemaa.Table, schemaa.Columns, sqlgraph.NewFieldSpec(schemaa.FieldID, field.TypeInt))
 	id, ok := sao.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SchemaA.id" for update`)}
@@ -1148,10 +1100,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: []string{schemaa.EdgeSchemabUniqueRequiredColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1164,10 +1113,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: []string{schemaa.EdgeSchemabUniqueRequiredColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -1183,10 +1129,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: []string{schemaa.EdgeSchemabUniqueRequiredBindtoBsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1199,10 +1142,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: []string{schemaa.EdgeSchemabUniqueRequiredBindtoBsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -1218,10 +1158,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: []string{schemaa.EdgeSchemabUniqueOptionalColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1234,10 +1171,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: []string{schemaa.EdgeSchemabUniqueOptionalColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -1253,10 +1187,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: []string{schemaa.EdgeSchemabColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1269,10 +1200,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: []string{schemaa.EdgeSchemabColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -1288,10 +1216,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: []string{schemaa.EdgeSchemabColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -1307,10 +1232,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: schemaa.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemaa.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1323,10 +1245,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: schemaa.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemaa.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1342,10 +1261,7 @@ func (sao *SchemaAUpdateOne) sqlSave(ctx context.Context) (_node *SchemaA, err e
 			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: schemaa.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemaa.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -178,10 +178,12 @@ func (sb *SchemaBQuery) AllX(ctx context.Context) []*SchemaB {
 }
 
 // IDs executes the query and returns a list of SchemaB IDs.
-func (sb *SchemaBQuery) IDs(ctx context.Context) ([]int64, error) {
-	var ids []int64
+func (sb *SchemaBQuery) IDs(ctx context.Context) (ids []int64, err error) {
+	if sb.ctx.Unique == nil && sb.path != nil {
+		sb.Unique(true)
+	}
 	ctx = setContextOp(ctx, sb.ctx, "IDs")
-	if err := sb.Select(schemab.FieldID).Scan(ctx, &ids); err != nil {
+	if err = sb.Select(schemab.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -345,20 +347,12 @@ func (sb *SchemaBQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (sb *SchemaBQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   schemab.Table,
-			Columns: schemab.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: schemab.FieldID,
-			},
-		},
-		From:   sb.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(schemab.Table, schemab.Columns, sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64))
+	_spec.From = sb.sql
 	if unique := sb.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if sb.path != nil {
+		_spec.Unique = true
 	}
 	if fields := sb.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

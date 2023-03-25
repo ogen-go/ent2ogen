@@ -40,15 +40,7 @@ func (sb *SchemaBDelete) ExecX(ctx context.Context) int {
 }
 
 func (sb *SchemaBDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: schemab.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: schemab.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(schemab.Table, sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64))
 	if ps := sb.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -69,6 +61,12 @@ type SchemaBDeleteOne struct {
 	sb *SchemaBDelete
 }
 
+// Where appends a list predicates to the SchemaBDelete builder.
+func (sbo *SchemaBDeleteOne) Where(ps ...predicate.SchemaB) *SchemaBDeleteOne {
+	sbo.sb.mutation.Where(ps...)
+	return sbo
+}
+
 // Exec executes the deletion query.
 func (sbo *SchemaBDeleteOne) Exec(ctx context.Context) error {
 	n, err := sbo.sb.Exec(ctx)
@@ -84,5 +82,7 @@ func (sbo *SchemaBDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (sbo *SchemaBDeleteOne) ExecX(ctx context.Context) {
-	sbo.sb.ExecX(ctx)
+	if err := sbo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

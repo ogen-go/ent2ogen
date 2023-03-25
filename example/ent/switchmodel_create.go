@@ -113,13 +113,7 @@ func (smc *SwitchModelCreate) sqlSave(ctx context.Context) (*SwitchModel, error)
 func (smc *SwitchModelCreate) createSpec() (*SwitchModel, *sqlgraph.CreateSpec) {
 	var (
 		_node = &SwitchModel{config: smc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: switchmodel.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: switchmodel.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(switchmodel.Table, sqlgraph.NewFieldSpec(switchmodel.FieldID, field.TypeInt64))
 	)
 	if id, ok := smc.mutation.ID(); ok {
 		_node.ID = id

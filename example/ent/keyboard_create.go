@@ -152,13 +152,7 @@ func (kc *KeyboardCreate) sqlSave(ctx context.Context) (*Keyboard, error) {
 func (kc *KeyboardCreate) createSpec() (*Keyboard, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Keyboard{config: kc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: keyboard.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: keyboard.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(keyboard.Table, sqlgraph.NewFieldSpec(keyboard.FieldID, field.TypeInt64))
 	)
 	if id, ok := kc.mutation.ID(); ok {
 		_node.ID = id
@@ -184,10 +178,7 @@ func (kc *KeyboardCreate) createSpec() (*Keyboard, *sqlgraph.CreateSpec) {
 			Columns: []string{keyboard.SwitchesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: switchmodel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(switchmodel.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -204,10 +195,7 @@ func (kc *KeyboardCreate) createSpec() (*Keyboard, *sqlgraph.CreateSpec) {
 			Columns: []string{keyboard.KeycapsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: keycapmodel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(keycapmodel.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

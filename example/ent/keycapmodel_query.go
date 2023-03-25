@@ -177,10 +177,12 @@ func (kmq *KeycapModelQuery) AllX(ctx context.Context) []*KeycapModel {
 }
 
 // IDs executes the query and returns a list of KeycapModel IDs.
-func (kmq *KeycapModelQuery) IDs(ctx context.Context) ([]int64, error) {
-	var ids []int64
+func (kmq *KeycapModelQuery) IDs(ctx context.Context) (ids []int64, err error) {
+	if kmq.ctx.Unique == nil && kmq.path != nil {
+		kmq.Unique(true)
+	}
 	ctx = setContextOp(ctx, kmq.ctx, "IDs")
-	if err := kmq.Select(keycapmodel.FieldID).Scan(ctx, &ids); err != nil {
+	if err = kmq.Select(keycapmodel.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -362,20 +364,12 @@ func (kmq *KeycapModelQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (kmq *KeycapModelQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   keycapmodel.Table,
-			Columns: keycapmodel.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: keycapmodel.FieldID,
-			},
-		},
-		From:   kmq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(keycapmodel.Table, keycapmodel.Columns, sqlgraph.NewFieldSpec(keycapmodel.FieldID, field.TypeInt64))
+	_spec.From = kmq.sql
 	if unique := kmq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if kmq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := kmq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

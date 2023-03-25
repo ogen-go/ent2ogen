@@ -84,13 +84,7 @@ func (sb *SchemaBCreate) sqlSave(ctx context.Context) (*SchemaB, error) {
 func (sb *SchemaBCreate) createSpec() (*SchemaB, *sqlgraph.CreateSpec) {
 	var (
 		_node = &SchemaB{config: sb.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: schemab.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: schemab.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(schemab.Table, sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64))
 	)
 	if id, ok := sb.mutation.ID(); ok {
 		_node.ID = id

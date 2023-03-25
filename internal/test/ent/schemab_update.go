@@ -60,16 +60,7 @@ func (sb *SchemaBUpdate) ExecX(ctx context.Context) {
 }
 
 func (sb *SchemaBUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   schemab.Table,
-			Columns: schemab.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: schemab.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(schemab.Table, schemab.Columns, sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64))
 	if ps := sb.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -100,6 +91,12 @@ type SchemaBUpdateOne struct {
 // Mutation returns the SchemaBMutation object of the builder.
 func (sbo *SchemaBUpdateOne) Mutation() *SchemaBMutation {
 	return sbo.mutation
+}
+
+// Where appends a list predicates to the SchemaBUpdate builder.
+func (sbo *SchemaBUpdateOne) Where(ps ...predicate.SchemaB) *SchemaBUpdateOne {
+	sbo.mutation.Where(ps...)
+	return sbo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -137,16 +134,7 @@ func (sbo *SchemaBUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (sbo *SchemaBUpdateOne) sqlSave(ctx context.Context) (_node *SchemaB, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   schemab.Table,
-			Columns: schemab.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: schemab.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(schemab.Table, schemab.Columns, sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64))
 	id, ok := sbo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SchemaB.id" for update`)}

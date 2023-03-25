@@ -273,13 +273,7 @@ func (sa *SchemaACreate) sqlSave(ctx context.Context) (*SchemaA, error) {
 func (sa *SchemaACreate) createSpec() (*SchemaA, *sqlgraph.CreateSpec) {
 	var (
 		_node = &SchemaA{config: sa.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: schemaa.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: schemaa.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(schemaa.Table, sqlgraph.NewFieldSpec(schemaa.FieldID, field.TypeInt))
 	)
 	if value, ok := sa.mutation.Int64(); ok {
 		_spec.SetField(schemaa.FieldInt64, field.TypeInt64, value)
@@ -333,10 +327,7 @@ func (sa *SchemaACreate) createSpec() (*SchemaA, *sqlgraph.CreateSpec) {
 			Columns: []string{schemaa.EdgeSchemabUniqueRequiredColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -353,10 +344,7 @@ func (sa *SchemaACreate) createSpec() (*SchemaA, *sqlgraph.CreateSpec) {
 			Columns: []string{schemaa.EdgeSchemabUniqueRequiredBindtoBsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -373,10 +361,7 @@ func (sa *SchemaACreate) createSpec() (*SchemaA, *sqlgraph.CreateSpec) {
 			Columns: []string{schemaa.EdgeSchemabUniqueOptionalColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -393,10 +378,7 @@ func (sa *SchemaACreate) createSpec() (*SchemaA, *sqlgraph.CreateSpec) {
 			Columns: []string{schemaa.EdgeSchemabColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: schemab.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemab.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -412,10 +394,7 @@ func (sa *SchemaACreate) createSpec() (*SchemaA, *sqlgraph.CreateSpec) {
 			Columns: schemaa.EdgeSchemaaRecursivePrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: schemaa.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(schemaa.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

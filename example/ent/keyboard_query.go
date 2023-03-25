@@ -226,10 +226,12 @@ func (kq *KeyboardQuery) AllX(ctx context.Context) []*Keyboard {
 }
 
 // IDs executes the query and returns a list of Keyboard IDs.
-func (kq *KeyboardQuery) IDs(ctx context.Context) ([]int64, error) {
-	var ids []int64
+func (kq *KeyboardQuery) IDs(ctx context.Context) (ids []int64, err error) {
+	if kq.ctx.Unique == nil && kq.path != nil {
+		kq.Unique(true)
+	}
 	ctx = setContextOp(ctx, kq.ctx, "IDs")
-	if err := kq.Select(keyboard.FieldID).Scan(ctx, &ids); err != nil {
+	if err = kq.Select(keyboard.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -524,20 +526,12 @@ func (kq *KeyboardQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (kq *KeyboardQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   keyboard.Table,
-			Columns: keyboard.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: keyboard.FieldID,
-			},
-		},
-		From:   kq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(keyboard.Table, keyboard.Columns, sqlgraph.NewFieldSpec(keyboard.FieldID, field.TypeInt64))
+	_spec.From = kq.sql
 	if unique := kq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if kq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := kq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

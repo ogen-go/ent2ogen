@@ -46,8 +46,8 @@ github.com/mattn/go-isatty v0.0.18/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D
 github.com/mattn/go-sqlite3 v1.14.16 h1:yOQRA0RpS5PFz/oikGwBEqvAWhWg5ufRz4ETLjwpU1Y=
 github.com/mitchellh/go-wordwrap v1.0.1 h1:TLuKupo69TCn6TQSyGxwI1EblZZEsQ0vMlAFQflz0v0=
 github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTSsCt+hzestvNj0=
-github.com/ogen-go/ogen v0.61.0 h1:U3hkx9ydCL2tb0055ut0o8hWaEOWCs2+rG2rpwCMGPM=
-github.com/ogen-go/ogen v0.61.0/go.mod h1:Rn43MIqVcT8utwLi45lv7e/a4kPRk+klLsWsgB1z9GQ=
+github.com/ogen-go/ogen v0.62.0 h1:RNsrAbso1DGpxZO5RCL5wd8pDh+sTsyUrYJovdJ3FuQ=
+github.com/ogen-go/ogen v0.62.0/go.mod h1:Rn43MIqVcT8utwLi45lv7e/a4kPRk+klLsWsgB1z9GQ=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/segmentio/asm v1.2.0 h1:9BQrFxC+YOHJlTlHGkTrFWf59nbL3XnCoFLTwDCI7ys=

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/ogen-go/ent2ogen/example/ent/switchmodel"
 )
@@ -18,7 +19,8 @@ type SwitchModel struct {
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// SwitchType holds the value of the "switch_type" field.
-	SwitchType switchmodel.SwitchType `json:"switch_type,omitempty"`
+	SwitchType   switchmodel.SwitchType `json:"switch_type,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -31,7 +33,7 @@ func (*SwitchModel) scanValues(columns []string) ([]any, error) {
 		case switchmodel.FieldName, switchmodel.FieldSwitchType:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type SwitchModel", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -63,9 +65,17 @@ func (sm *SwitchModel) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				sm.SwitchType = switchmodel.SwitchType(value.String)
 			}
+		default:
+			sm.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the SwitchModel.
+// This includes values selected through modifiers, order, etc.
+func (sm *SwitchModel) Value(name string) (ent.Value, error) {
+	return sm.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this SwitchModel.

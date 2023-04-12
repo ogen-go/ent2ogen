@@ -4,6 +4,8 @@ package switchmodel
 
 import (
 	"fmt"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 const (
@@ -63,4 +65,22 @@ func SwitchTypeValidator(st SwitchType) error {
 	default:
 		return fmt.Errorf("switchmodel: invalid enum value for switch_type field: %q", st)
 	}
+}
+
+// Order defines the ordering method for the SwitchModel queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// BySwitchType orders the results by the switch_type field.
+func BySwitchType(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldSwitchType, opts...).ToFunc()
 }

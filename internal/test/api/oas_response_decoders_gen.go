@@ -14,7 +14,7 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func decodeTestResponse(resp *http.Response) (res *SchemaA, err error) {
+func decodeTestResponse(resp *http.Response) (res *SchemaA, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.

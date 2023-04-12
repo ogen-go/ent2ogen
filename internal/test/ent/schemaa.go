@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/ogen-go/ent2ogen/internal/test/ent/schemaa"
 	"github.com/ogen-go/ent2ogen/internal/test/ent/schemab"
@@ -45,6 +46,7 @@ type SchemaA struct {
 	schemaa_edge_schemab_unique_required           *int64
 	schemaa_edge_schemab_unique_required_bindto_bs *int64
 	schemaa_edge_schemab_unique_optional           *int64
+	selectValues                                   sql.SelectValues
 }
 
 // SchemaAEdges holds the relations/edges for other nodes in the graph.
@@ -141,7 +143,7 @@ func (*SchemaA) scanValues(columns []string) ([]any, error) {
 		case schemaa.ForeignKeys[2]: // schemaa_edge_schemab_unique_optional
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type SchemaA", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -259,9 +261,17 @@ func (s *SchemaA) assignValues(columns []string, values []any) error {
 				s.schemaa_edge_schemab_unique_optional = new(int64)
 				*s.schemaa_edge_schemab_unique_optional = int64(value.Int64)
 			}
+		default:
+			s.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the SchemaA.
+// This includes values selected through modifiers, order, etc.
+func (s *SchemaA) Value(name string) (ent.Value, error) {
+	return s.selectValues.Get(name)
 }
 
 // QueryEdgeSchemabUniqueRequired queries the "edge_schemab_unique_required" edge of the SchemaA entity.

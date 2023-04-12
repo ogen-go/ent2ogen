@@ -179,6 +179,13 @@ func (o *NilInt64) SetTo(v int64) {
 // IsSet returns true if value is Null.
 func (o NilInt64) IsNull() bool { return o.Null }
 
+// SetNull sets value to null.
+func (o *NilInt64) SetToNull() {
+	o.Null = true
+	var v int64
+	o.Value = v
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o NilInt64) Get() (v int64, ok bool) {
 	if o.Null {

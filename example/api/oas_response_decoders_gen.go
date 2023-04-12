@@ -14,7 +14,7 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func decodeGetKeyboardResponse(resp *http.Response) (res *Keyboard, err error) {
+func decodeGetKeyboardResponse(resp *http.Response) (res *Keyboard, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.

@@ -4,6 +4,9 @@ package schemaa
 
 import (
 	"fmt"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -166,4 +169,126 @@ func OptionalNullableEnumValidator(one OptionalNullableEnum) error {
 	default:
 		return fmt.Errorf("schemaa: invalid enum value for optional_nullable_enum field: %q", one)
 	}
+}
+
+// Order defines the ordering method for the SchemaA queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByInt64 orders the results by the int64 field.
+func ByInt64(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldInt64, opts...).ToFunc()
+}
+
+// ByStringBindtoFoobar orders the results by the string_bindto_foobar field.
+func ByStringBindtoFoobar(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldStringBindtoFoobar, opts...).ToFunc()
+}
+
+// ByStringOptionalNullable orders the results by the string_optional_nullable field.
+func ByStringOptionalNullable(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldStringOptionalNullable, opts...).ToFunc()
+}
+
+// ByOptionalNullableBool orders the results by the optional_nullable_bool field.
+func ByOptionalNullableBool(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldOptionalNullableBool, opts...).ToFunc()
+}
+
+// ByRequiredEnum orders the results by the required_enum field.
+func ByRequiredEnum(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldRequiredEnum, opts...).ToFunc()
+}
+
+// ByOptionalNullableEnum orders the results by the optional_nullable_enum field.
+func ByOptionalNullableEnum(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldOptionalNullableEnum, opts...).ToFunc()
+}
+
+// ByEdgeSchemabUniqueRequiredField orders the results by edge_schemab_unique_required field.
+func ByEdgeSchemabUniqueRequiredField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newEdgeSchemabUniqueRequiredStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByEdgeSchemabUniqueRequiredBindtoBsField orders the results by edge_schemab_unique_required_bindto_bs field.
+func ByEdgeSchemabUniqueRequiredBindtoBsField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newEdgeSchemabUniqueRequiredBindtoBsStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByEdgeSchemabUniqueOptionalField orders the results by edge_schemab_unique_optional field.
+func ByEdgeSchemabUniqueOptionalField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newEdgeSchemabUniqueOptionalStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByEdgeSchemabCount orders the results by edge_schemab count.
+func ByEdgeSchemabCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newEdgeSchemabStep(), opts...)
+	}
+}
+
+// ByEdgeSchemab orders the results by edge_schemab terms.
+func ByEdgeSchemab(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newEdgeSchemabStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByEdgeSchemaaRecursiveCount orders the results by edge_schemaa_recursive count.
+func ByEdgeSchemaaRecursiveCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newEdgeSchemaaRecursiveStep(), opts...)
+	}
+}
+
+// ByEdgeSchemaaRecursive orders the results by edge_schemaa_recursive terms.
+func ByEdgeSchemaaRecursive(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newEdgeSchemaaRecursiveStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newEdgeSchemabUniqueRequiredStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(EdgeSchemabUniqueRequiredInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, EdgeSchemabUniqueRequiredTable, EdgeSchemabUniqueRequiredColumn),
+	)
+}
+func newEdgeSchemabUniqueRequiredBindtoBsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(EdgeSchemabUniqueRequiredBindtoBsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, EdgeSchemabUniqueRequiredBindtoBsTable, EdgeSchemabUniqueRequiredBindtoBsColumn),
+	)
+}
+func newEdgeSchemabUniqueOptionalStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(EdgeSchemabUniqueOptionalInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, EdgeSchemabUniqueOptionalTable, EdgeSchemabUniqueOptionalColumn),
+	)
+}
+func newEdgeSchemabStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(EdgeSchemabInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, EdgeSchemabTable, EdgeSchemabColumn),
+	)
+}
+func newEdgeSchemaaRecursiveStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, EdgeSchemaaRecursiveTable, EdgeSchemaaRecursivePrimaryKey...),
+	)
 }

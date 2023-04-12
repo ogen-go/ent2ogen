@@ -28,6 +28,13 @@ func (o *NilString) SetTo(v string) {
 // IsSet returns true if value is Null.
 func (o NilString) IsNull() bool { return o.Null }
 
+// SetNull sets value to null.
+func (o *NilString) SetToNull() {
+	o.Null = true
+	var v string
+	o.Value = v
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o NilString) Get() (v string, ok bool) {
 	if o.Null {
@@ -79,6 +86,14 @@ func (o *OptNilBool) SetTo(v bool) {
 
 // IsSet returns true if value is Null.
 func (o OptNilBool) IsNull() bool { return o.Null }
+
+// SetNull sets value to null.
+func (o *OptNilBool) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v bool
+	o.Value = v
+}
 
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilBool) Get() (v bool, ok bool) {
@@ -134,6 +149,14 @@ func (o *OptNilSchemaAOptionalNullableEnum) SetTo(v SchemaAOptionalNullableEnum)
 
 // IsSet returns true if value is Null.
 func (o OptNilSchemaAOptionalNullableEnum) IsNull() bool { return o.Null }
+
+// SetNull sets value to null.
+func (o *OptNilSchemaAOptionalNullableEnum) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v SchemaAOptionalNullableEnum
+	o.Value = v
+}
 
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilSchemaAOptionalNullableEnum) Get() (v SchemaAOptionalNullableEnum, ok bool) {

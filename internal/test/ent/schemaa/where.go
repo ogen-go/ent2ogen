@@ -402,11 +402,7 @@ func HasEdgeSchemabUniqueRequired() predicate.SchemaA {
 // HasEdgeSchemabUniqueRequiredWith applies the HasEdge predicate on the "edge_schemab_unique_required" edge with a given conditions (other predicates).
 func HasEdgeSchemabUniqueRequiredWith(preds ...predicate.SchemaB) predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EdgeSchemabUniqueRequiredInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, EdgeSchemabUniqueRequiredTable, EdgeSchemabUniqueRequiredColumn),
-		)
+		step := newEdgeSchemabUniqueRequiredStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -429,11 +425,7 @@ func HasEdgeSchemabUniqueRequiredBindtoBs() predicate.SchemaA {
 // HasEdgeSchemabUniqueRequiredBindtoBsWith applies the HasEdge predicate on the "edge_schemab_unique_required_bindto_bs" edge with a given conditions (other predicates).
 func HasEdgeSchemabUniqueRequiredBindtoBsWith(preds ...predicate.SchemaB) predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EdgeSchemabUniqueRequiredBindtoBsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, EdgeSchemabUniqueRequiredBindtoBsTable, EdgeSchemabUniqueRequiredBindtoBsColumn),
-		)
+		step := newEdgeSchemabUniqueRequiredBindtoBsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -456,11 +448,7 @@ func HasEdgeSchemabUniqueOptional() predicate.SchemaA {
 // HasEdgeSchemabUniqueOptionalWith applies the HasEdge predicate on the "edge_schemab_unique_optional" edge with a given conditions (other predicates).
 func HasEdgeSchemabUniqueOptionalWith(preds ...predicate.SchemaB) predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EdgeSchemabUniqueOptionalInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, EdgeSchemabUniqueOptionalTable, EdgeSchemabUniqueOptionalColumn),
-		)
+		step := newEdgeSchemabUniqueOptionalStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -483,11 +471,7 @@ func HasEdgeSchemab() predicate.SchemaA {
 // HasEdgeSchemabWith applies the HasEdge predicate on the "edge_schemab" edge with a given conditions (other predicates).
 func HasEdgeSchemabWith(preds ...predicate.SchemaB) predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EdgeSchemabInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, EdgeSchemabTable, EdgeSchemabColumn),
-		)
+		step := newEdgeSchemabStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -510,11 +494,7 @@ func HasEdgeSchemaaRecursive() predicate.SchemaA {
 // HasEdgeSchemaaRecursiveWith applies the HasEdge predicate on the "edge_schemaa_recursive" edge with a given conditions (other predicates).
 func HasEdgeSchemaaRecursiveWith(preds ...predicate.SchemaA) predicate.SchemaA {
 	return predicate.SchemaA(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, EdgeSchemaaRecursiveTable, EdgeSchemaaRecursivePrimaryKey...),
-		)
+		step := newEdgeSchemaaRecursiveStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/ogen-go/ent2ogen/internal/test/ent/schemab"
 )
@@ -16,6 +17,7 @@ type SchemaB struct {
 	// ID of the ent.
 	ID                   int64 `json:"id,omitempty"`
 	schemaa_edge_schemab *int
+	selectValues         sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -28,7 +30,7 @@ func (*SchemaB) scanValues(columns []string) ([]any, error) {
 		case schemab.ForeignKeys[0]: // schemaa_edge_schemab
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type SchemaB", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -55,9 +57,17 @@ func (s *SchemaB) assignValues(columns []string, values []any) error {
 				s.schemaa_edge_schemab = new(int)
 				*s.schemaa_edge_schemab = int(value.Int64)
 			}
+		default:
+			s.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the SchemaB.
+// This includes values selected through modifiers, order, etc.
+func (s *SchemaB) Value(name string) (ent.Value, error) {
+	return s.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this SchemaB.

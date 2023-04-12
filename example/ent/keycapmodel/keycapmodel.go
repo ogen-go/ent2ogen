@@ -4,6 +4,8 @@ package keycapmodel
 
 import (
 	"fmt"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 const (
@@ -65,4 +67,27 @@ func MaterialValidator(m Material) error {
 	default:
 		return fmt.Errorf("keycapmodel: invalid enum value for material field: %q", m)
 	}
+}
+
+// Order defines the ordering method for the KeycapModel queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByProfile orders the results by the profile field.
+func ByProfile(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldProfile, opts...).ToFunc()
+}
+
+// ByMaterial orders the results by the material field.
+func ByMaterial(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldMaterial, opts...).ToFunc()
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/ogen-go/ent2ogen/example/ent/keyboard"
 	"github.com/ogen-go/ent2ogen/example/ent/keycapmodel"
@@ -28,6 +29,7 @@ type Keyboard struct {
 	Edges             KeyboardEdges `json:"edges"`
 	keyboard_switches *int64
 	keyboard_keycaps  *int64
+	selectValues      sql.SelectValues
 }
 
 // KeyboardEdges holds the relations/edges for other nodes in the graph.
@@ -81,7 +83,7 @@ func (*Keyboard) scanValues(columns []string) ([]any, error) {
 		case keyboard.ForeignKeys[1]: // keyboard_keycaps
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Keyboard", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -134,9 +136,17 @@ func (k *Keyboard) assignValues(columns []string, values []any) error {
 				k.keyboard_keycaps = new(int64)
 				*k.keyboard_keycaps = int64(value.Int64)
 			}
+		default:
+			k.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Keyboard.
+// This includes values selected through modifiers, order, etc.
+func (k *Keyboard) Value(name string) (ent.Value, error) {
+	return k.selectValues.Get(name)
 }
 
 // QuerySwitches queries the "switches" edge of the Keyboard entity.

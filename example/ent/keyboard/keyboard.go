@@ -2,6 +2,11 @@
 
 package keyboard
 
+import (
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+)
+
 const (
 	// Label holds the string label denoting the keyboard type in the database.
 	Label = "keyboard"
@@ -69,3 +74,54 @@ var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 )
+
+// Order defines the ordering method for the Keyboard queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByPrice orders the results by the price field.
+func ByPrice(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldPrice, opts...).ToFunc()
+}
+
+// ByDiscount orders the results by the discount field.
+func ByDiscount(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldDiscount, opts...).ToFunc()
+}
+
+// BySwitchesField orders the results by switches field.
+func BySwitchesField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSwitchesStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByKeycapsField orders the results by keycaps field.
+func ByKeycapsField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newKeycapsStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newSwitchesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SwitchesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, SwitchesTable, SwitchesColumn),
+	)
+}
+func newKeycapsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(KeycapsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, KeycapsTable, KeycapsColumn),
+	)
+}

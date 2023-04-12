@@ -20,7 +20,7 @@ import (
 type SchemaAQuery struct {
 	config
 	ctx                                   *QueryContext
-	order                                 []OrderFunc
+	order                                 []schemaa.Order
 	inters                                []Interceptor
 	predicates                            []predicate.SchemaA
 	withEdgeSchemabUniqueRequired         *SchemaBQuery
@@ -60,7 +60,7 @@ func (sa *SchemaAQuery) Unique(unique bool) *SchemaAQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (sa *SchemaAQuery) Order(o ...OrderFunc) *SchemaAQuery {
+func (sa *SchemaAQuery) Order(o ...schemaa.Order) *SchemaAQuery {
 	sa.order = append(sa.order, o...)
 	return sa
 }
@@ -364,7 +364,7 @@ func (sa *SchemaAQuery) Clone() *SchemaAQuery {
 	return &SchemaAQuery{
 		config:                                sa.config,
 		ctx:                                   sa.ctx.Clone(),
-		order:                                 append([]OrderFunc{}, sa.order...),
+		order:                                 append([]schemaa.Order{}, sa.order...),
 		inters:                                append([]Interceptor{}, sa.inters...),
 		predicates:                            append([]predicate.SchemaA{}, sa.predicates...),
 		withEdgeSchemabUniqueRequired:         sa.withEdgeSchemabUniqueRequired.Clone(),

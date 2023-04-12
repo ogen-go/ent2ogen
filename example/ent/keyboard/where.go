@@ -237,11 +237,7 @@ func HasSwitches() predicate.Keyboard {
 // HasSwitchesWith applies the HasEdge predicate on the "switches" edge with a given conditions (other predicates).
 func HasSwitchesWith(preds ...predicate.SwitchModel) predicate.Keyboard {
 	return predicate.Keyboard(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SwitchesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, SwitchesTable, SwitchesColumn),
-		)
+		step := newSwitchesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -264,11 +260,7 @@ func HasKeycaps() predicate.Keyboard {
 // HasKeycapsWith applies the HasEdge predicate on the "keycaps" edge with a given conditions (other predicates).
 func HasKeycapsWith(preds ...predicate.KeycapModel) predicate.Keyboard {
 	return predicate.Keyboard(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(KeycapsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, KeycapsTable, KeycapsColumn),
-		)
+		step := newKeycapsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

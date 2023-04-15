@@ -1,10 +1,9 @@
 package ent2ogen
 
 import (
-	"fmt"
-
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
+	"github.com/go-faster/errors"
 	"github.com/ogen-go/ogen/gen/ir"
 	"github.com/ogen-go/ogen/jsonschema"
 	"github.com/ogen-go/ogen/openapi"
@@ -35,10 +34,10 @@ type ExtensionConfig struct {
 
 func NewExtension(cfg ExtensionConfig) (*Extension, error) {
 	if cfg.API == nil {
-		return nil, fmt.Errorf("spec cannot be nil")
+		return nil, errors.New("spec cannot be nil")
 	}
 	if cfg.Types == nil {
-		return nil, fmt.Errorf("types map cannot be nil")
+		return nil, errors.New("types map cannot be nil")
 	}
 
 	index := make(map[*jsonschema.Schema]*ir.Type)
@@ -48,7 +47,7 @@ func NewExtension(cfg ExtensionConfig) (*Extension, error) {
 		}
 
 		if _, ok := index[t.Schema]; ok {
-			return nil, fmt.Errorf("type map schema collision: %+v", t)
+			return nil, errors.Errorf("type map schema collision: %+v", t)
 		}
 
 		index[t.Schema] = t
@@ -86,7 +85,7 @@ func (ex *Extension) ogen(next gen.Generator) gen.Generator {
 	return gen.GenerateFunc(func(g *gen.Graph) error {
 		for _, n := range g.Nodes {
 			if err := ex.generateMapping(n); err != nil {
-				return fmt.Errorf("type %q: %w", n.Name, err)
+				return errors.Wrapf(err, "type %q", n.Name)
 			}
 		}
 
@@ -97,7 +96,7 @@ func (ex *Extension) ogen(next gen.Generator) gen.Generator {
 func (ex *Extension) generateMapping(n *gen.Type) error {
 	ant, err := annotation(n.Annotations)
 	if err != nil {
-		return fmt.Errorf("read annotation: %w", err)
+		return errors.Wrap(err, "read annotation")
 	}
 
 	if ant == nil {
@@ -112,12 +111,12 @@ func (ex *Extension) generateMapping(n *gen.Type) error {
 
 	s, err := ex.findComponent(schemaName)
 	if err != nil {
-		return fmt.Errorf("find %q schema: %w", schemaName, err)
+		return errors.Wrapf(err, "find %q schema", schemaName)
 	}
 
 	t, ok := ex.index[s]
 	if !ok {
-		return fmt.Errorf("schema %q: ir type not found", schemaName)
+		return errors.Errorf("schema %q: ir type not found", schemaName)
 	}
 
 	return ex.createMapping(n, t)
@@ -126,7 +125,7 @@ func (ex *Extension) generateMapping(n *gen.Type) error {
 func (ex *Extension) findComponent(name string) (*jsonschema.Schema, error) {
 	s, ok := ex.api.Components.Schemas[name]
 	if !ok {
-		return nil, fmt.Errorf("component is not present in the openapi document")
+		return nil, errors.New("component is not present in the openapi document")
 	}
 
 	return s, nil

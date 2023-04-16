@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"entgo.io/ent/entc/gen"
+	"github.com/go-faster/errors"
 	"github.com/ogen-go/ogen/gen/ir"
 )
 
@@ -86,7 +87,7 @@ func unassign(dst *ir.Field) (string, error) {
 	// From github.com/ogen-go/ogen/gen/generics.go:boxType
 	if dst.Type.GenericOf.Kind == ir.KindArray || dst.Type.GenericOf.Primitive == ir.ByteSlice {
 		if dst.Type.GenericVariant.NullableOptional() {
-			return "", fmt.Errorf("unexpected nullable & optional ogen array type")
+			return "", errors.New("unexpected nullable & optional ogen array type")
 		}
 
 		// t.Foo = nil

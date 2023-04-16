@@ -1,12 +1,12 @@
 package ent2ogen
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/schema/field"
+	"github.com/go-faster/errors"
 	"github.com/ogen-go/ogen/gen/ir"
 	"github.com/ogen-go/ogen/jsonschema"
 )
@@ -59,38 +59,38 @@ func (e *Extension) createMapping(from *gen.Type, to *ir.Type) error {
 
 func (m *Mapping) checkCompatibility() error {
 	if m.To.Kind != ir.KindStruct {
-		return fmt.Errorf("schema must be an object")
+		return errors.New("schema must be an object")
 	}
 
 	for _, field := range m.To.Fields {
 		if field.Spec == nil {
-			return fmt.Errorf("field %q has no spec", field.Name)
+			return errors.Errorf("field %q has no spec", field.Name)
 		}
 
 		f, ok, err := m.lookupField(field.Spec.Name)
 		if err != nil {
-			return fmt.Errorf("lookup for field with name %q: %w", field.Spec.Name, err)
+			return errors.Wrapf(err, "lookup for field with name %q", field.Spec.Name)
 		}
 
 		if !ok {
 			e, ok, err := m.lookupEdge(field.Spec.Name)
 			if err != nil {
-				return fmt.Errorf("lookup for edge with name %q: %w", field.Spec.Name, err)
+				return errors.Wrapf(err, "lookup for edge with name %q", field.Spec.Name)
 			}
 
 			if !ok {
-				return fmt.Errorf("property %q not found in ent schema", field.Spec.Name)
+				return errors.Errorf("property %q not found in ent schema", field.Spec.Name)
 			}
 
 			if err := m.createEdgeMapping(e, field); err != nil {
-				return fmt.Errorf("edge %q: %w", e.Name, err)
+				return errors.Wrapf(err, "edge %q", e.Name)
 			}
 
 			continue
 		}
 
 		if err := m.createFieldMapping(f, field); err != nil {
-			return fmt.Errorf("field %q: %w", f.Name, err)
+			return errors.Wrapf(err, "field %q", f.Name)
 		}
 	}
 
@@ -102,7 +102,7 @@ func (m *Mapping) lookupField(name string) (*gen.Field, bool, error) {
 	for _, f := range m.EntFields() {
 		ant, err := annotation(f.Annotations)
 		if err != nil {
-			return nil, false, fmt.Errorf("read field %q annotation: %w", f.Name, err)
+			return nil, false, errors.Wrapf(err, "read field %q annotation", f.Name)
 		}
 
 		if ant != nil && ant.BindTo == name {
@@ -127,7 +127,7 @@ func (m *Mapping) lookupField(name string) (*gen.Field, bool, error) {
 		for _, m := range matches {
 			names = append(names, m.Name)
 		}
-		return nil, false, fmt.Errorf("matched multiple fields: %v", names)
+		return nil, false, errors.Errorf("matched multiple fields: %v", names)
 	}
 }
 
@@ -143,16 +143,16 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 
 	assertJS := func(js *jsonschema.Schema, typ jsonschema.SchemaType, format string) error {
 		if js == nil {
-			return fmt.Errorf("unexpected null or empty schema")
+			return errors.New("unexpected null or empty schema")
 		}
 		if js.Type != typ {
-			return fmt.Errorf("type mismatch: expected %q but have %q", typ, js.Type)
+			return errors.Errorf("type mismatch: expected %q but have %q", typ, js.Type)
 		}
 		if js.Format != format {
 			if format == "" {
-				return fmt.Errorf("unexpected format %q", js.Format)
+				return errors.Errorf("unexpected format %q", js.Format)
 			}
-			return fmt.Errorf("format mismatch: expected %q but have %q", format, js.Format)
+			return errors.Errorf("format mismatch: expected %q but have %q", format, js.Format)
 		}
 		return nil
 	}
@@ -163,17 +163,17 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 		case et.Type == field.TypeJSON && et.Ident == "[]string":
 		case et.Type == field.TypeJSON && et.Ident == "[]int":
 		default:
-			return fmt.Errorf("optional ent fields are not supported - you need to make the field either optional and nullable or required")
+			return errors.New("optional ent fields are not supported - you need to make the field either optional and nullable or required")
 		}
 
 	case entField.Optional && entField.Nillable:
 		if !ogenField.Type.IsGeneric() {
-			return fmt.Errorf("ent field is optional, ogen type must be generic, not %q", ogenField.Type.Kind)
+			return errors.Errorf("ent field is optional, ogen type must be generic, not %q", ogenField.Type.Kind)
 		}
 
 	case !entField.Optional:
 		if ogenField.Type.IsGeneric() {
-			return fmt.Errorf("openapi field must be required")
+			return errors.New("openapi field must be required")
 		}
 
 	default:
@@ -205,17 +205,17 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 					return err
 				}
 				if err := assertJS(js.Item, jsonschema.String, ""); err != nil {
-					return fmt.Errorf("items: %w", err)
+					return errors.Wrap(err, "items")
 				}
 			case "[]int":
 				if err := assertJS(js, jsonschema.Array, ""); err != nil {
 					return err
 				}
 				if err := assertJS(js.Item, jsonschema.Integer, ""); err != nil {
-					return fmt.Errorf("items: %w", err)
+					return errors.Wrap(err, "items")
 				}
 			default:
-				return fmt.Errorf("unsupported ent json type: %s", et.Ident)
+				return errors.Errorf("unsupported ent json type: %s", et.Ident)
 			}
 
 			return nil
@@ -227,7 +227,7 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 			return err
 		}
 	} else {
-		return fmt.Errorf("unsupported ent type: %s", entField.Type.ConstName())
+		return errors.Errorf("unsupported ent type: %s", entField.Type.ConstName())
 	}
 
 	fm := FieldMapping{
@@ -238,7 +238,7 @@ func (m *Mapping) createFieldMapping(entField *gen.Field, ogenField *ir.Field) e
 	if entField.Type.Type == field.TypeEnum {
 		enumMappings, err := m.createEnumMappings(entField, ogenField)
 		if err != nil {
-			return fmt.Errorf("enum: %w", err)
+			return errors.Wrap(err, "enum")
 		}
 
 		fm.Enums = enumMappings
@@ -257,11 +257,11 @@ func (m *Mapping) createEnumMappings(ef *gen.Field, gf *ir.Field) ([]EnumMapping
 	)
 
 	if et.Type != field.TypeEnum || len(js.Enum) == 0 {
-		return nil, fmt.Errorf("bad schema")
+		return nil, errors.New("bad schema")
 	}
 
 	if len(js.Enum) != len(ef.EnumValues()) {
-		return nil, fmt.Errorf("enum mismatch")
+		return nil, errors.New("enum mismatch")
 	}
 
 	dbEnums := make(map[string]gen.Enum, len(ef.Enums))
@@ -277,12 +277,12 @@ func (m *Mapping) createEnumMappings(ef *gen.Field, gf *ir.Field) ([]EnumMapping
 	for _, ogenEnum := range typ.EnumVariants {
 		val, ok := ogenEnum.Value.(string)
 		if !ok {
-			return nil, fmt.Errorf("unexpected enum value type: %T", ogenEnum.Value)
+			return nil, errors.Errorf("unexpected enum value type: %T", ogenEnum.Value)
 		}
 
 		dbEnum, ok := dbEnums[val]
 		if !ok {
-			return nil, fmt.Errorf("enum value %q not found in ent schema", val)
+			return nil, errors.Errorf("enum value %q not found in ent schema", val)
 		}
 
 		enumMappings = append(enumMappings, EnumMapping{
@@ -299,7 +299,7 @@ func (m *Mapping) lookupEdge(name string) (*gen.Edge, bool, error) {
 	for _, e := range m.From.Edges {
 		ant, err := annotation(e.Annotations)
 		if err != nil {
-			return nil, false, fmt.Errorf("read edge %q annotation: %w", e.Name, err)
+			return nil, false, errors.Wrapf(err, "read edge %q annotation", e.Name)
 		}
 
 		if ant != nil && ant.BindTo == name {
@@ -324,27 +324,27 @@ func (m *Mapping) lookupEdge(name string) (*gen.Edge, bool, error) {
 		for _, m := range matches {
 			names = append(names, m.Name)
 		}
-		return nil, false, fmt.Errorf("matched multiple edges: %v", names)
+		return nil, false, errors.Errorf("matched multiple edges: %v", names)
 	}
 }
 
 func (m *Mapping) createEdgeMapping(edge *gen.Edge, field *ir.Field) error {
 	if field.Spec == nil || field.Spec.Schema == nil {
-		return fmt.Errorf("spec cannot be nil")
+		return errors.New("spec cannot be nil")
 	}
 
 	typ := field.Type
 	switch {
 	case edge.Optional && edge.Unique: // Single optional type.
 		if !typ.IsGeneric() {
-			return fmt.Errorf("edge is optional, generic type is expected, not %q", typ.Kind)
+			return errors.Errorf("edge is optional, generic type is expected, not %q", typ.Kind)
 		}
 
 		typ = typ.GenericOf
 
 	case edge.Optional && !edge.Unique: // Multiple optional types.
 		if !typ.IsArray() {
-			return fmt.Errorf("edge is not unique, schema must be an array, not %q", typ.Kind)
+			return errors.Errorf("edge is not unique, schema must be an array, not %q", typ.Kind)
 		}
 
 		typ = typ.Item
@@ -354,7 +354,7 @@ func (m *Mapping) createEdgeMapping(edge *gen.Edge, field *ir.Field) error {
 
 	case !edge.Optional && !edge.Unique: // Required multiple types.
 		if !typ.IsArray() {
-			return fmt.Errorf("edge is not unique, schema must be an array, not %q", typ.Kind)
+			return errors.Errorf("edge is not unique, schema must be an array, not %q", typ.Kind)
 		}
 
 		typ = typ.Item

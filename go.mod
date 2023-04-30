@@ -3,13 +3,13 @@ module github.com/ogen-go/ent2ogen
 go 1.18
 
 require (
-	entgo.io/ent v0.12.0
+	entgo.io/ent v0.12.2
 	github.com/go-faster/errors v0.6.1
 	github.com/go-faster/jx v1.0.0
-	github.com/ogen-go/ogen v0.62.0
-	go.opentelemetry.io/otel v1.14.0
-	go.opentelemetry.io/otel/metric v0.37.0
-	go.opentelemetry.io/otel/trace v1.14.0
+	github.com/ogen-go/ogen v0.66.0
+	go.opentelemetry.io/otel v1.15.0
+	go.opentelemetry.io/otel/metric v0.38.0
+	go.opentelemetry.io/otel/trace v1.15.0
 )
 
 require (
@@ -19,7 +19,7 @@ require (
 	github.com/dlclark/regexp2 v1.9.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-faster/yaml v0.4.5 // indirect
+	github.com/go-faster/yaml v0.4.6 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
@@ -34,7 +34,7 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
+	golang.org/x/exp v0.0.0-20230425010034-47ecfdc1ba53 // indirect
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect

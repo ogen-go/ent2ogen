@@ -18,7 +18,7 @@ import (
 type KeycapModelQuery struct {
 	config
 	ctx        *QueryContext
-	order      []keycapmodel.Order
+	order      []keycapmodel.OrderOption
 	inters     []Interceptor
 	predicates []predicate.KeycapModel
 	// intermediate query (i.e. traversal path).
@@ -52,7 +52,7 @@ func (kmq *KeycapModelQuery) Unique(unique bool) *KeycapModelQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (kmq *KeycapModelQuery) Order(o ...keycapmodel.Order) *KeycapModelQuery {
+func (kmq *KeycapModelQuery) Order(o ...keycapmodel.OrderOption) *KeycapModelQuery {
 	kmq.order = append(kmq.order, o...)
 	return kmq
 }
@@ -246,7 +246,7 @@ func (kmq *KeycapModelQuery) Clone() *KeycapModelQuery {
 	return &KeycapModelQuery{
 		config:     kmq.config,
 		ctx:        kmq.ctx.Clone(),
-		order:      append([]keycapmodel.Order{}, kmq.order...),
+		order:      append([]keycapmodel.OrderOption{}, kmq.order...),
 		inters:     append([]Interceptor{}, kmq.inters...),
 		predicates: append([]predicate.KeycapModel{}, kmq.predicates...),
 		// clone intermediate query.

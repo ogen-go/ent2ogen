@@ -75,38 +75,38 @@ var (
 	NameValidator func(string) error
 )
 
-// Order defines the ordering method for the Keyboard queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Keyboard queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByPrice orders the results by the price field.
-func ByPrice(opts ...sql.OrderTermOption) Order {
+func ByPrice(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPrice, opts...).ToFunc()
 }
 
 // ByDiscount orders the results by the discount field.
-func ByDiscount(opts ...sql.OrderTermOption) Order {
+func ByDiscount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDiscount, opts...).ToFunc()
 }
 
 // BySwitchesField orders the results by switches field.
-func BySwitchesField(field string, opts ...sql.OrderTermOption) Order {
+func BySwitchesField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newSwitchesStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByKeycapsField orders the results by keycaps field.
-func ByKeycapsField(field string, opts ...sql.OrderTermOption) Order {
+func ByKeycapsField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newKeycapsStep(), sql.OrderByField(field, opts...))
 	}

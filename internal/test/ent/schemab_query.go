@@ -18,7 +18,7 @@ import (
 type SchemaBQuery struct {
 	config
 	ctx        *QueryContext
-	order      []schemab.Order
+	order      []schemab.OrderOption
 	inters     []Interceptor
 	predicates []predicate.SchemaB
 	withFKs    bool
@@ -53,7 +53,7 @@ func (sb *SchemaBQuery) Unique(unique bool) *SchemaBQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (sb *SchemaBQuery) Order(o ...schemab.Order) *SchemaBQuery {
+func (sb *SchemaBQuery) Order(o ...schemab.OrderOption) *SchemaBQuery {
 	sb.order = append(sb.order, o...)
 	return sb
 }
@@ -247,7 +247,7 @@ func (sb *SchemaBQuery) Clone() *SchemaBQuery {
 	return &SchemaBQuery{
 		config:     sb.config,
 		ctx:        sb.ctx.Clone(),
-		order:      append([]schemab.Order{}, sb.order...),
+		order:      append([]schemab.OrderOption{}, sb.order...),
 		inters:     append([]Interceptor{}, sb.inters...),
 		predicates: append([]predicate.SchemaB{}, sb.predicates...),
 		// clone intermediate query.

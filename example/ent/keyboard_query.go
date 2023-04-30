@@ -20,7 +20,7 @@ import (
 type KeyboardQuery struct {
 	config
 	ctx          *QueryContext
-	order        []keyboard.Order
+	order        []keyboard.OrderOption
 	inters       []Interceptor
 	predicates   []predicate.Keyboard
 	withSwitches *SwitchModelQuery
@@ -57,7 +57,7 @@ func (kq *KeyboardQuery) Unique(unique bool) *KeyboardQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (kq *KeyboardQuery) Order(o ...keyboard.Order) *KeyboardQuery {
+func (kq *KeyboardQuery) Order(o ...keyboard.OrderOption) *KeyboardQuery {
 	kq.order = append(kq.order, o...)
 	return kq
 }
@@ -295,7 +295,7 @@ func (kq *KeyboardQuery) Clone() *KeyboardQuery {
 	return &KeyboardQuery{
 		config:       kq.config,
 		ctx:          kq.ctx.Clone(),
-		order:        append([]keyboard.Order{}, kq.order...),
+		order:        append([]keyboard.OrderOption{}, kq.order...),
 		inters:       append([]Interceptor{}, kq.inters...),
 		predicates:   append([]predicate.Keyboard{}, kq.predicates...),
 		withSwitches: kq.withSwitches.Clone(),

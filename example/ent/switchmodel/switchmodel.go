@@ -67,20 +67,20 @@ func SwitchTypeValidator(st SwitchType) error {
 	}
 }
 
-// Order defines the ordering method for the SwitchModel queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the SwitchModel queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // BySwitchType orders the results by the switch_type field.
-func BySwitchType(opts ...sql.OrderTermOption) Order {
+func BySwitchType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSwitchType, opts...).ToFunc()
 }

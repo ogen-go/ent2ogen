@@ -18,7 +18,7 @@ import (
 type SwitchModelQuery struct {
 	config
 	ctx        *QueryContext
-	order      []switchmodel.Order
+	order      []switchmodel.OrderOption
 	inters     []Interceptor
 	predicates []predicate.SwitchModel
 	// intermediate query (i.e. traversal path).
@@ -52,7 +52,7 @@ func (smq *SwitchModelQuery) Unique(unique bool) *SwitchModelQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (smq *SwitchModelQuery) Order(o ...switchmodel.Order) *SwitchModelQuery {
+func (smq *SwitchModelQuery) Order(o ...switchmodel.OrderOption) *SwitchModelQuery {
 	smq.order = append(smq.order, o...)
 	return smq
 }
@@ -246,7 +246,7 @@ func (smq *SwitchModelQuery) Clone() *SwitchModelQuery {
 	return &SwitchModelQuery{
 		config:     smq.config,
 		ctx:        smq.ctx.Clone(),
-		order:      append([]switchmodel.Order{}, smq.order...),
+		order:      append([]switchmodel.OrderOption{}, smq.order...),
 		inters:     append([]Interceptor{}, smq.inters...),
 		predicates: append([]predicate.SwitchModel{}, smq.predicates...),
 		// clone intermediate query.

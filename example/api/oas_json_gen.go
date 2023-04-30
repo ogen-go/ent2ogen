@@ -22,32 +22,26 @@ func (s *Keyboard) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Keyboard) encodeFields(e *jx.Encoder) {
 	{
-
 		e.FieldStart("id")
 		e.Int64(s.ID)
 	}
 	{
-
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
 	{
-
 		e.FieldStart("switches")
 		s.Switches.Encode(e)
 	}
 	{
-
 		e.FieldStart("keycaps")
 		s.Keycaps.Encode(e)
 	}
 	{
-
 		e.FieldStart("price")
 		e.Int64(s.Price)
 	}
 	{
-
 		e.FieldStart("discount")
 		s.Discount.Encode(e)
 	}
@@ -203,22 +197,18 @@ func (s *Keycaps) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Keycaps) encodeFields(e *jx.Encoder) {
 	{
-
 		e.FieldStart("id")
 		e.Int64(s.ID)
 	}
 	{
-
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
 	{
-
 		e.FieldStart("profile")
 		e.Str(s.Profile)
 	}
 	{
-
 		e.FieldStart("material")
 		s.Material.Encode(e)
 	}
@@ -438,17 +428,14 @@ func (s *Switches) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Switches) encodeFields(e *jx.Encoder) {
 	{
-
 		e.FieldStart("id")
 		e.Int64(s.ID)
 	}
 	{
-
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
 	{
-
 		e.FieldStart("switch_type")
 		s.SwitchType.Encode(e)
 	}

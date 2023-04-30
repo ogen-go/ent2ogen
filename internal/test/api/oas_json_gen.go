@@ -201,17 +201,14 @@ func (s *SchemaA) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *SchemaA) encodeFields(e *jx.Encoder) {
 	{
-
 		e.FieldStart("int64")
 		e.Int64(s.Int64)
 	}
 	{
-
 		e.FieldStart("string_foobar_bind")
 		e.Str(s.StringFoobarBind)
 	}
 	{
-
 		e.FieldStart("string_optional_nullable")
 		s.StringOptionalNullable.Encode(e)
 	}
@@ -222,7 +219,6 @@ func (s *SchemaA) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-
 		e.FieldStart("jsontype_strings")
 		e.ArrStart()
 		for _, elem := range s.JsontypeStrings {
@@ -241,7 +237,6 @@ func (s *SchemaA) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-
 		e.FieldStart("jsontype_ints")
 		e.ArrStart()
 		for _, elem := range s.JsontypeInts {
@@ -260,7 +255,6 @@ func (s *SchemaA) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-
 		e.FieldStart("required_enum")
 		s.RequiredEnum.Encode(e)
 	}
@@ -271,17 +265,14 @@ func (s *SchemaA) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-
 		e.FieldStart("bytes")
 		e.Base64(s.Bytes)
 	}
 	{
-
 		e.FieldStart("edge_schemab_unique_required")
 		s.EdgeSchemabUniqueRequired.Encode(e)
 	}
 	{
-
 		e.FieldStart("edge_schemab_unique_required_bs_bind")
 		s.EdgeSchemabUniqueRequiredBsBind.Encode(e)
 	}
@@ -706,7 +697,6 @@ func (s *SchemaB) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *SchemaB) encodeFields(e *jx.Encoder) {
 	{
-
 		e.FieldStart("id")
 		e.Int64(s.ID)
 	}

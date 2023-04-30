@@ -69,25 +69,25 @@ func MaterialValidator(m Material) error {
 	}
 }
 
-// Order defines the ordering method for the KeycapModel queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the KeycapModel queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByProfile orders the results by the profile field.
-func ByProfile(opts ...sql.OrderTermOption) Order {
+func ByProfile(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProfile, opts...).ToFunc()
 }
 
 // ByMaterial orders the results by the material field.
-func ByMaterial(opts ...sql.OrderTermOption) Order {
+func ByMaterial(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMaterial, opts...).ToFunc()
 }

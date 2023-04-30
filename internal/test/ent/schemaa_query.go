@@ -20,7 +20,7 @@ import (
 type SchemaAQuery struct {
 	config
 	ctx                                   *QueryContext
-	order                                 []schemaa.Order
+	order                                 []schemaa.OrderOption
 	inters                                []Interceptor
 	predicates                            []predicate.SchemaA
 	withEdgeSchemabUniqueRequired         *SchemaBQuery
@@ -60,7 +60,7 @@ func (sa *SchemaAQuery) Unique(unique bool) *SchemaAQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (sa *SchemaAQuery) Order(o ...schemaa.Order) *SchemaAQuery {
+func (sa *SchemaAQuery) Order(o ...schemaa.OrderOption) *SchemaAQuery {
 	sa.order = append(sa.order, o...)
 	return sa
 }
@@ -364,7 +364,7 @@ func (sa *SchemaAQuery) Clone() *SchemaAQuery {
 	return &SchemaAQuery{
 		config:                                sa.config,
 		ctx:                                   sa.ctx.Clone(),
-		order:                                 append([]schemaa.Order{}, sa.order...),
+		order:                                 append([]schemaa.OrderOption{}, sa.order...),
 		inters:                                append([]Interceptor{}, sa.inters...),
 		predicates:                            append([]predicate.SchemaA{}, sa.predicates...),
 		withEdgeSchemabUniqueRequired:         sa.withEdgeSchemabUniqueRequired.Clone(),
@@ -687,7 +687,7 @@ func (sa *SchemaAQuery) loadEdgeSchemab(ctx context.Context, query *SchemaBQuery
 	}
 	query.withFKs = true
 	query.Where(predicate.SchemaB(func(s *sql.Selector) {
-		s.Where(sql.InValues(schemaa.EdgeSchemabColumn, fks...))
+		s.Where(sql.InValues(s.C(schemaa.EdgeSchemabColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -700,7 +700,7 @@ func (sa *SchemaAQuery) loadEdgeSchemab(ctx context.Context, query *SchemaBQuery
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "schemaa_edge_schemab" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "schemaa_edge_schemab" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

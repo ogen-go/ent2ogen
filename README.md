@@ -20,7 +20,7 @@ func (s *Server) GetUser(ctx context.Context, params openapi.GetUserParams) (ope
 ```
 
 Writing such conversion by hand is annoying and error-prone (especially when the types are big with deep nesting).\
-Also these conversions may become out of sync over time because of database/api schema updates.\
+Also these conversions may become out of sync over time because of database or api schema updates.\
 Ent2ogen solves this problem by generating mapping functions automatically.
 
 ## How to use
@@ -34,4 +34,4 @@ Ent2ogen solves this problem by generating mapping functions automatically.
 * ```ent2ogen.BindTo("")``` - generate mapping function to specified openapi schema component.
 * ```ent2ogen.Bind()``` - similar to BindTo but uses ent schema name by default.
 
-7. Run ```go generate```
+6. Run ```go generate```

@@ -52,7 +52,7 @@ func (kmu *KeycapModelUpdate) Mutation() *KeycapModelMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (kmu *KeycapModelUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, KeycapModelMutation](ctx, kmu.sqlSave, kmu.mutation, kmu.hooks)
+	return withHooks(ctx, kmu.sqlSave, kmu.mutation, kmu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -171,7 +171,7 @@ func (kmuo *KeycapModelUpdateOne) Select(field string, fields ...string) *Keycap
 
 // Save executes the query and returns the updated KeycapModel entity.
 func (kmuo *KeycapModelUpdateOne) Save(ctx context.Context) (*KeycapModel, error) {
-	return withHooks[*KeycapModel, KeycapModelMutation](ctx, kmuo.sqlSave, kmuo.mutation, kmuo.hooks)
+	return withHooks(ctx, kmuo.sqlSave, kmuo.mutation, kmuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

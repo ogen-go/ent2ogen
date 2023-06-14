@@ -46,9 +46,9 @@ func (s *SchemaA) Validate() error {
 		})
 	}
 	if err := func() error {
-		if s.OptionalNullableEnum.Set {
+		if value, ok := s.OptionalNullableEnum.Get(); ok {
 			if err := func() error {
-				if err := s.OptionalNullableEnum.Value.Validate(); err != nil {
+				if err := value.Validate(); err != nil {
 					return err
 				}
 				return nil

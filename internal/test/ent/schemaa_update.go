@@ -318,7 +318,7 @@ func (sa *SchemaAUpdate) RemoveEdgeSchemaaRecursive(s ...*SchemaA) *SchemaAUpdat
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (sa *SchemaAUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, SchemaAMutation](ctx, sa.sqlSave, sa.mutation, sa.hooks)
+	return withHooks(ctx, sa.sqlSave, sa.mutation, sa.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -946,7 +946,7 @@ func (sao *SchemaAUpdateOne) Select(field string, fields ...string) *SchemaAUpda
 
 // Save executes the query and returns the updated SchemaA entity.
 func (sao *SchemaAUpdateOne) Save(ctx context.Context) (*SchemaA, error) {
-	return withHooks[*SchemaA, SchemaAMutation](ctx, sao.sqlSave, sao.mutation, sao.hooks)
+	return withHooks(ctx, sao.sqlSave, sao.mutation, sao.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

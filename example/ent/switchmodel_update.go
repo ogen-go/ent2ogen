@@ -46,7 +46,7 @@ func (smu *SwitchModelUpdate) Mutation() *SwitchModelMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (smu *SwitchModelUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, SwitchModelMutation](ctx, smu.sqlSave, smu.mutation, smu.hooks)
+	return withHooks(ctx, smu.sqlSave, smu.mutation, smu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -156,7 +156,7 @@ func (smuo *SwitchModelUpdateOne) Select(field string, fields ...string) *Switch
 
 // Save executes the query and returns the updated SwitchModel entity.
 func (smuo *SwitchModelUpdateOne) Save(ctx context.Context) (*SwitchModel, error) {
-	return withHooks[*SwitchModel, SwitchModelMutation](ctx, smuo.sqlSave, smuo.mutation, smuo.hooks)
+	return withHooks(ctx, smuo.sqlSave, smuo.mutation, smuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

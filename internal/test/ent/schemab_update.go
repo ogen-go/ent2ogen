@@ -34,7 +34,7 @@ func (sb *SchemaBUpdate) Mutation() *SchemaBMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (sb *SchemaBUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, SchemaBMutation](ctx, sb.sqlSave, sb.mutation, sb.hooks)
+	return withHooks(ctx, sb.sqlSave, sb.mutation, sb.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -108,7 +108,7 @@ func (sbo *SchemaBUpdateOne) Select(field string, fields ...string) *SchemaBUpda
 
 // Save executes the query and returns the updated SchemaB entity.
 func (sbo *SchemaBUpdateOne) Save(ctx context.Context) (*SchemaB, error) {
-	return withHooks[*SchemaB, SchemaBMutation](ctx, sbo.sqlSave, sbo.mutation, sbo.hooks)
+	return withHooks(ctx, sbo.sqlSave, sbo.mutation, sbo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

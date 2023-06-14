@@ -50,7 +50,7 @@ func (kmc *KeycapModelCreate) Mutation() *KeycapModelMutation {
 
 // Save creates the KeycapModel in the database.
 func (kmc *KeycapModelCreate) Save(ctx context.Context) (*KeycapModel, error) {
-	return withHooks[*KeycapModel, KeycapModelMutation](ctx, kmc.sqlSave, kmc.mutation, kmc.hooks)
+	return withHooks(ctx, kmc.sqlSave, kmc.mutation, kmc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

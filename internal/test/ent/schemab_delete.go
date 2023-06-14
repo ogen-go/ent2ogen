@@ -27,7 +27,7 @@ func (sb *SchemaBDelete) Where(ps ...predicate.SchemaB) *SchemaBDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (sb *SchemaBDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, SchemaBMutation](ctx, sb.sqlExec, sb.mutation, sb.hooks)
+	return withHooks(ctx, sb.sqlExec, sb.mutation, sb.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

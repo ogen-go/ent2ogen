@@ -116,7 +116,7 @@ func (ku *KeyboardUpdate) ClearKeycaps() *KeyboardUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ku *KeyboardUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, KeyboardMutation](ctx, ku.sqlSave, ku.mutation, ku.hooks)
+	return withHooks(ctx, ku.sqlSave, ku.mutation, ku.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -365,7 +365,7 @@ func (kuo *KeyboardUpdateOne) Select(field string, fields ...string) *KeyboardUp
 
 // Save executes the query and returns the updated Keyboard entity.
 func (kuo *KeyboardUpdateOne) Save(ctx context.Context) (*Keyboard, error) {
-	return withHooks[*Keyboard, KeyboardMutation](ctx, kuo.sqlSave, kuo.mutation, kuo.hooks)
+	return withHooks(ctx, kuo.sqlSave, kuo.mutation, kuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

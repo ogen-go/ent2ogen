@@ -27,7 +27,7 @@ func (kmd *KeycapModelDelete) Where(ps ...predicate.KeycapModel) *KeycapModelDel
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (kmd *KeycapModelDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, KeycapModelMutation](ctx, kmd.sqlExec, kmd.mutation, kmd.hooks)
+	return withHooks(ctx, kmd.sqlExec, kmd.mutation, kmd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

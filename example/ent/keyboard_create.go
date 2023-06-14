@@ -82,7 +82,7 @@ func (kc *KeyboardCreate) Mutation() *KeyboardMutation {
 
 // Save creates the Keyboard in the database.
 func (kc *KeyboardCreate) Save(ctx context.Context) (*Keyboard, error) {
-	return withHooks[*Keyboard, KeyboardMutation](ctx, kc.sqlSave, kc.mutation, kc.hooks)
+	return withHooks(ctx, kc.sqlSave, kc.mutation, kc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

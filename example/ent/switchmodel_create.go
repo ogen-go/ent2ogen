@@ -44,7 +44,7 @@ func (smc *SwitchModelCreate) Mutation() *SwitchModelMutation {
 
 // Save creates the SwitchModel in the database.
 func (smc *SwitchModelCreate) Save(ctx context.Context) (*SwitchModel, error) {
-	return withHooks[*SwitchModel, SwitchModelMutation](ctx, smc.sqlSave, smc.mutation, smc.hooks)
+	return withHooks(ctx, smc.sqlSave, smc.mutation, smc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

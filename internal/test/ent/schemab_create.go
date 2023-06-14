@@ -31,7 +31,7 @@ func (sb *SchemaBCreate) Mutation() *SchemaBMutation {
 
 // Save creates the SchemaB in the database.
 func (sb *SchemaBCreate) Save(ctx context.Context) (*SchemaB, error) {
-	return withHooks[*SchemaB, SchemaBMutation](ctx, sb.sqlSave, sb.mutation, sb.hooks)
+	return withHooks(ctx, sb.sqlSave, sb.mutation, sb.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

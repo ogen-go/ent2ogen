@@ -27,7 +27,7 @@ func (smd *SwitchModelDelete) Where(ps ...predicate.SwitchModel) *SwitchModelDel
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (smd *SwitchModelDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, SwitchModelMutation](ctx, smd.sqlExec, smd.mutation, smd.hooks)
+	return withHooks(ctx, smd.sqlExec, smd.mutation, smd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

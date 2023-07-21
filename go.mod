@@ -6,7 +6,7 @@ require (
 	entgo.io/ent v0.12.3
 	github.com/go-faster/errors v0.6.1
 	github.com/go-faster/jx v1.0.1
-	github.com/ogen-go/ogen v0.69.1
+	github.com/ogen-go/ogen v0.71.1
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/metric v1.16.0
 	go.opentelemetry.io/otel/trace v1.16.0
@@ -35,11 +35,11 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
-	golang.org/x/mod v0.11.0 // indirect
-	golang.org/x/net v0.11.0 // indirect
+	golang.org/x/mod v0.12.0 // indirect
+	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/text v0.10.0 // indirect
-	golang.org/x/tools v0.9.3 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/tools v0.11.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
